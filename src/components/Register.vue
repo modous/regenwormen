@@ -10,7 +10,7 @@
             id="email" 
             type="email" 
             v-model="email" 
-            placeholder="Typ hier je email" 
+            placeholder="Type your email" 
             required 
           />
         </div>
@@ -21,7 +21,7 @@
             id="password" 
             type="password" 
             v-model="password" 
-            placeholder="Typ hier je wachtwoord" 
+            placeholder="Type your password" 
             required 
           />
         </div>
@@ -32,7 +32,7 @@
             id="confirmPassword" 
             type="password" 
             v-model="confirmPassword" 
-            placeholder="Bevestig je wachtwoord" 
+            placeholder="Confirm your password" 
             required 
           />
         </div>
