@@ -6,7 +6,7 @@ import wormImage from '../assets/regenwormSpel.png'
     <section class="start-screen">
         <section class="left-side">
            <a  class="title-link" href="#home"><h1 class="title">Regenwormen</h1></a>
-           <router-link to="/how-to-play" class="start-btn">Start Game</router-link>
+           <router-link to="/game" class="start-btn">Start Game</router-link>
             <nav class="nav-links">
                <router-link to="/how-to-play" class="nav-link">How to Play</router-link>
                <router-link to="/credits" class="nav-link">Credits</router-link>
