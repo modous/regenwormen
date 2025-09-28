@@ -15,25 +15,20 @@ public class Game {
 
     private static final int MIN_PLAYERS = 2;
     private static final int MAX_PLAYERS = 8;
+    private static final int MAX_NAME_LENGTH = 16;
 
     public Game(String gameName, int maxPlayers) {
-        if (gameName == null || gameName.isBlank() || gameName.length() > 16) {
-            throw new IllegalArgumentException("Game name cannot be empty or more than 16 characters");
-        }
-        if (maxPlayers < MIN_PLAYERS || maxPlayers > MAX_PLAYERS) {
-            throw new IllegalArgumentException("Max players must be between " + MIN_PLAYERS + " and " + MAX_PLAYERS);
-        }
+        setGameNameInternal(gameName);
+        setMaxPlayersInternal(maxPlayers);
 
         this.id = UUID.randomUUID();
-        this.gameName = gameName.trim();
-        this.maxPlayers = maxPlayers;
         this.players = new ArrayList<>();
         this.playersTurn = 0;
         this.gameState = GameState.PRE_GAME;
     }
 
     //Getters
-    public UUID getID() {return id;}
+    public UUID getId() {return id;}
 
     public String getGameName() {return gameName;}
 
@@ -41,23 +36,20 @@ public class Game {
 
     public List<Player> getPlayers() {return Collections.unmodifiableList(players);}
 
+    public int playersAmount(){return  players.size();}
+
     public int getTurnIndex() {return playersTurn;}
 
+    public GameState getGameState() {return gameState;}
 
     //setters
     public void setGameName(String gameName) {
-        if (gameName == null || gameName.isBlank() || gameName.length() > 16) {
-            throw new IllegalArgumentException("Game name cannot be empty or more than 16 characters");
-        } else {
-            this.gameName = gameName.trim();
-        }
+        setGameNameInternal(gameName);
+
     }
 
     public void setMaxPlayers(int maxPlayers){
-        if (maxPlayers < MIN_PLAYERS || maxPlayers > MAX_PLAYERS) {
-            throw new IllegalArgumentException("Max players must be between "+MIN_PLAYERS+"and "+MAX_PLAYERS);
-        }
-        this.maxPlayers = maxPlayers;
+        setMaxPlayersInternal(maxPlayers);
     }
 
     //logica
@@ -73,8 +65,41 @@ public class Game {
 
     public void setNextPlayersTurn() {
         int maxIndexPlayers = getPlayers().size()-1;
-        if(getTurnIndex() == maxIndexPlayers){this.playersTurn = 0;}
-        else {this.playersTurn++;}
+        this.playersTurn = (getTurnIndex() == maxIndexPlayers) ? 0 : playersTurn+1;
+    }
+
+    public boolean addPlayer (Player player) {
+        if (player == null){return false;}
+        if (gameState != GameState.PRE_GAME) {throw new IllegalStateException("Game already started. Cannot join current game.");}
+        if (playersAmount() >= maxPlayers){ throw new IllegalStateException("Max players how game is already reached");}
+
+        return players.add(player);
+    }
+
+    public void startGame(){
+        if (gameState != GameState.PRE_GAME) {throw new IllegalStateException("Game already started/ended");}
+        if (playersAmount() < MIN_PLAYERS){throw new IllegalStateException("too little players to start the game");}
+        if (playersAmount() > MAX_PLAYERS){throw new IllegalStateException("too many players to start the game");}
+        gameState = GameState.PLAYING;
+    }
+
+    public void endGame() {
+        if (gameState != GameState.PLAYING) return;
+        gameState = GameState.ENDED;
+    }
+
+    // ---- helpers ----
+    private void setGameNameInternal(String gameName) {
+        if (gameName == null || gameName.isBlank() || gameName.length() > MAX_NAME_LENGTH) {
+            throw new IllegalArgumentException("Game name must be 1–" + MAX_NAME_LENGTH + " characters");}
+        this.gameName = gameName.trim();
+    }
+
+    private void setMaxPlayersInternal(int maxPlayers) {
+        if (maxPlayers < MIN_PLAYERS || maxPlayers > MAX_PLAYERS) {
+            throw new IllegalArgumentException("Max players must be between " + MIN_PLAYERS + " and " + MAX_PLAYERS);
+        }
+        this.maxPlayers = maxPlayers;
     }
 
 

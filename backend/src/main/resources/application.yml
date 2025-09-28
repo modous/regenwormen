@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: regenwormen
+  profiles:
+    default: dev   # standaard opstartprofiel
+server:
+  port: 8080
