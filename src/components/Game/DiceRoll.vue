@@ -1,20 +1,22 @@
 <template>
-  <div>
-    <h2>Roll</h2>
-    <button @click="$emit('roll')">Roll ({{ rolled.length }})</button>
-    <div v-if="rolled.length > 0" style="display:flex;gap:5px;">
-      <button
-          v-for="(d,i) in rolled"
-          :key="i"
-          @click="$emit('choose', d)"
-          style="padding:5px;border:1px solid black;"
+  <div class="dice-roll">
+    <h2>Dobbelstenen</h2>
+    <button @click="$emit('roll')">Gooien</button>
+    <div class="dice">
+      <span
+          v-for="(die, index) in rolledDice"
+          :key="index"
+          class="die"
+          @click="$emit('selectDie', die)"
       >
-        {{ d === 6 ? "Worm" : d }}
-      </button>
+        🎲 {{ die }}
+      </span>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({ rolled: Array })
+defineProps({
+  rolledDice: { type: Array, required: true }
+});
 </script>

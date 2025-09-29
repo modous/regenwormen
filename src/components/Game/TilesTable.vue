@@ -1,20 +1,21 @@
 <template>
-  <div>
-    <h2>Tiles Table</h2>
-    <div style="display:flex;flex-wrap:wrap;gap:5px;">
-      <button
+  <div class="tiles-table">
+    <h2>Tegels op tafel</h2>
+    <div class="tiles">
+      <div
           v-for="tile in tiles"
-          :key="tile"
-          @click="$emit('takeTile', tile)"
-          :disabled="tile > total || !hasWorm"
-          style="padding:5px;border:1px solid black;"
+          :key="tile.value"
+          class="tile"
+          @click="$emit('pickTile', tile)"
       >
-        {{ tile }}
-      </button>
+        {{ tile.value }} ({{ tile.worms }} 🪱)
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({ tiles: Array, total: Number, hasWorm: Boolean })
+defineProps({
+  tiles: { type: Array, required: true }
+});
 </script>

@@ -1,17 +1,16 @@
 <template>
-  <div>
-    <h2>Other Players</h2>
-    <div v-for="p in players" :key="p.id" style="margin-bottom:10px;">
-      <strong>{{ p.name }}</strong>:
-      <div style="display:flex;gap:5px;">
-        <div v-for="tile in p.tiles" :key="tile" style="background:lightcoral;padding:5px;">
-          {{ tile }}
-        </div>
+  <div class="tiles-other">
+    <h3>Tegenspelers</h3>
+    <div class="tiles">
+      <div v-for="tile in tiles" :key="tile.value" class="tile">
+        {{ tile.value }} ({{ tile.worms }} 🪱)
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({ players: Array })
+defineProps({
+  tiles: { type: Array, required: true }
+});
 </script>

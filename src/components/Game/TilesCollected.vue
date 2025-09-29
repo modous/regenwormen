@@ -1,14 +1,17 @@
 <template>
-  <div>
-    <h2>Collected Dice</h2>
-    <div style="display:flex;gap:5px;">
-      <div v-for="(d,i) in dice" :key="i" style="background:lightblue;padding:5px;">
-        {{ d === 6 ? "Worm" : d }}
+  <div class="tiles-collected" :class="{ current: isCurrentPlayer }">
+    <h3>Mijn tegels</h3>
+    <div class="tiles">
+      <div v-for="tile in tiles" :key="tile.value" class="tile">
+        {{ tile.value }} ({{ tile.worms }} 🪱)
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({ dice: Array })
+defineProps({
+  tiles: { type: Array, required: true },
+  isCurrentPlayer: { type: Boolean, default: false }
+});
 </script>
