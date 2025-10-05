@@ -57,18 +57,37 @@ const password = ref('')
 const confirmPassword = ref('')
 const router = useRouter()
 
-function handleRegister() {
-  if(password.value !== confirmPassword.value) {
-    alert("Passwords do not match!")
-    return
+async function handleRegister() {
+  if (password.value !== confirmPassword.value) {
+    alert("Passwords do not match!");
+    return;
   }
 
-  // Voor nu: gewoon console log
-  console.log('Registering:', email.value, password.value)
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      }),
+    });
 
-  // Navigeren naar login na registratie
-  router.push('/login')
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Registration failed.");
+      return;
+    }
+
+    alert("Registration successful!");
+    router.push('/login');
+  } catch (err) {
+    alert("Could not reach server.");
+    console.error(err);
+  }
 }
+
 </script>
 
 <style scoped>

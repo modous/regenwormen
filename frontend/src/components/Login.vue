@@ -33,13 +33,32 @@ const email = ref('')
 const password = ref('')
 const router = useRouter()
 
-function handleLogin() {
-    // Voor nu: gewoon console log, later kun je API call toevoegen
-    console.log('Logging in with:', email.value, password.value)
+async function handleLogin() {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      }),
+    });
 
-    // Navigeren naar home na login
-    router.push('/')
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Invalid email or password");
+      return;
+    }
+
+    alert("Login successful!");
+    router.push('/');
+  } catch (err) {
+    alert("Could not reach server.");
+    console.error(err);
+  }
 }
+
 </script>
 
 <style scoped>

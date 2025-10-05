@@ -6,16 +6,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    // ✅ this was missing and must import java.util.List
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getById(UUID id) {
+        return userRepository.findById(id).orElseThrow();
     }
 
     public User register(String email, String password) {
