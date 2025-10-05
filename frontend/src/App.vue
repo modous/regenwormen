@@ -1,11 +1,21 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import tiles from './components/tiles.vue'
+import houtBg from './assets/hout.jpg'
+
 </script>
 
 <template>
-  <tiles></tiles>
+  <div class="app" :style="{ backgroundImage: `url(${houtBg})` }">
+    <router-view />
+  </div>
 </template>
 
-<style scoped>
+<style>
+.app {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+}
 </style>
