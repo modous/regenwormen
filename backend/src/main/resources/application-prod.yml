@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/regenwormen
+    username: regenwormen
+    password: ewaregenwormen420
+  jpa:
+    hibernate:
+      ddl-auto: validate
+logging:
+  level:
+    org.hibernate.SQL: warn
