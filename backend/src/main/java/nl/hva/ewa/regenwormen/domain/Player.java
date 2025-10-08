@@ -1,31 +1,80 @@
 package nl.hva.ewa.regenwormen.domain;
 
-import java.util.UUID;
+
+import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
-    private final UUID id;
+    //getters
+    @Getter
+    private final String id;
     private String name;
+    private List<Tile> ownedTiles = new ArrayList<Tile>();
+    private Diceroll turn ;
+    private int doublePointsTile;
 
     private static final int MAX_NAME_LENGTH = 16;
 
     public Player(String name) {
         setPlayerNameInternal(name);
-        this.id = UUID.randomUUID();
+        this.id = Helpers.generateShortHexId(8);
     }
 
-    //getters
-    public UUID getId() {return id;}
+    //getter
+    public int getPoints(){
+        return ownedTiles.stream()
+                .filter(tile -> tile.getOwner().equals(this))
+                .mapToInt(Tile::getPoints)
+                .sum();
+    }
+    public Tile getTopTile(){
+        if (ownedTiles.isEmpty())return null;
+        return ownedTiles.getLast();
+    }
+    public Diceroll getDiceRoll(){return turn;}
 
-    public String getName() {return name;}
+    public int getAmountTiles(){return ownedTiles.size();}
+
 
     //setter
     public void setName(String name) {setPlayerNameInternal(name);}
+
+    public void  setDoublePointsTile(int value){doublePointsTile = value;}
+
+    public void setStartTurn(Diceroll Dices) {
+        if (turn != null){throw new IllegalStateException("Throw turn is already active");}
+        turn = Dices;
+    }
+    public void setEndTurn() {
+        this.turn = null;
+    }
+
+    //functions
+    public void addTile(Tile tile){
+        if(tile == null) {throw new IllegalArgumentException("missing tile");}
+        ownedTiles.add(tile);
+    }
+
+    public void loseTopTileToStack(){
+        if (getTopTile() == null){throw new IllegalStateException("No tiles owned");}
+        ownedTiles.remove(getTopTile());
+    }
 
     //helpers
     private void setPlayerNameInternal(String playerName) {
         if (playerName == null || playerName.isBlank() || playerName.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("Player name must be 1–" + MAX_NAME_LENGTH + " characters");}
         this.name = playerName.trim();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Player)) return false;
+        Player other = (Player) obj;
+        return id.equals(other.id);
     }
 
 

@@ -56,6 +56,24 @@ public class TilesPot {
         }
         return highest;
     }
+    public Tile getLowestAvailableTile() {
+        Tile lowest = null;
+        for (Tile t : tiles) {
+            if (t.isAvailableInPot()) {
+                if (lowest == null || t.getValue() < lowest.getValue()) {
+                    lowest = t;
+                }
+            }
+        }
+        return lowest;
+    }
+
+    public int getLowestAvailableTileValue () {
+        Tile lowestTile = getLowestAvailableTile();
+        if (lowestTile == null){return 0;}
+        int lowestTileValue = lowestTile.getValue();
+        return lowestTileValue;
+    }
 
 
 }
