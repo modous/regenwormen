@@ -1,9 +1,13 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.dto.ClaimOptions;
+import nl.hva.ewa.regenwormen.domain.dto.EndTurnView;
+import nl.hva.ewa.regenwormen.domain.dto.StealOptions;
 import nl.hva.ewa.regenwormen.domain.dto.TurnView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Game {
@@ -19,6 +23,12 @@ public class Game {
     private static final int MIN_PLAYERS = 2;
     private static final int MAX_PLAYERS = 8;
     private static final int MAX_NAME_LENGTH = 16;
+
+    private static final Comparator<Player> ROUND_ZERO_ORDER =
+            Comparator.comparingInt(Player::getDoublePointsTile)
+                    .reversed()
+                    .thenComparing(Player::getId);
+
 
     public Game(String gameName, int maxPlayers) {
         setGameNameInternal(gameName);
@@ -69,11 +79,6 @@ public class Game {
         return getPlayer(getTurnIndex());
     }
 
-    public void setNextPlayersTurn() {
-        int maxIndexPlayers = getPlayers().size()-1;
-        this.currentPlayersTurnIndex = (getTurnIndex() == maxIndexPlayers) ? 0 : currentPlayersTurnIndex+1;
-    }
-
     public boolean addPlayer (Player player) {
         if (player == null){return false;}
         if (gameState != GameState.PRE_GAME) {throw new IllegalStateException("Game already started. Cannot join current game.");}
@@ -92,12 +97,22 @@ public class Game {
     }
 
     //MIDGAME Flow
-    public void roundZero(){
+    private void roundZero(){
         ensurePlaying();
         if(round != 0){throw new IllegalStateException("Round must be round: 0");}
         for(Player player : players){
             player.setStartTurn(new Diceroll(player));
         }
+    }
+
+    private void finalizeRoundZeroAndSetTurnOrder(){
+        ensurePlaying();
+        if (round != 0) {throw new IllegalStateException("Turn order only set at end of round 0");}
+        for(Player p: players){
+            p.setEndTurn();
+        }
+        players.sort(ROUND_ZERO_ORDER);
+        round = 1;
     }
 
     //MIDGAME roundZero actions
@@ -114,8 +129,11 @@ public class Game {
         ensurePlaying();
         if (!p.getDiceRoll().canRollPreCheck()){throw new IllegalStateException("Cannot throw anymore");}
         List<DiceFace> options = throwDices(p);
-        TurnView dto = options.isEmpty() ? TurnView.bust(p) : TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
-        return dto;
+        if(options.isEmpty()){
+            finishRoundZero(p);
+            return TurnView.bust(p);
+        }
+        return TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
     }
 
     public TurnView pickDiceFaceZero(Player p, DiceFace face){
@@ -124,10 +142,32 @@ public class Game {
         return dto;
     }
 
+    public EndTurnView finishRoundZero(Player p){
+        //adding double points round zero value.
+        ensurePlaying();
+        Diceroll roll = p.getDiceRoll();
+        if(roll == null){throw new IllegalStateException("No active round zero roll");}
+        if(roll.getBusted()){p.setDoublePointsTile(0);}
+        else {
+            if (!roll.hasSpecial()) {throw new IllegalStateException("You must have a SPECIAL to finish");}
+            int score = roll.getTakenScore();
+            if (score < 21) {throw new IllegalStateException("You must throw atleast 21");}
+            p.setDoublePointsTile(score);
+        }
+
+        //checking if all zero round have been played
+        boolean unfinishedRoundZero = roundZerounfinished();
+        EndTurnView dto = EndTurnView.roundZero(p);
+
+        if(!unfinishedRoundZero){ finalizeRoundZeroAndSetTurnOrder();}
+        return dto;
+    }
+
     //MIDGAME round >=1
     public TurnView startAndRollRound() {
         ensurePlaying();
         Player p = getCurrentPlayer();
+        p.setStartTurn(new Diceroll(p));
 
         List<DiceFace> options = throwDices(p);
         TurnView dto = TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
@@ -141,8 +181,11 @@ public class Game {
 
         if (!p.getDiceRoll().canRollPreCheck()){throw new IllegalStateException("Cannot throw anymore");}
         List<DiceFace> options = throwDices(p);
-        TurnView dto = options.isEmpty() ? TurnView.bust(p) : TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
-        return dto;
+        if(options.isEmpty()){
+            finishRound();
+            return TurnView.bust(p);
+        }
+        return TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
     }
 
     public TurnView pickDiceFace(DiceFace face){
@@ -154,16 +197,68 @@ public class Game {
         return dto;
     }
 
+    public EndTurnView finishRound(){
+        ensurePlaying();
+        Player p = getCurrentPlayer();
+        Diceroll roll = p.getDiceRoll();
+        if(roll == null){throw new IllegalStateException("No active round zero roll");}
+        if(roll.getBusted()){
+            handleBust(p);
+            return EndTurnView.round(p, new ClaimOptions(p.getId(), List.of(), List.of()));
+        }
+        int score = roll.getTakenScore();
+        if(!hasMinValueToStop(score)){throw new IllegalStateException("Not enough points to pick something");}
+        ClaimOptions tilePickOptions = buildClaimOptions(p);
+
+        return EndTurnView.round(p, tilePickOptions);
+    }
+
+    public void claimFromPot() {
+        ensurePlaying();
+        Player p = getCurrentPlayer();
+        if (!p.equals(getCurrentPlayer())) { throw new IllegalStateException("Not your turn"); }
+
+        int score = p.getDiceRoll().getTakenScore();
+
+        Tile t = tilesPot.findAvailableTileByScore(score);
+        if (t == null ) { throw new IllegalArgumentException("Tile not available in pot"); }
+        t.takeTile(p);
+        p.setEndTurn();
+        if(endGameCheck()){endGame();}
+        setNextPlayersTurn();
+    }
+
+    public void stealTopTile(String victimPlayerId, int value) {
+        ensurePlaying();
+        Player thief = getCurrentPlayer();
+        if (!thief.equals(getCurrentPlayer())) { throw new IllegalStateException("Not your turn"); }
+
+        Player victim = players.stream()
+                .filter(pl -> pl.getId().equals(victimPlayerId))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Victim not found"));
+
+        Tile top = victim.getTopTile();
+        if (top == null || top.getValue() != value) {
+            throw new IllegalArgumentException("Nothing to steal");
+        }
+
+        victim.loseTopTileToStack();
+        top.takeTile(thief);
+        thief.setEndTurn();
+        setNextPlayersTurn();
+    }
+
+
 
     public List<DiceFace> throwDices (Player player){
         List<DiceFace> options = player.getDiceRoll().rollRemainingDice();
-        if(options.isEmpty()){return null;}
         return options;
     }
 
     public void endGame() {
         if (gameState != GameState.PLAYING) return;
         gameState = GameState.ENDED;
+        //winner and score
     }
 
     // ---- helpers ----
@@ -184,6 +279,11 @@ public class Game {
         if (gameState != GameState.PLAYING) throw new IllegalStateException("Game not playing");
     }
 
+    public void setNextPlayersTurn() {
+        int maxIndexPlayers = getPlayers().size()-1;
+        this.currentPlayersTurnIndex = (getTurnIndex() == maxIndexPlayers) ? 0 : currentPlayersTurnIndex+1;
+    }
+
     private void addDoubleValue(Player player, int value) {
         if(value < 21){return;}
         player.setDoublePointsTile(value);
@@ -201,7 +301,61 @@ public class Game {
         return pointsThrown >= lowestPot || topTileValues.contains(pointsThrown);
     }
 
+    public boolean roundZerounfinished(){
+        boolean unfinishedRoundZero = false;
+        for(Player player: players){
+            int doublePointTileValue = player.getDoublePointsTile();
+            if(doublePointTileValue < 0) {unfinishedRoundZero = true;}
+        }
+        return unfinishedRoundZero;
+    }
 
+    private ClaimOptions buildClaimOptions(Player p) {
+        Diceroll roll = p.getDiceRoll();
+        boolean hasSpecial = roll != null && roll.hasSpecial();
+        if (!hasSpecial) {
+            // Zonder SPECIAL mag je niets claimen of stelen
+            return new ClaimOptions(p.getId(), List.of(), List.of());
+        }
+
+        int score = p.getDiceRoll().getTakenScore();
+
+        // 1) Pot-tiles die je mag pakken: score >= tile value & tile is beschikbaar
+        List<Integer> claimablePot = new ArrayList<>();
+        for (Tile t : tilesPot.getAvailableTiles()) {
+            if (score >= t.getValue()) {
+                claimablePot.add(t.getValue());
+            }
+        }
+
+        // 2) Steal-opties: score == andermans top tile value
+        List<StealOptions> steals = new ArrayList<>();
+        for (Player victim : players) {
+            if (victim.equals(p)) continue;
+            Tile top = victim.getTopTile();
+            if (top != null && score == top.getValue()) {
+                steals.add(new StealOptions(victim.getId(), top.getValue()));
+            }
+        }
+
+        return new ClaimOptions(p.getId(), claimablePot, steals);
+    }
+
+    private void handleBust(Player p) {
+        Tile top = p.getTopTile();
+        if (top != null) {
+            top.tileToPot();
+            p.loseTopTileToStack();
+        }
+        tilesPot.flipHighestAvailableTileIfAny();
+        p.setEndTurn();
+        if(endGameCheck()){endGame();}
+        setNextPlayersTurn();
+    }
+
+    private boolean endGameCheck(){
+        return (tilesPot.amountAvailableTiles() == 0)  ? true : false;
+    }
 
     @Override
     public boolean equals(Object obj) {

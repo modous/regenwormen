@@ -1,5 +1,7 @@
 package nl.hva.ewa.regenwormen.domain.dto;
 
+import nl.hva.ewa.regenwormen.domain.Player;
+
 import java.util.List;
 
 public record ClaimOptions(

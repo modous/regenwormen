@@ -1,6 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TilesPot {
@@ -31,6 +32,17 @@ public class TilesPot {
         return null;
     }
 
+    public Tile findAvailableTileByScore(int score){
+        List<Tile> availableTiles = getAvailableTiles();
+        availableTiles.sort(Comparator.comparingInt(Tile::getValue).reversed());
+        for (Tile tile : availableTiles) {
+            if (tile.getValue() <= score) {
+                return tile;
+            }
+        }
+        return null;
+    }
+
     public List<Tile> getAvailableTiles(){
         List<Tile> available = new ArrayList<>();
         for (Tile t : tiles) {
@@ -56,6 +68,20 @@ public class TilesPot {
         }
         return highest;
     }
+    public int getHighestAvailableTileValue () {
+        Tile HighestTile = getHighestAvailableTile();
+        if (HighestTile == null){return 0;}
+        int highestTileValue = HighestTile.getValue();
+        return highestTileValue;
+    }
+
+    public void flipHighestAvailableTileIfAny() {
+        Tile highest = getHighestAvailableTile();
+        if (highest != null) {
+            highest.flip();
+        }
+    }
+
     public Tile getLowestAvailableTile() {
         Tile lowest = null;
         for (Tile t : tiles) {

@@ -13,7 +13,7 @@ public class Player {
     private String name;
     private List<Tile> ownedTiles = new ArrayList<Tile>();
     private Diceroll turn ;
-    private int doublePointsTile;
+    private int doublePointsTile = -1;
 
     private static final int MAX_NAME_LENGTH = 16;
 
@@ -37,6 +37,8 @@ public class Player {
 
     public int getAmountTiles(){return ownedTiles.size();}
 
+    public int getDoublePointsTile(){return doublePointsTile;}
+
 
     //setter
     public void setName(String name) {setPlayerNameInternal(name);}
@@ -58,7 +60,8 @@ public class Player {
     }
 
     public void loseTopTileToStack(){
-        if (getTopTile() == null){throw new IllegalStateException("No tiles owned");}
+        Tile topTile = getTopTile();
+        if (topTile == null){throw new IllegalStateException("No tiles owned");}
         ownedTiles.remove(getTopTile());
     }
 

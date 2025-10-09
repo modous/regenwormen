@@ -11,6 +11,7 @@ public class Diceroll {
     private final Player player;
     private TurnState turnState = TurnState.CAN_ROLL;
     private boolean hasSpecial = false;
+    private boolean busted = false;
 
     private List<Dice> dices = new ArrayList<Dice>(AMOUNT_DICES);
     private List<Dice> lastRoll= new ArrayList<>();
@@ -28,24 +29,14 @@ public class Diceroll {
     public TurnState getTurnState() { return turnState; }
     public boolean hasSpecial() { return hasSpecial; }
     public Player getPlayer() { return player; }
-
-    public Set<DiceFace> getChosenFaces() {
-        return Set.copyOf(chosen);
-    }
-
-    public List<Dice> getLastRoll() {
-        return List.copyOf(lastRoll);
-    }
-
-    public List<Dice> getAllDice() {
-        return List.copyOf(dices);
-    }
+    public boolean getBusted(){return busted;}
 
     // ----------------- helpers -----------------
 
     private void requireAlive() {
         if (turnState == TurnState.ENDED){throw new IllegalStateException("Turn already ended (bust).");};
     }
+
     public List<Dice> getChosenDices(){
         return dices.stream()
                 .filter(Dice::isTaken)
@@ -103,6 +94,7 @@ public class Diceroll {
         if(turnState != TurnState.CAN_ROLL){throw new IllegalArgumentException("First pick a dice face before throwing dice");}
         if(!canRollPreCheck()){
             turnState = TurnState.ENDED;
+            busted = true;
             return List.of();
         }
 
@@ -117,6 +109,7 @@ public class Diceroll {
         List<DiceFace> options = getPickableFaces();
         if (options.isEmpty()){
             turnState = TurnState.ENDED;
+            busted = true;
             return List.of();
         }
 
