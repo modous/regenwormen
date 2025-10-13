@@ -13,12 +13,14 @@ import java.util.List;
 public class Game {
     private final String id;
     private String gameName;
-    private int maxPlayers ;
     private List<Player> players;
-    private int currentPlayersTurnIndex;
-    private GameState gameState;
+
     private int round = 0;
+    private GameState gameState;
     private TilesPot tilesPot;
+
+    private int currentPlayersTurnIndex;
+    private int maxPlayers ;
 
     private static final int MIN_PLAYERS = 2;
     private static final int MAX_PLAYERS = 8;
@@ -58,11 +60,7 @@ public class Game {
     public GameState getGameState() {return gameState;}
 
     //setters
-    public void setGameName(String gameName) {
-        setGameNameInternal(gameName);
-
-    }
-
+    public void setGameName(String gameName) {setGameNameInternal(gameName);}
     public void setMaxPlayers(int maxPlayers){
         setMaxPlayersInternal(maxPlayers);
     }
@@ -85,6 +83,16 @@ public class Game {
         if (playersAmount() >= maxPlayers){ throw new IllegalStateException("Max players how game is already reached");}
 
         return players.add(player);
+    }
+
+    public boolean leavePlayer(Player player){
+        if (player == null){return false;}
+
+        Player playerInGame = findPlayerById(player.getId());
+        if(playerInGame ==null){throw new IllegalArgumentException("Player not in game");}
+        // tiles terug naar pot?
+        players.remove(playerInGame);
+
     }
 
     public void startGame(){
@@ -244,6 +252,7 @@ public class Game {
 
         victim.loseTopTileToStack();
         top.takeTile(thief);
+        thief.addTile(top);
         thief.setEndTurn();
         setNextPlayersTurn();
     }
@@ -275,13 +284,28 @@ public class Game {
         this.maxPlayers = maxPlayers;
     }
 
+    public Player findPlayerById(String id){
+        Player playerFound = null;
+        for(Player p:players){
+            if (p.getId()==id){
+                playerFound = p;
+            }
+        }
+        return playerFound;
+    }
+
     private void ensurePlaying() {
         if (gameState != GameState.PLAYING) throw new IllegalStateException("Game not playing");
     }
 
     public void setNextPlayersTurn() {
         int maxIndexPlayers = getPlayers().size()-1;
-        this.currentPlayersTurnIndex = (getTurnIndex() == maxIndexPlayers) ? 0 : currentPlayersTurnIndex+1;
+       if (getTurnIndex() == maxIndexPlayers) {
+           currentPlayersTurnIndex = 0;
+           round++;
+           return;
+       }
+       currentPlayersTurnIndex++;
     }
 
     private void addDoubleValue(Player player, int value) {
