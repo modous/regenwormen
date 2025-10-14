@@ -1,6 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class TilesPot {
     }
 
     public List<Tile> getTiles() {
-        return tiles;
+        return Collections.unmodifiableList(tiles);
     }
 
     public Tile findTileByValue(int value) {
@@ -100,6 +101,4 @@ public class TilesPot {
         int lowestTileValue = lowestTile.getValue();
         return lowestTileValue;
     }
-
-
 }

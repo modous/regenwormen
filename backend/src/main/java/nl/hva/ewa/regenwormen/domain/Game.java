@@ -52,6 +52,10 @@ public class Game {
 
     public int getMaxPlayers() {return maxPlayers;}
 
+    public TilesPot getTilesPot() {
+        return tilesPot;
+    }
+
     public List<Player> getPlayers() {return Collections.unmodifiableList(players);}
 
     public int playersAmount(){return  players.size();}
@@ -104,12 +108,7 @@ public class Game {
         boolean leavingIdxIsLast = (leavingIdx == (playersAmount()-1));
 
         if(gameState == GameState.PLAYING){
-            for(Tile t : tilesPot.getTiles()){
-                Player owner = t.getOwner();
-                if(owner!= null && owner.equals(playerToLeaveGame)){
-                    t.tileToPot();
-                }
-            }
+            playerToLeaveGame.returnAllTilesToPot();
             if(wasCurrent){
                 playerToLeaveGame.setEndTurn();
             }
@@ -266,23 +265,29 @@ public class Game {
 
         Tile t = tilesPot.findAvailableTileByScore(score);
         if (t == null ) { throw new IllegalArgumentException("Tile not available in pot"); }
-        t.takeTile(p);
+        p.addTile(t);
         p.setEndTurn();
         if(endGameCheck()){endGame();}
         setNextPlayersTurn();
     }
 
-    public void stealTopTile(int value) {
+    public void stealTopTile(String victimId) {
         ensurePlaying();
-        Player victim = tilesPot.findTileByValue(value).getOwner();
-        String victimPlayerId = victim.getId();
-        Player thief = getCurrentPlayer();
 
+        Player thief = getCurrentPlayer();
+        Player victim = findPlayerById(victimId);
+        if (victim == null) throw new IllegalArgumentException("Victim not found");
 
         Tile top = victim.getTopTile();
-        if (top == null || top.getValue() != value) {
+        if (top == null) {
             throw new IllegalArgumentException("Nothing to steal");
         }
+
+        Diceroll roll = thief.getDiceRoll();
+        if (roll == null || roll.getBusted()) throw new IllegalStateException("No active round roll");
+        if (!roll.hasSpecial()) throw new IllegalStateException("SPECIAL required to steal");
+        if (roll.getTakenScore() != top.getValue()) throw new IllegalArgumentException("Score must equal victim's top tile value");
+
 
         victim.loseTopTileToStack();
         top.takeTile(thief);

@@ -40,7 +40,8 @@ public class Tile {
     }
 
     public void takeTile(Player player){
-        if(player == null || flipped){return;}
+        if (player == null) throw new IllegalArgumentException("Player cannot be null");
+        if (flipped) throw new IllegalStateException("Cannot take a flipped tile");
         state = TileState.OWNED;
         owner = player;
     }

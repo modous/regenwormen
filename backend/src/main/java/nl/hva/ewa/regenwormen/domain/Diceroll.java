@@ -18,7 +18,7 @@ public class Diceroll {
     private Set<DiceFace> chosen = EnumSet.noneOf(DiceFace.class);
 
     public Diceroll(Player player){
-        if(player == null) {throw new IllegalStateException("player is missing");}
+        if(player == null) {throw new IllegalArgumentException("player is missing");}
         this.player = player;
         for (int i = 0; i < AMOUNT_DICES; i++){
             dices.add(new Dice());
@@ -34,7 +34,7 @@ public class Diceroll {
     // ----------------- helpers -----------------
 
     private void requireAlive() {
-        if (turnState == TurnState.ENDED){throw new IllegalStateException("Turn already ended (bust).");};
+        if (turnState == TurnState.ENDED){throw new IllegalStateException("Turn already ended.");};
     }
 
     public List<Dice> getChosenDices(){

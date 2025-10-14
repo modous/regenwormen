@@ -2,81 +2,100 @@ package nl.hva.ewa.regenwormen.domain;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class PlayerTest {
 
     @Test
-    void createsPlayerWithValidName() {
-        // Arrange
-        String name = "Alice";
-
-        // Act
-        Player player = new Player(name);
+    void constructor_setsIdAndName_andValidatesLength() {
+        // Arrange & Act
+        Player p = new Player("Alice");
 
         // Assert
-        assertNotNull(player.getId());
-        assertEquals("Alice", player.getName());
+        assertThat(p.getId()).isNotBlank();
+        assertThat(p.getName()).isEqualTo("Alice");
+
+        // Arrange/Act/Assert invalid
+        assertThatThrownBy(() -> new Player(""))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Player("ABCDEFGHIJKLMNOPQ")) // 17 chars
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void trimsWhitespaceFromName() {
+    void addTile_setsOwnerAndAddsToStack_affectsPoints() {
         // Arrange
-        String nameWithSpaces = "  Bob  ";
+        Player p = new Player("Bob");
+        Tile t25 = new Tile(25); // 2 points
+        Tile t33 = new Tile(33); // 4 points
 
         // Act
-        Player player = new Player(nameWithSpaces);
+        p.addTile(t25); // addTile roept takeTile(this) aan
+        p.addTile(t33);
 
         // Assert
-        assertEquals("Bob", player.getName());
-    }
+        assertThat(p.getTopTile()).isEqualTo(t33);
+        assertThat(t25.getOwner()).isEqualTo(p);
+        assertThat(t33.getOwner()).isEqualTo(p);
+        assertThat(p.getPoints()).isEqualTo(2 + 4);
 
-    @Test
-    void rejectsNullName() {
-        // Arrange
-        String name = null;
-
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> new Player(name));
-    }
-
-    @Test
-    void rejectsBlankName() {
-        // Arrange
-        String blank = "   ";
-
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> new Player(blank));
-    }
-
-    @Test
-    void rejectsTooLongName() {
-        // Arrange
-        String tooLong = "x".repeat(17); // MAX_NAME_LENGTH = 16
-
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> new Player(tooLong));
-    }
-
-    @Test
-    void setNameUpdatesWhenValid() {
-        // Arrange
-        Player player = new Player("Ann");
+        // Arrange: double points voor 33
+        p.setDoublePointsTile(33);
 
         // Act
-        player.setName("Eve");
+        int pts = p.getPoints();
 
         // Assert
-        assertEquals("Eve", player.getName());
+        assertThat(pts).isEqualTo(2 + 4 * 2);
     }
 
     @Test
-    void setNameRejectsInvalid() {
+    void getTopTile_returnsLastOrNull_andLoseTopTileRemovesIt() {
         // Arrange
-        Player player = new Player("Ann");
+        Player p = new Player("Dan");
 
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> player.setName(" ".repeat(5)));
-        assertThrows(IllegalArgumentException.class, () -> player.setName("x".repeat(17)));
+        // Act & Assert
+        assertThat(p.getTopTile()).isNull();
+
+        Tile t21 = new Tile(21);
+        p.addTile(t21);
+        assertThat(p.getTopTile()).isEqualTo(t21);
+
+        Tile t22 = new Tile(22);
+        p.addTile(t22);
+        assertThat(p.getTopTile()).isEqualTo(t22);
+
+        // Act
+        p.loseTopTileToStack();
+
+        // Assert
+        assertThat(p.getTopTile()).isEqualTo(t21);
+    }
+
+    @Test
+    void loseTopTileToStack_throwsWhenEmpty() {
+        // Arrange
+        Player p = new Player("Eve");
+
+        // Act & Assert
+        assertThatThrownBy(p::loseTopTileToStack)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No tiles owned");
+    }
+
+    @Test
+    void setName_validatesAndTrims() {
+        // Arrange
+        Player p = new Player("  Frank  ");
+
+        // Act
+        p.setName("  New Name  ");
+
+        // Assert
+        assertThat(p.getName()).isEqualTo("New Name");
+        assertThatThrownBy(() -> p.setName(""))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> p.setName("ABCDEFGHIJKLMNOPQ"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

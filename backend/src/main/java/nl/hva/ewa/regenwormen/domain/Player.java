@@ -8,7 +8,6 @@ import java.util.List;
 
 public class Player {
     //getters
-    @Getter
     private final String id;
     private String name;
     private List<Tile> ownedTiles = new ArrayList<Tile>();
@@ -29,13 +28,13 @@ public class Player {
 
     public int getPoints(){
         return ownedTiles.stream()
-                .filter(t -> t.getOwner().equals(this))
+                .filter(t -> t.getOwner()==this)
                 .mapToInt(t -> (t.getValue() == doublePointsTile) ? t.getPoints() * 2 : t.getPoints())
                 .sum();
     }
     public Tile getTopTile(){
         if (ownedTiles.isEmpty())return null;
-        return ownedTiles.getLast();
+        return ownedTiles.get(ownedTiles.size()-1);
     }
     public Diceroll getDiceRoll(){return turn;}
 
@@ -58,13 +57,14 @@ public class Player {
     //functions
     public void addTile(Tile tile){
         if(tile == null) {throw new IllegalArgumentException("missing tile");}
+        tile.takeTile(this);
         ownedTiles.add(tile);
     }
 
     public void loseTopTileToStack(){
         Tile topTile = getTopTile();
         if (topTile == null){throw new IllegalStateException("No tiles owned");}
-        ownedTiles.remove(getTopTile());
+        ownedTiles.remove(topTile);
     }
 
     //helpers
@@ -73,6 +73,15 @@ public class Player {
             throw new IllegalArgumentException("Player name must be 1–" + MAX_NAME_LENGTH + " characters");}
         this.name = playerName.trim();
     }
+
+    public void returnAllTilesToPot() {
+        while (getTopTile() != null) {
+            Tile top = getTopTile();
+            top.tileToPot();
+            loseTopTileToStack();
+        }
+    }
+
 
     @Override
     public boolean equals(Object obj) {
