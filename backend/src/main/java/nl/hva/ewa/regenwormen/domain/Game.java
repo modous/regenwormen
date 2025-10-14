@@ -1,9 +1,6 @@
 package nl.hva.ewa.regenwormen.domain;
 
-import nl.hva.ewa.regenwormen.domain.dto.ClaimOptions;
-import nl.hva.ewa.regenwormen.domain.dto.EndTurnView;
-import nl.hva.ewa.regenwormen.domain.dto.StealOptions;
-import nl.hva.ewa.regenwormen.domain.dto.TurnView;
+import nl.hva.ewa.regenwormen.domain.dto.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +16,8 @@ public class Game {
     private GameState gameState;
     private TilesPot tilesPot;
 
+    private List<PlayersLeaderboardView> leaderboard;
+
     private int currentPlayersTurnIndex;
     private int maxPlayers ;
 
@@ -30,6 +29,10 @@ public class Game {
             Comparator.comparingInt(Player::getDoublePointsTile)
                     .reversed()
                     .thenComparing(Player::getId);
+
+    private static final Comparator<Player> SORT_LEADERBOARD =
+            Comparator.comparingInt(Player::getPoints).reversed();
+
 
 
     public Game(String gameName, int maxPlayers) {
@@ -85,14 +88,41 @@ public class Game {
         return players.add(player);
     }
 
-    public boolean leavePlayer(Player player){
-        if (player == null){return false;}
+    public boolean leavePlayer(String playerId){
+        if (playerId == null || playerId.isBlank()){throw new IllegalArgumentException("Player is missing");}
 
-        Player playerInGame = findPlayerById(player.getId());
-        if(playerInGame ==null){throw new IllegalArgumentException("Player not in game");}
-        // tiles terug naar pot?
-        players.remove(playerInGame);
+        Player playerToLeaveGame = findPlayerById(playerId);
+        if(playerToLeaveGame ==null){throw new IllegalArgumentException("Player not in game");}
 
+        if (gameState == GameState.PRE_GAME) {
+            players.remove(playerToLeaveGame);
+            return true;
+        }
+
+        int leavingIdx = players.indexOf(playerToLeaveGame);
+        boolean wasCurrent = (leavingIdx == currentPlayersTurnIndex);
+        boolean leavingIdxIsLast = (leavingIdx == (playersAmount()-1));
+
+        if(gameState == GameState.PLAYING){
+            for(Tile t : tilesPot.getTiles()){
+                Player owner = t.getOwner();
+                if(owner!= null && owner.equals(playerToLeaveGame)){
+                    t.tileToPot();
+                }
+            }
+            if(wasCurrent){
+                playerToLeaveGame.setEndTurn();
+            }
+        }
+
+        players.remove(leavingIdx);
+        if(gameState == GameState.PLAYING) {
+            if (players.size() < MIN_PLAYERS) {endGame();}
+            if (leavingIdx < currentPlayersTurnIndex) {currentPlayersTurnIndex--;
+            }
+            if (leavingIdxIsLast && wasCurrent) {currentPlayersTurnIndex = 0;}
+        }
+        return true;
     }
 
     public void startGame(){
@@ -101,16 +131,17 @@ public class Game {
         if (playersAmount() > MAX_PLAYERS){throw new IllegalStateException("too many players to start the game");}
         gameState = GameState.PLAYING;
         tilesPot = new TilesPot();
-        roundZero();
+        startRoundZero();
     }
 
     //MIDGAME Flow
-    private void roundZero(){
+    private boolean startRoundZero(){
         ensurePlaying();
         if(round != 0){throw new IllegalStateException("Round must be round: 0");}
         for(Player player : players){
             player.setStartTurn(new Diceroll(player));
         }
+        return true;
     }
 
     private void finalizeRoundZeroAndSetTurnOrder(){
@@ -171,7 +202,7 @@ public class Game {
         return dto;
     }
 
-    //MIDGAME round >=1
+    //MIDGAME round >=1 rolls
     public TurnView startAndRollRound() {
         ensurePlaying();
         Player p = getCurrentPlayer();
@@ -205,11 +236,16 @@ public class Game {
         return dto;
     }
 
+    public List<DiceFace> throwDices (Player player){
+        List<DiceFace> options = player.getDiceRoll().rollRemainingDice();
+        return options;
+    }
+
     public EndTurnView finishRound(){
         ensurePlaying();
         Player p = getCurrentPlayer();
         Diceroll roll = p.getDiceRoll();
-        if(roll == null){throw new IllegalStateException("No active round zero roll");}
+        if(roll == null){throw new IllegalStateException("No active round roll");}
         if(roll.getBusted()){
             handleBust(p);
             return EndTurnView.round(p, new ClaimOptions(p.getId(), List.of(), List.of()));
@@ -221,10 +257,10 @@ public class Game {
         return EndTurnView.round(p, tilePickOptions);
     }
 
+    //Action after throwing
     public void claimFromPot() {
         ensurePlaying();
         Player p = getCurrentPlayer();
-        if (!p.equals(getCurrentPlayer())) { throw new IllegalStateException("Not your turn"); }
 
         int score = p.getDiceRoll().getTakenScore();
 
@@ -236,14 +272,12 @@ public class Game {
         setNextPlayersTurn();
     }
 
-    public void stealTopTile(String victimPlayerId, int value) {
+    public void stealTopTile(int value) {
         ensurePlaying();
+        Player victim = tilesPot.findTileByValue(value).getOwner();
+        String victimPlayerId = victim.getId();
         Player thief = getCurrentPlayer();
-        if (!thief.equals(getCurrentPlayer())) { throw new IllegalStateException("Not your turn"); }
 
-        Player victim = players.stream()
-                .filter(pl -> pl.getId().equals(victimPlayerId))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Victim not found"));
 
         Tile top = victim.getTopTile();
         if (top == null || top.getValue() != value) {
@@ -258,16 +292,10 @@ public class Game {
     }
 
 
-
-    public List<DiceFace> throwDices (Player player){
-        List<DiceFace> options = player.getDiceRoll().rollRemainingDice();
-        return options;
-    }
-
     public void endGame() {
         if (gameState != GameState.PLAYING) return;
         gameState = GameState.ENDED;
-        //winner and score
+        calculateLeaderboard();
     }
 
     // ---- helpers ----
@@ -287,7 +315,7 @@ public class Game {
     public Player findPlayerById(String id){
         Player playerFound = null;
         for(Player p:players){
-            if (p.getId()==id){
+            if (p.getId().equals(id)){
                 playerFound = p;
             }
         }
@@ -306,11 +334,6 @@ public class Game {
            return;
        }
        currentPlayersTurnIndex++;
-    }
-
-    private void addDoubleValue(Player player, int value) {
-        if(value < 21){return;}
-        player.setDoublePointsTile(value);
     }
 
     public boolean hasMinValueToStop(int pointsThrown){
@@ -379,6 +402,25 @@ public class Game {
 
     private boolean endGameCheck(){
         return (tilesPot.amountAvailableTiles() == 0)  ? true : false;
+    }
+
+    private void calculateLeaderboard(){
+        List<Player> sorted = players.stream()
+                .sorted(Comparator.comparingInt(Player::getPoints).reversed())
+                .toList();
+
+        List<PlayersLeaderboardView> withRank = new ArrayList<PlayersLeaderboardView>();
+        int rank = 0;
+        int lastscore = -1;
+        for (Player p : sorted){
+            int pts = p.getPoints();
+            if (pts != lastscore) {
+                rank++;
+                lastscore = pts;
+            }
+            withRank.add(new PlayersLeaderboardView(p.getId(), p.getName(), pts, rank));
+        }
+        leaderboard = withRank;
     }
 
     @Override

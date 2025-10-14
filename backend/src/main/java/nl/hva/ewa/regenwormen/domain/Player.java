@@ -23,10 +23,14 @@ public class Player {
     }
 
     //getter
+    public String getId() {return id;}
+
+    public String getName(){return name;}
+
     public int getPoints(){
         return ownedTiles.stream()
-                .filter(tile -> tile.getOwner().equals(this))
-                .mapToInt(Tile::getPoints)
+                .filter(t -> t.getOwner().equals(this))
+                .mapToInt(t -> (t.getValue() == doublePointsTile) ? t.getPoints() * 2 : t.getPoints())
                 .sum();
     }
     public Tile getTopTile(){
@@ -34,8 +38,6 @@ public class Player {
         return ownedTiles.getLast();
     }
     public Diceroll getDiceRoll(){return turn;}
-
-    public int getAmountTiles(){return ownedTiles.size();}
 
     public int getDoublePointsTile(){return doublePointsTile;}
 
