@@ -5,20 +5,18 @@ import HowToPlay from '../components/HowToPlay.vue';
 import Credits from '../components/Credits.vue';
 import Login from '../components/Login.vue';
 import Register from '../components/Register.vue';
-import GameMain from '../components/Game/GameMain.vue';
+import App from '../App.vue'; // gamecomponent
 
 const routes = [
-  { path: '/', name: 'Home', component: StartScreen },
-  { path: '/how-to-play', name: 'HowToPlay', component: HowToPlay },
-  { path: '/credits', name: 'Credits', component: Credits },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/register', name: 'Register', component: Register },
-    { path: '/game', name: 'GameMain', component: GameMain },
+    { path: '/', name: 'Home', component: StartScreen },
+    { path: '/how-to-play', name: 'HowToPlay', component: HowToPlay },
+    { path: '/credits', name: 'Credits', component: Credits },
+    { path: '/login', name: 'Login', component: Login },
+    { path: '/register', name: 'Register', component: Register },
+    { path: '/game', name: 'Game', component: App },
 ];
 
-const router = createRouter({
-  history: createWebHistory(), 
-  routes,
+export default createRouter({
+    history: createWebHistory(),
+    routes,
 });
-
-export default router;
