@@ -1,5 +1,8 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.TurnState;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;

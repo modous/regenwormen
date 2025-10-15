@@ -1,6 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
 
+import nl.hva.ewa.regenwormen.domain.Enum.TileState;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

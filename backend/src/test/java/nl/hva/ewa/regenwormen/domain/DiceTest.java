@@ -1,5 +1,6 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

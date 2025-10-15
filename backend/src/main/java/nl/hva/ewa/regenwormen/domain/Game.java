@@ -1,5 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 import nl.hva.ewa.regenwormen.domain.dto.*;
 
 import java.util.ArrayList;
@@ -88,7 +90,7 @@ public class Game {
         if (player == null){return false;}
         if (gameState != GameState.PRE_GAME) {throw new IllegalStateException("Game already started. Cannot join current game.");}
         if (playersAmount() >= maxPlayers){ throw new IllegalStateException("Max players how game is already reached");}
-
+        player.setGame(this);
         return players.add(player);
     }
 
@@ -100,6 +102,7 @@ public class Game {
 
         if (gameState == GameState.PRE_GAME) {
             players.remove(playerToLeaveGame);
+            playerToLeaveGame.setGame(null);
             return true;
         }
 
@@ -109,6 +112,7 @@ public class Game {
 
         if(gameState == GameState.PLAYING){
             playerToLeaveGame.returnAllTilesToPot();
+            playerToLeaveGame.setGame(null);
             if(wasCurrent){
                 playerToLeaveGame.setEndTurn();
             }

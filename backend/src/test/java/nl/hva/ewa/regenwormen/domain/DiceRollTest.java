@@ -1,5 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.TurnState;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
