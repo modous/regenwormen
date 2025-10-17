@@ -16,8 +16,8 @@ public class PlayerMockRepository implements PlayerRepository {
         User User1 = new User();
         User User2 = new User();
 
-        players.add(new Player("Player1", User1));
-        players.add(new Player("Player2", User2));
+        players.add(new Player("Player1", User1.getId()));
+        players.add(new Player("Player2", User2.getId()));
     }
 
     @Override
@@ -35,38 +35,12 @@ public class PlayerMockRepository implements PlayerRepository {
                 .findFirst();
     }
 
+    public boolean deleteByPlayerId(String id){
+        return players.removeIf(p -> Objects.equals(p.getId(), id));
+    }
+
     @Override
     public List<Player> findAll() {
         return List.copyOf(players);
-    }
-
-    @Override
-    public List<Player> findByGameId(String gameId) {
-        return players.stream()
-                .filter(p -> Objects.equals(p.getGame().getId(), gameId))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsByGameIdAndUserId(String gameId, String userId) {
-        return players.stream().anyMatch(p ->
-                Objects.equals(p.getGame().getId(), gameId)
-                        && Objects.equals(p.getUser().getId(), userId)
-        );
-    }
-
-    @Override
-    public boolean deleteByGameIdAndUserId(String gameId, String userId) {
-        return players.removeIf(p ->
-                Objects.equals(p.getGame().getId(), gameId)
-                        && Objects.equals(p.getUser().getId(), userId)
-        );
-    }
-
-    @Override
-    public long countByGameId(String gameId) {
-        return players.stream()
-                .filter(p -> Objects.equals(p.getGame().getId(), gameId))
-                .count();
     }
 }

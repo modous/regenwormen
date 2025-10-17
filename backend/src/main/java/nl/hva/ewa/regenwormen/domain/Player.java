@@ -9,9 +9,8 @@ import java.util.List;
 public class Player {
     //getters
     private final String id;
-    private final User user;
+    private final String userId;
     private String name;
-    private Game game;
 
     private List<Tile> ownedTiles = new ArrayList<Tile>();
     private Diceroll turn ;
@@ -19,17 +18,22 @@ public class Player {
 
     private static final int MAX_NAME_LENGTH = 16;
 
-    public Player(String name, User user) {
+    public Player(String name) {
         setPlayerNameInternal(name);
         this.id = Helpers.generateShortHexId(10);
-        this.user = user;
+        this.userId = null;
+    }
+
+    public Player(String name, String userId) {
+        setPlayerNameInternal(name);
+        this.id = Helpers.generateShortHexId(10);
+        this.userId = userId;
     }
 
     //getter
     public String getId() {return id;}
     public String getName(){return name;}
-    public Game getGame() {return game;}
-    public User getUser() {return user;}
+    public String getUser() {return userId;}
 
     public int getPoints(){
         return ownedTiles.stream()
@@ -49,9 +53,6 @@ public class Player {
     //setter
     public void setName(String name) {setPlayerNameInternal(name);}
 
-    public void setGame(Game game){
-        this.game = game;
-    }
 
     public void  setDoublePointsTile(int value){doublePointsTile = value;}
 

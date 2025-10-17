@@ -64,8 +64,6 @@ public class Game {
 
     public int getTurnIndex() {return currentPlayersTurnIndex;}
 
-    public Player getCurrentPlayer(){return players.get(getTurnIndex());}
-
     public GameState getGameState() {return gameState;}
 
     //setters
@@ -76,21 +74,12 @@ public class Game {
 
     //Logic
     //Pregame
-    public Player getPlayer(int index) {
-        if(index < 0 || index >= players.size()){throw new IndexOutOfBoundsException("Invalid player index");}
-        return players.get(index);
-    }
-
-    public Player getPlayersTurn(){
-        if(players.size() == 0) {return null;}
-        return getPlayer(getTurnIndex());
-    }
 
     public boolean addPlayer (Player player) {
         if (player == null){return false;}
+        if(findPlayerById(player.getId()) != null ){throw new IllegalArgumentException("Player is already in game");}
         if (gameState != GameState.PRE_GAME) {throw new IllegalStateException("Game already started. Cannot join current game.");}
         if (playersAmount() >= maxPlayers){ throw new IllegalStateException("Max players how game is already reached");}
-        player.setGame(this);
         return players.add(player);
     }
 
@@ -102,7 +91,6 @@ public class Game {
 
         if (gameState == GameState.PRE_GAME) {
             players.remove(playerToLeaveGame);
-            playerToLeaveGame.setGame(null);
             return true;
         }
 
@@ -112,7 +100,6 @@ public class Game {
 
         if(gameState == GameState.PLAYING){
             playerToLeaveGame.returnAllTilesToPot();
-            playerToLeaveGame.setGame(null);
             if(wasCurrent){
                 playerToLeaveGame.setEndTurn();
             }
@@ -142,7 +129,7 @@ public class Game {
         ensurePlaying();
         if(round != 0){throw new IllegalStateException("Round must be round: 0");}
         for(Player player : players){
-            player.setStartTurn(new Diceroll(player));
+            player.setStartTurn(new Diceroll());
         }
         return true;
     }
@@ -209,7 +196,7 @@ public class Game {
     public TurnView startAndRollRound() {
         ensurePlaying();
         Player p = getCurrentPlayer();
-        p.setStartTurn(new Diceroll(p));
+        p.setStartTurn(new Diceroll());
 
         List<DiceFace> options = throwDices(p);
         TurnView dto = TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
@@ -319,6 +306,12 @@ public class Game {
             throw new IllegalArgumentException("Max players must be between " + MIN_PLAYERS + " and " + MAX_PLAYERS);
         }
         this.maxPlayers = maxPlayers;
+    }
+
+    public Player getCurrentPlayer() {
+        if (players == null || players.isEmpty()) return null;
+        if (currentPlayersTurnIndex < 0 || currentPlayersTurnIndex >= players.size()) return null;
+        return players.get(currentPlayersTurnIndex);
     }
 
     public Player findPlayerById(String id){
