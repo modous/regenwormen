@@ -28,7 +28,7 @@ async function joinLobby(id) {
     const res = await fetch(`http://localhost:8080/api/lobbies/join/${id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user.email, ready: false })
+      body: JSON.stringify({ username: user.username, ready: false })
     })
 
     if (!res.ok) {
