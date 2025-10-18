@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import StartScreen from '../components/StartScreen.vue';
-import HowToPlay from '../components/HowToPlay.vue';
-import Credits from '../components/Credits.vue';
-import Login from '../components/Login.vue';
-import Register from '../components/Register.vue';
+import StartScreen from '../views/StartScreen.vue';
+import HowToPlay from '../views/HowToPlay.vue';
+import Credits from '../views/Credits.vue';
+import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
 import GameMain from '../components/Game/GameMain.vue';
+import LobbyOverview from "@/views/LobbyOverview.vue";
+import LobbyRoom from "@/views/LobbyRoom.vue";
 
 const routes = [
   { path: '/', name: 'Home', component: StartScreen },
@@ -13,6 +15,8 @@ const routes = [
   { path: '/credits', name: 'Credits', component: Credits },
   { path: '/login', name: 'Login', component: Login },
   { path: '/register', name: 'Register', component: Register },
+    { path: '/lobbies', component: LobbyOverview },
+    { path: '/lobby/:id', component: LobbyRoom },
     { path: '/game', name: 'GameMain', component: GameMain },
 ];
 

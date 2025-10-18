@@ -4,7 +4,7 @@ import houtBg from './assets/hout.jpg'
 </script>
 
 <template>
-  <div class="app" :style="{ backgroundImage: `url(${houtBg})` }">
+  <div class="app">
     <router-view />
   </div>
 </template>
