@@ -1,3 +1,10 @@
+@import './base.css';
+
+#app {
+    font-weight: normal;
+    background-color: #ffffff;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background: #1e1e2f;
