@@ -57,6 +57,16 @@ public class LobbyController {
         return lobby;
     }
 
+    @PostMapping("/{id}/invite")
+    public String invitePlayer(@PathVariable int id, @RequestBody LobbyPlayer inviter, @RequestParam String inviteeEmail) {
+        Lobby lobby = repo.findById(id);
+        if (lobby == null) return "Lobby not found";
+
+        System.out.println("📨 " + inviter.getUsername() + " invited " + inviteeEmail + " to lobby " + lobby.getName());
+
+        return "Invitation sent to " + inviteeEmail;
+    }
+
     @PostMapping("/{id}/leave")
     public Lobby leaveLobby(@PathVariable int id, @RequestBody LobbyPlayer player) {
         Lobby lobby = repo.findById(id);
