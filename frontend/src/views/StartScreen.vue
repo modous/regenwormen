@@ -3,13 +3,22 @@ import wormImage from '../assets/regenwormSpel.png'
 import { useUserStore } from '@/stores/user.js'
 
 const userStore = useUserStore()
-console.log('User store test:', userStore)
 </script>
 
 <template>
   <section class="start-screen">
-    <a class="title-link" href="/"><h1 class="title">Regenwormen</h1></a>
+    <!-- 👤 Username top-right -->
+    <div v-if="userStore.isAuthenticated" class="user-info">
+      <span class="username">👤 {{ userStore.user?.username || 'Player' }}</span>
+      <button class="logout-btn" @click="userStore.logout">Logout</button>
+    </div>
 
+    <!-- Title -->
+    <a class="title-link" href="/">
+      <h1 class="title">Regenwormen</h1>
+    </a>
+
+    <!-- Main button -->
     <router-link
         v-if="userStore.isAuthenticated"
         to="/lobbies"
@@ -18,6 +27,7 @@ console.log('User store test:', userStore)
       Start Game
     </router-link>
 
+    <!-- Navigation -->
     <nav class="nav-links">
       <router-link to="/how-to-play" class="nav-link">How to Play</router-link>
       <router-link to="/credits" class="nav-link">Credits</router-link>
@@ -38,15 +48,6 @@ console.log('User store test:', userStore)
         Register
       </router-link>
 
-      <a
-          v-if="userStore.isAuthenticated"
-          href="#"
-          class="nav-link"
-          @click.prevent="userStore.logout"
-      >
-        Logout
-      </a>
-
       <router-link to="/exit" class="nav-link">Exit</router-link>
     </nav>
   </section>
@@ -57,11 +58,40 @@ console.log('User store test:', userStore)
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;   /* move content a bit higher */
+  justify-content: flex-start;
   min-height: 100vh;
-  padding: 4rem 2rem 2rem;       /* extra top padding */
+  padding: 4rem 2rem 2rem;
   background: #faf9fc;
   position: relative;
+}
+
+/* 👤 Username + logout top right */
+.user-info {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.username {
+  font-weight: 600;
+  color: #333;
+}
+.logout-btn {
+  background: none;
+  border: none;
+  color: #b10c96;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.logout-btn:hover {
+  color: #770494;
 }
 
 /* Title styling */
@@ -83,7 +113,7 @@ console.log('User store test:', userStore)
 /* Start button */
 .start-btn {
   display: block;
-  margin: 0 auto 3rem auto;      /* perfectly centered horizontally + spaced below title */
+  margin: 0 auto 3rem auto;
   padding: 0.75rem 2.5rem;
   font-size: 1.4rem;
   border: none;
@@ -119,22 +149,5 @@ console.log('User store test:', userStore)
   background-color: #770494;
   padding: 0.3rem 1rem;
   border-radius: 6px;
-}
-
-/* Optional image placement */
-.worm-img {
-  margin-top: 2rem;
-  width: 250px;
-  max-width: 80%;
-  height: auto;
-}
-
-/* Responsive fallback */
-@media (min-width: 1200px) {
-  .start-screen {
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-  }
 }
 </style>

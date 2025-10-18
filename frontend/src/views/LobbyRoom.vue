@@ -20,7 +20,7 @@ async function toggleReady() {
   await fetch(`http://localhost:8080/api/lobbies/${route.params.id}/ready`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: user.email })
+    body: JSON.stringify({ username: user.username })
   })
   await loadLobby()
 
@@ -32,7 +32,7 @@ async function leaveLobby() {
   await fetch(`http://localhost:8080/api/lobbies/${route.params.id}/leave`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: user.email })
+    body: JSON.stringify({ username: user.username })
   })
 
   clearInterval(poller)
@@ -114,10 +114,10 @@ async function copyInviteLink() {
       <!-- Ready / Unready -->
       <button
           @click="toggleReady"
-          :style="{ background: lobby.players.find(p => p.username === user.email)?.ready ? 'red' : 'green' }"
+          :style="{ background: lobby.players.find(p => p.username === user.username)?.ready ? 'red' : 'green' }"
       >
         {{
-          lobby.players.find(p => p.username === user.email)?.ready
+          lobby.players.find(p => p.username === user.username)?.ready
               ? 'Unready'
               : 'Click to Ready'
         }}
