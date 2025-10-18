@@ -71,7 +71,7 @@ onMounted(async () => {
     await fetch(`http://localhost:8080/api/lobbies/join/${route.params.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user.email, ready: false })
+      body: JSON.stringify({ username: user.username, ready: false })
     })
     await loadLobby()
   }
