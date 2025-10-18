@@ -6,34 +6,45 @@
       <form @submit.prevent="handleRegister">
         <div class="form-group">
           <label for="email">Email</label>
-          <input 
-            id="email" 
-            type="email" 
-            v-model="email" 
-            placeholder="Type your email" 
-            required 
+          <input
+              id="email"
+              type="email"
+              v-model="email"
+              placeholder="Type your email"
+              required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+              id="username"
+              type="text"
+              v-model="username"
+              placeholder="Choose a username"
+              required
           />
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input 
-            id="password" 
-            type="password" 
-            v-model="password" 
-            placeholder="Type your password" 
-            required 
+          <input
+              id="password"
+              type="password"
+              v-model="password"
+              placeholder="Type your password"
+              required
           />
         </div>
 
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input 
-            id="confirmPassword" 
-            type="password" 
-            v-model="confirmPassword" 
-            placeholder="Confirm your password" 
-            required 
+          <input
+              id="confirmPassword"
+              type="password"
+              v-model="confirmPassword"
+              placeholder="Confirm your password"
+              required
           />
         </div>
 
@@ -53,14 +64,15 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const email = ref('')
+const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const router = useRouter()
 
 async function handleRegister() {
   if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match!");
-    return;
+    alert("Passwords do not match!")
+    return
   }
 
   try {
@@ -69,25 +81,25 @@ async function handleRegister() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: email.value,
+        username: username.value,
         password: password.value
       }),
-    });
+    })
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
-      alert(data.error || "Registration failed.");
-      return;
+      alert(data.error || "Registration failed.")
+      return
     }
 
-    alert("Registration successful!");
-    router.push('/login');
+    alert("Registration successful!")
+    router.push('/login')
   } catch (err) {
-    alert("Could not reach server.");
-    console.error(err);
+    alert("Could not reach server.")
+    console.error(err)
   }
 }
-
 </script>
 
 <style scoped>

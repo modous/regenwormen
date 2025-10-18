@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -21,27 +20,32 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // ✅ this was missing and must import java.util.List
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User getById(UUID id) {
+    public User getById(String id) {
         return userRepository.findById(id).orElseThrow();
     }
 
-    public User register(String email, String password) {
+    public User register(String email, String username, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Username already in use");
+        }
 
         String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(email, encodedPassword);
+        User user = new User(email, username, encodedPassword);
         return userRepository.save(user);
     }
 
-    public boolean login(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
+    public boolean login(String identifier, String password) {
+        Optional<User> userOpt = userRepository.findByEmail(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByUsername(identifier);
+        }
         return userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword());
     }
 }
