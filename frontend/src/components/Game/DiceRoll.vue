@@ -42,46 +42,66 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { rollDice as mockRollDice, pickDie as mockPickDie, getGameState } from "../../api/mockAPI.js";
+import { ref, onMounted } from "vue";
+import { listGames, createGame, getGame, joinGame, startGame } from "../../api/gameApi.js";
 
 export default {
   name: "DiceRoll",
   setup() {
     const dice = ref([]);
     const gameState = ref({ collectedDice: [] });
+    const currentGameId = ref(null);
+    const currentPlayerId = ref("player1");
 
-    async function refreshGameState() {
-      gameState.value = await getGameState();
+    async function initGame() {
+      const games = await listGames();
+      if (games.length === 0) {
+        const created = await createGame("Room 1", 4);
+        currentGameId.value = created.id;
+      } else {
+        currentGameId.value = games[0].id;
+      }
+      await joinGame(currentGameId.value, currentPlayerId.value);
+      await refreshGameState();
     }
 
+    async function refreshGameState() {
+      if (!currentGameId.value) return;
+      const game = await getGame(currentGameId.value);
+      gameState.value = game;
+    }
+
+    // placeholder-functies, want backend heeft nog geen dice-logica
     async function rollDice() {
-      const rolled = await mockRollDice();
-      dice.value = rolled.map(d => ({
+      // tijdelijk lokale simulatie tot backend dit ondersteunt
+      const rolled = Array.from({ length: 5 }, () =>
+          Math.ceil(Math.random() * 6)
+      );
+      dice.value = rolled.map((d) => ({
         value: d,
-        img: d !== "SPECIAL" ? `/assets/dice/dice-${d}.png` : `/assets/dice/dice-special.png`
+        img: `/assets/dice/dice-${d}.png`,
       }));
       await refreshGameState();
     }
 
     async function pickDie(die) {
-      const result = await mockPickDie(die.value);
-      dice.value = result.rolledDice.map(d => ({
-        value: d,
-        img: d !== "SPECIAL" ? `/assets/dice/dice-${d}.png` : `/assets/dice/dice-special.png`
-      }));
-      await refreshGameState();
+      // zelfde: geen backend-logica, enkel UI update
+      gameState.value.collectedDice.push({
+        value: die.value,
+        img: die.img,
+      });
+      dice.value = dice.value.filter((d) => d.value !== die.value);
     }
 
-    refreshGameState();
+    onMounted(initGame);
 
     return {
       dice,
       gameState,
       rollDice,
-      pickDie
+      pickDie,
     };
-  }
+  },
 };
 </script>
 
@@ -110,11 +130,11 @@ export default {
   align-items: center;
   border: 1px solid #333;
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0); /* transparant */
+  background-color: rgba(255, 255, 255, 0);
 }
 
 .dice.collected {
-  background-color: rgba(238, 238, 238, 0); /* transparant */
+  background-color: rgba(238, 238, 238, 0);
 }
 
 .dice-img {
