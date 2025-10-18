@@ -3,11 +3,8 @@ package nl.hva.ewa.regenwormen.api;
 import nl.hva.ewa.regenwormen.domain.Lobby;
 import nl.hva.ewa.regenwormen.domain.dto.LobbyPlayer;
 import nl.hva.ewa.regenwormen.repository.LobbyRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,38 +18,21 @@ public class LobbyController {
         this.repo = repo;
     }
 
-    // Get all lobbies
     @GetMapping
     public List<Lobby> getAllLobbies() {
         return repo.findAll();
     }
 
-    // Get a single lobby by ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getLobby(@PathVariable int id) {
-        Lobby lobby = repo.findById(id);
-        if (lobby == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Lobby not found");
-        }
-        return ResponseEntity.ok(lobby);
+    public Lobby getLobby(@PathVariable int id) {
+        return repo.findById(id);
     }
 
-    // Join a lobby
     @PostMapping("/join/{id}")
-    public ResponseEntity<?> joinLobby(@PathVariable int id, @RequestBody LobbyPlayer player) {
+    public Lobby joinLobby(@PathVariable int id, @RequestBody LobbyPlayer player) {
         Lobby lobby = repo.findById(id);
-        if (lobby == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Lobby not found");
-        }
+        if (lobby == null) return null;
 
-        // Make sure player list exists
-        if (lobby.getPlayers() == null) {
-            lobby.setPlayers(new ArrayList<>());
-        }
-
-        // Check if player already joined
         boolean alreadyIn = lobby.getPlayers().stream()
                 .anyMatch(p -> p.getUsername().equals(player.getUsername()));
 
@@ -60,32 +40,33 @@ public class LobbyController {
             lobby.getPlayers().add(player);
         }
 
-        return ResponseEntity.ok(lobby);
+        return lobby;
     }
 
-    // Toggle a player's ready state
     @PostMapping("/{id}/ready")
-    public ResponseEntity<?> toggleReady(@PathVariable int id, @RequestBody LobbyPlayer player) {
+    public Lobby toggleReady(@PathVariable int id, @RequestBody LobbyPlayer player) {
         Lobby lobby = repo.findById(id);
-        if (lobby == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Lobby not found");
-        }
+        if (lobby == null) return null;
 
-        // Toggle ready state for the given player
         lobby.getPlayers().forEach(p -> {
             if (p.getUsername().equals(player.getUsername())) {
                 p.setReady(!p.isReady());
             }
         });
 
-        // Activate countdown if everyone is ready
-        if (!lobby.getPlayers().isEmpty() && lobby.allReady()) {
-            lobby.setCountdownActive(true);
-        } else {
-            lobby.setCountdownActive(false);
-        }
+        return lobby;
+    }
 
-        return ResponseEntity.ok(lobby);
+    @PostMapping("/{id}/leave")
+    public Lobby leaveLobby(@PathVariable int id, @RequestBody LobbyPlayer player) {
+        Lobby lobby = repo.findById(id);
+        if (lobby == null) return null;
+
+        // ✅ Remove player safely by username
+        lobby.getPlayers().removeIf(p -> p.getUsername().equals(player.getUsername()));
+
+
+
+        return lobby;
     }
 }

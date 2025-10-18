@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -7,6 +7,7 @@ const router = useRouter()
 const lobby = ref(null)
 const countdown = ref(null)
 let timer = null
+let poller = null
 
 const user = JSON.parse(localStorage.getItem('user'))
 
@@ -23,13 +24,24 @@ async function toggleReady() {
   })
   await loadLobby()
 
-  // If not everyone ready anymore, stop countdown
+  // stop countdown if someone unreadies
   if (!allPlayersReady()) stopCountdown()
 }
 
-function startCountdown() {
-  if (countdown.value) return // prevent multiple timers
+async function leaveLobby() {
+  await fetch(`http://localhost:8080/api/lobbies/${route.params.id}/leave`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user.email })
+  })
 
+  clearInterval(poller)
+  stopCountdown()
+  router.push('/lobbies')
+}
+
+function startCountdown() {
+  if (countdown.value) return
   countdown.value = 10
   timer = setInterval(() => {
     countdown.value--
@@ -53,13 +65,17 @@ function allPlayersReady() {
 
 onMounted(async () => {
   await loadLobby()
-
-  setInterval(async () => {
+  poller = setInterval(async () => {
     await loadLobby()
     if (allPlayersReady() && !countdown.value) {
       startCountdown()
     }
   }, 2000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(poller)
+  stopCountdown()
 })
 </script>
 
@@ -77,28 +93,24 @@ onMounted(async () => {
       </li>
     </ul>
 
-    <!-- ✅ Button now always visible -->
-    <button
-        @click="toggleReady"
-        :style="{ background: lobby.players.find(p => p.username === user.email)?.ready ? 'green' : 'red' }"
-    >
-      {{
-        lobby.players.find(p => p.username === user.email)?.ready
-            ? 'Unready'
-            : 'Click to Ready'
-      }}
-    </button>
+    <div class="buttons">
+      <!-- Ready / Unready -->
+      <button
+          @click="toggleReady"
+          :style="{ background: lobby.players.find(p => p.username === user.email)?.ready ? 'green' : 'red' }"
+      >
+        {{
+          lobby.players.find(p => p.username === user.email)?.ready
+              ? 'Unready'
+              : 'Click to Ready'
+        }}
+      </button>
 
-    <!-- ✅ Start button visible when all ready -->
-    <button
-        v-if="allPlayersReady()"
-        @click="startCountdown"
-        class="start-btn"
-    >
-      Start Game
-    </button>
+      <!-- Leave Lobby -->
+      <button class="leave-btn" @click="leaveLobby">Leave Lobby</button>
+    </div>
 
-    <div v-if="countdown">Game starting in {{ countdown }}</div>
+    <div v-if="countdown" class="countdown">Game starting in {{ countdown }}</div>
   </section>
 </template>
 
@@ -115,22 +127,31 @@ li {
   margin: 0.5rem 0;
   font-weight: bold;
 }
-button {
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-top: 1rem;
+}
+button {
   border: none;
   border-radius: 8px;
   padding: 0.5rem 1rem;
   color: white;
   font-size: 1rem;
   cursor: pointer;
-}
-.start-btn {
-  background-color: #008000;
-  margin-left: 10px;
   transition: 0.3s;
 }
-.start-btn:hover {
-  background-color: #005f00;
+.leave-btn {
+  background-color: #b10c0c;
+}
+.leave-btn:hover {
+  background-color: #7a0606;
   transform: translateY(-2px);
+}
+.countdown {
+  margin-top: 1rem;
+  font-size: 1.3rem;
+  font-weight: bold;
 }
 </style>
