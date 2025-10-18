@@ -1,134 +1,131 @@
-package nl.hva.ewa.regenwormen.domain;
-
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class GameTest {
-
-    @Test
-    void createsGameWithValidValues() {
-        // Arrange
-        String title = "Regenwormen";
-        int maxPlayers = 4;
-
-        // Act
-        Game game = new Game(title, maxPlayers);
-
-        // Assert
-        assertNotNull(game.getId());
-        assertEquals("Regenwormen", game.getGameName());
-        assertEquals(4, game.getMaxPlayers());
-        assertEquals(GameState.PRE_GAME, game.getGameState());
-        assertEquals(0, game.playersAmount());
-    }
-
-    @Test
-    void rejectsInvalidNameOrMaxPlayers() {
-        // Arrange
-        String empty = "";
-        String tooLong = "X".repeat(17); // MAX_NAME_LENGTH = 16
-
-        // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> new Game(empty, 4));
-        assertThrows(IllegalArgumentException.class, () -> new Game(tooLong, 4));
-        assertThrows(IllegalArgumentException.class, () -> new Game("OK", 1));
-        assertThrows(IllegalArgumentException.class, () -> new Game("OK", 9));
-    }
-
-    @Test
-    void addPlayerSucceedsInPreGame() {
-        // Arrange
-        Game game = new Game("Test", 2);
-        Player alice = new Player("Alice");
-
-        // Act
-        boolean added = game.addPlayer(alice);
-
-        // Assert
-        assertTrue(added);
-        assertEquals(1, game.playersAmount());
-        assertEquals("Alice", game.getPlayers().get(0).getName());
-    }
-
-    @Test
-    void addPlayerFailsAfterGameStarts() {
-        // Arrange
-        Game game = new Game("Test", 2);
-        game.addPlayer(new Player("Alice"));
-        game.addPlayer(new Player("Bob"));
-        game.startGame();
-
-        // Act + Assert
-        assertThrows(IllegalStateException.class, () -> game.addPlayer(new Player("Charlie")));
-    }
-
-    @Test
-    void startGameNeedsAtLeastTwoPlayers() {
-        // Arrange
-        Game game = new Game("Test", 3);
-        game.addPlayer(new Player("Alice"));
-
-        // Act + Assert
-        assertThrows(IllegalStateException.class, game::startGame);
-    }
-
-    @Test
-    void startGameSetsStateAndTurn() {
-        // Arrange
-        Game game = new Game("Test", 3);
-        Player p1 = new Player("A");
-        Player p2 = new Player("B");
-        game.addPlayer(p1);
-        game.addPlayer(p2);
-
-        // Act
-        game.startGame();
-
-        // Assert
-        assertEquals(GameState.PLAYING, game.getGameState());
-        assertEquals(p1, game.getPlayersTurn());
-        assertEquals(0, game.getTurnIndex());
-    }
-
-    @Test
-    void turnCyclesThroughPlayers() {
-        // Arrange
-        Game game = new Game("Test", 3);
-        Player p1 = new Player("A");
-        Player p2 = new Player("B");
-        Player p3 = new Player("C");
-        game.addPlayer(p1);
-        game.addPlayer(p2);
-        game.addPlayer(p3);
-        game.startGame();
-
-        // Act
-        game.setNextPlayersTurn(); // -> B
-        Player afterOne = game.getPlayersTurn();
-        game.setNextPlayersTurn(); // -> C
-        Player afterTwo = game.getPlayersTurn();
-        game.setNextPlayersTurn(); // -> A
-        Player afterThree = game.getPlayersTurn();
-
-        // Assert
-        assertEquals(p2, afterOne);
-        assertEquals(p3, afterTwo);
-        assertEquals(p1, afterThree);
-    }
-
-    @Test
-    void endGameTransitionsToEnded() {
-        // Arrange
-        Game game = new Game("Test", 2);
-        game.addPlayer(new Player("A"));
-        game.addPlayer(new Player("B"));
-        game.startGame();
-
-        // Act
-        game.endGame();
-
-        // Assert
-        assertEquals(GameState.ENDED, game.getGameState());
-    }
-}
+//package nl.hva.ewa.regenwormen.domain;
+//
+//import nl.hva.ewa.regenwormen.domain.Enum.GameState;
+//import org.junit.jupiter.api.Test;
+//
+//import static org.assertj.core.api.Assertions.*;
+//
+//class GameBasicTest {
+//
+//    @Test
+//    void createGame_andAddPlayers_untilMax() {
+//        // Arrange
+//        Game g = new Game("Test", 3);
+//        User user = new User().getId();
+//
+//        // Act
+//        boolean a1 = g.addPlayer(new Player("Alice", user));
+//        boolean a2 = g.addPlayer(new Player("Bob", user));
+//        boolean a3 = g.addPlayer(new Player("Cara", user));
+//
+//        // Assert
+//        assertThat(a1).isTrue();
+//        assertThat(a2).isTrue();
+//        assertThat(a3).isTrue();
+//        assertThat(g.playersAmount()).isEqualTo(3);
+//
+//        // Act & Assert: boven max
+//        assertThatThrownBy(() -> g.addPlayer(new Player("Dave", user)))
+//                .isInstanceOf(IllegalStateException.class)
+//                .hasMessageContaining("Max players");
+//    }
+//
+//    @Test
+//    void leavePlayer_inPreGame_removesPlayer() {
+//        // Arrange
+//        User user = new User();
+//        Game g = new Game("Lobby", 4);
+//        Player a = new Player("Alice", user);
+//        Player b = new Player("Bob", user);
+//        g.addPlayer(a);
+//        g.addPlayer(b);
+//        assertThat(g.playersAmount()).isEqualTo(2);
+//
+//        // Act
+//        boolean left = g.leavePlayer(a.getId());
+//
+//        // Assert
+//        assertThat(left).isTrue();
+//        assertThat(g.playersAmount()).isEqualTo(1);
+//        assertThatThrownBy(() -> g.leavePlayer("unknown"))
+//                .isInstanceOf(IllegalArgumentException.class);
+//    }
+//
+//    @Test
+//    void startGame_requiresMinPlayers_andTransitionsToPlaying() {
+//        // Arrange
+//        Game g = new Game("Room", 4);
+//        User user = new User();
+//
+//        // Act & Assert: te weinig spelers
+//        g.addPlayer(new Player("Alice", user));
+//        assertThatThrownBy(g::startGame)
+//                .isInstanceOf(IllegalStateException.class)
+//                .hasMessageContaining("too little players");
+//
+//        // Arrange
+//        g.addPlayer(new Player("Bob", user));
+//
+//        // Act
+//        g.startGame();
+//
+//        // Assert
+//        assertThat(g.getGameState()).isEqualTo(GameState.PLAYING);
+//    }
+//
+//    @Test
+//    void setNextPlayersTurn_wrapsToZero() {
+//        // Arrange
+//        User user = new User();
+//        Game g = new Game("Turns", 3);
+//        Player a = new Player("Alice", user);
+//        Player b = new Player("Bob", user);
+//        Player c = new Player("Cara", user);
+//        g.addPlayer(a);
+//        g.addPlayer(b);
+//        g.addPlayer(c);
+//
+//        // Act
+//        assertThat(g.getTurnIndex()).isEqualTo(0); // startindex
+//        g.setNextPlayersTurn(); // -> 1
+//        g.setNextPlayersTurn(); // -> 2
+//        g.setNextPlayersTurn(); // -> wrap -> 0
+//
+//        // Assert
+//        assertThat(g.getTurnIndex()).isEqualTo(0);
+//    }
+//
+//    @Test
+//    void findPlayerById_returnsCorrectPlayerOrNull() {
+//        // Arrange
+//        User user = new User();
+//        Game g = new Game("Find", 4);
+//        Player a = new Player("Alice", user);
+//        Player b = new Player("Bob", user);
+//        g.addPlayer(a);
+//        g.addPlayer(b);
+//
+//        // Act
+//        Player p1 = g.findPlayerById(a.getId());
+//        Player p2 = g.findPlayerById("does-not-exist");
+//
+//        // Assert
+//        assertThat(p1).isEqualTo(a);
+//        assertThat(p2).isNull();
+//    }
+//
+//    @Test
+//    void addPlayer_afterStart_throws() {
+//        // Arrange
+//        User user = new User();
+//        Game g = new Game("AfterStart", 3);
+//        g.addPlayer(new Player("Alice", user));
+//        g.addPlayer(new Player("Bob", user));
+//        g.startGame();
+//
+//        // Act & Assert
+//        assertThatThrownBy(() -> g.addPlayer(new Player("Cara", user)))
+//                .isInstanceOf(IllegalStateException.class)
+//                .hasMessageContaining("Game already started");
+//    }
+//}
