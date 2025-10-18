@@ -65,6 +65,17 @@ function allPlayersReady() {
 
 onMounted(async () => {
   await loadLobby()
+
+  const alreadyIn = lobby.value.players.some(p => p.username === user.email)
+  if (!alreadyIn && !lobby.value.isFull) {
+    await fetch(`http://localhost:8080/api/lobbies/join/${route.params.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user.email, ready: false })
+    })
+    await loadLobby()
+  }
+
   poller = setInterval(async () => {
     await loadLobby()
     if (allPlayersReady() && !countdown.value) {
@@ -77,6 +88,12 @@ onBeforeUnmount(() => {
   clearInterval(poller)
   stopCountdown()
 })
+
+async function copyInviteLink() {
+  const inviteLink = `${window.location.origin}/lobby/${route.params.id}`
+  await navigator.clipboard.writeText(inviteLink)
+  alert(`✅ Invite link copied!\n${inviteLink}`)
+}
 </script>
 
 <template>
@@ -97,7 +114,7 @@ onBeforeUnmount(() => {
       <!-- Ready / Unready -->
       <button
           @click="toggleReady"
-          :style="{ background: lobby.players.find(p => p.username === user.email)?.ready ? 'green' : 'red' }"
+          :style="{ background: lobby.players.find(p => p.username === user.email)?.ready ? 'red' : 'green' }"
       >
         {{
           lobby.players.find(p => p.username === user.email)?.ready
@@ -109,6 +126,7 @@ onBeforeUnmount(() => {
       <!-- Leave Lobby -->
       <button class="leave-btn" @click="leaveLobby">Leave Lobby</button>
     </div>
+    <button class="invite-link-btn" @click="copyInviteLink">Invite via Link</button>
 
     <div v-if="countdown" class="countdown">Game starting in {{ countdown }}</div>
   </section>
@@ -143,7 +161,7 @@ button {
   transition: 0.3s;
 }
 .leave-btn {
-  background-color: #b10c0c;
+  background-color: #000000;
 }
 .leave-btn:hover {
   background-color: #7a0606;
@@ -153,5 +171,15 @@ button {
   margin-top: 1rem;
   font-size: 1.3rem;
   font-weight: bold;
+}
+
+.invite-link-btn {
+  background-color: #0077cc;
+  margin-top: 20px;
+  margin-left: 10px;
+}
+.invite-link-btn:hover {
+  background-color: #005fa3;
+  transform: translateY(-2px);
 }
 </style>
