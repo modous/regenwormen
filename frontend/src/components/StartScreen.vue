@@ -1,25 +1,61 @@
 <script setup>
 import wormImage from '../assets/regenwormSpel.png'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+console.log('User store test:', userStore)
 </script>
 
 <template>
-    <section class="start-screen">
-        <section class="left-side">
-           <a  class="title-link" href="#home"><h1 class="title">Regenwormen</h1></a>
-           <router-link to="/game" class="start-btn">Start Game</router-link>
-            <nav class="nav-links">
-               <router-link to="/how-to-play" class="nav-link">How to Play</router-link>
-               <router-link to="/credits" class="nav-link">Credits</router-link>
-               <router-link to="/login" class="nav-link">Login</router-link>
-               <router-link to="/register" class="nav-link">Register</router-link>
-               <router-link to="/exit" class="nav-link">Exit</router-link>
-            </nav>
-        </section>
+  <section class="start-screen">
+    <section class="left-side">
+      <a class="title-link" href="#home"><h1 class="title">Regenwormen</h1></a>
 
-        <section class="right-side">
-            <img :src="wormImage" alt="Regenwormen plaatje" class="worm-img" />
-        </section>
+      <router-link
+          v-if="userStore.isAuthenticated"
+          to="/game"
+          class="start-btn"
+      >
+        Start Game
+      </router-link>
+
+      <nav class="nav-links">
+        <router-link to="/how-to-play" class="nav-link">How to Play</router-link>
+        <router-link to="/credits" class="nav-link">Credits</router-link>
+
+        <router-link
+            v-if="!userStore.isAuthenticated"
+            to="/login"
+            class="nav-link"
+        >
+          Login
+        </router-link>
+
+        <router-link
+            v-if="!userStore.isAuthenticated"
+            to="/register"
+            class="nav-link"
+        >
+          Register
+        </router-link>
+
+        <a
+            v-if="userStore.isAuthenticated"
+            href="#"
+            class="nav-link"
+            @click.prevent="userStore.logout"
+        >
+          Logout
+        </a>
+
+        <router-link to="/exit" class="nav-link">Exit</router-link>
+      </nav>
     </section>
+
+    <section class="right-side">
+      <img :src="wormImage" alt="Regenwormen plaatje" class="worm-img" />
+    </section>
+  </section>
 </template>
 
 <style scoped>

@@ -28,10 +28,12 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const email = ref('')
 const password = ref('')
 const router = useRouter()
+const userStore = useUserStore()
 
 async function handleLogin() {
   try {
@@ -51,6 +53,8 @@ async function handleLogin() {
       return;
     }
 
+    userStore.login(data);
+
     alert("Login successful!");
     router.push('/');
   } catch (err) {
@@ -58,8 +62,8 @@ async function handleLogin() {
     console.error(err);
   }
 }
-
 </script>
+
 
 <style scoped>
 .login-page {
