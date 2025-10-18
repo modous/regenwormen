@@ -1,9 +1,107 @@
-@import './base.css';
-
-#app {
-  font-weight: normal;
-  background-color: #ffffff;
+body {
+    font-family: 'Arial', sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
 }
 
+.game-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
+h1, h2, h3 {
+    margin: 10px 0;
+}
+
+button {
+    background-color: #ff8c00;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #ff8c00;
+}
+
+.dice-container {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.dice-container img.dice-face {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.dice-container img.dice-face:hover {
+    transform: scale(1.2) rotate(10deg);
+}
+
+.tiles-table, .tiles-collected, .tiles-other {
+    margin: 20px 0;
+}
+
+.tiles {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tile {
+    width: 60px;
+    height: 80px;
+    background: #333;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tile:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #ff8c00;
+}
+
+.tile .special-icon {
+    font-weight: bold;
+    color: #ff8c00;
+}
+
+.players-container {
+    display: flex;
+    gap: 20px;
+}
+
+.tiles-on-top {
+    margin-bottom: 30px;
+}
+
+.dice-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
 
