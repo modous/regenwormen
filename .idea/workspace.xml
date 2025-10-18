@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link" />
+    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/LobbyOverview.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/LobbyOverview.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature-able-to-leave-lobby" />
+        <entry key="$PROJECT_DIR$" value="feature-show-username" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -64,7 +69,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature-invite-player-to-lobby",
+    "git-widget-placeholder": "feature-show-username-on-startscreen",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
     "node.js.detected.package.eslint": "true",
@@ -191,7 +196,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760797473309</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="feat: can now invite players to lobby with a invite link">
+      <option name="closed" value="true" />
+      <created>1760797923987</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1760797923987</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

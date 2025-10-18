@@ -52,7 +52,11 @@ onMounted(loadLobbies)
 
 <template>
   <section class="lobby-overview">
-    <h1>Available Lobbies</h1>
+
+    <div class="top-bar">
+
+      <h1>Available Lobbies</h1>
+    </div>
 
     <div class="lobby-grid">
       <div v-for="lobby in lobbies" :key="lobby.id" class="lobby-box">
@@ -66,6 +70,7 @@ onMounted(loadLobbies)
         </button>
       </div>
     </div>
+    <button class="back-btn" @click="$router.push('/')">Leave</button>
   </section>
 </template>
 
