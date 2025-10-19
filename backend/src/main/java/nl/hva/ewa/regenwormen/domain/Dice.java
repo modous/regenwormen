@@ -1,5 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+
 import java.util.Random;
 
 public class Dice {

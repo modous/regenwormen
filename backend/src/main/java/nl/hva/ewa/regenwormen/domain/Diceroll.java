@@ -1,5 +1,8 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.TurnState;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -8,7 +11,7 @@ import java.util.Set;
 public class Diceroll {
     private static final int AMOUNT_DICES = 8;
 
-    private final Player player;
+//    private final Player player;
     private TurnState turnState = TurnState.CAN_ROLL;
     private boolean hasSpecial = false;
     private boolean busted = false;
@@ -17,9 +20,7 @@ public class Diceroll {
     private List<Dice> lastRoll= new ArrayList<>();
     private Set<DiceFace> chosen = EnumSet.noneOf(DiceFace.class);
 
-    public Diceroll(Player player){
-        if(player == null) {throw new IllegalArgumentException("player is missing");}
-        this.player = player;
+    public Diceroll(){
         for (int i = 0; i < AMOUNT_DICES; i++){
             dices.add(new Dice());
         }
@@ -28,7 +29,6 @@ public class Diceroll {
     //getters
     public TurnState getTurnState() { return turnState; }
     public boolean hasSpecial() { return hasSpecial; }
-    public Player getPlayer() { return player; }
     public boolean getBusted(){return busted;}
 
     // ----------------- helpers -----------------

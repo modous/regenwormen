@@ -1,5 +1,7 @@
 package nl.hva.ewa.regenwormen.domain;
 
+import nl.hva.ewa.regenwormen.domain.Enum.TileState;
+
 /**
  * Represents a single tile in the game.
  * Each tile has a value between 21 and 36, and a number of worms (1–4).

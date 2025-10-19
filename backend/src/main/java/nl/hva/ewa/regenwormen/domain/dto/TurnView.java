@@ -1,7 +1,7 @@
 package nl.hva.ewa.regenwormen.domain.dto;
 
 import nl.hva.ewa.regenwormen.domain.Dice;
-import nl.hva.ewa.regenwormen.domain.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Player;
 
 import java.util.List;

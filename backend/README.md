@@ -102,4 +102,22 @@ JDBC URL: jdbc:h2:mem:regenwormen
 
 User: sa, Password: leeg
 
-Je ziet GAMES en PLAYERS.
+
+### voor de volgene checkpoint Domain, Game regels, dto , test, controller, service en mockrepo
+
+src
+└── main
+├── java/nl/hva/ewa/regenwormen
+│   ├── api/               → (optioneel) API-specifieke interfaces of externe integraties
+│   ├── config/            → Spring Boot configuratieklassen (bijv. security, CORS, data)
+│   ├── controller/        → REST controllers die HTTP-verzoeken afhandelen
+│   ├── domain/            → Domeinlogica en entiteiten
+│   │   ├── dto/           → Data Transfer Objects voor communicatie met de frontend
+│   │   └── Enum/          → Enumeraties voor vaste waarden (zoals GameState, DiceType)
+│   ├── repository/        → Interfaces en mockrepositories voor dataopslag
+│   └── service/           → Businesslogica; verbindt controllers met repositories
+└── resources/
+└── db/migration/      → Flyway migratiebestanden voor database-initialisatie
+
+
+
