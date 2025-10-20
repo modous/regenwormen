@@ -2,6 +2,7 @@ package nl.hva.ewa.regenwormen.repository;
 
 import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 import nl.hva.ewa.regenwormen.domain.Game;
+import nl.hva.ewa.regenwormen.domain.Player;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
