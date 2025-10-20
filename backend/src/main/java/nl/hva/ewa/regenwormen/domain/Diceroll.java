@@ -3,10 +3,9 @@ package nl.hva.ewa.regenwormen.domain;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Enum.TurnState;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Diceroll {
     private static final int AMOUNT_DICES = 8;
@@ -50,6 +49,14 @@ public class Diceroll {
                 .distinct()
                 .toList();
     }
+
+    public Map<DiceFace, Long> getOptionCounts() {
+        return lastRoll.stream()
+                .map(Dice::getDiceState)
+                .filter(face -> !chosen.contains(face))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    }
+
     public int getTakenScore() {
         return dices.stream()
                 .filter(Dice::isTaken)

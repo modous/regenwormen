@@ -21,6 +21,17 @@ public class PreGameService {
         this.playerRepo = playerRepo;
     }
 
+    //TEST
+    public int testGame(){
+        List<Player> allPlayers = playerRepo.findAll();
+        List<Game> allGames = gameRepo.findAllPreGames();
+
+        Game game = allGames.get(0);
+        game.addPlayer(allPlayers.get(0));
+        game.addPlayer(allPlayers.get(1));
+        return 1;
+    }
+
     public List<Player> findAllPlayers() {
         return playerRepo.findAll();
     }

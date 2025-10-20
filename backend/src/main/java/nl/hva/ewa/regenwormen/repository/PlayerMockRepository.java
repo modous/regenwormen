@@ -13,11 +13,11 @@ public class PlayerMockRepository implements PlayerRepository {
     private final List<Player> players = new ArrayList<>();
 
     public PlayerMockRepository(){
-        User User1 = new User();
-        User User2 = new User();
 
-        players.add(new Player("Player1", User1.getId()));
-        players.add(new Player("Player2", User2.getId()));
+        players.add(new Player("Player1"));
+        players.add(new Player("Player2"));
+        players.add(new Player("Player3"));
+        players.add(new Player("Player4"));
     }
 
     @Override
