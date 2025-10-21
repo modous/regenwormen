@@ -156,7 +156,6 @@ public class Game {
 
     public TurnView reRollRoundZero(Player p){
         ensurePlaying();
-        if (!p.getDiceRoll().canRollPreCheck()){throw new IllegalStateException("Cannot throw anymore");}
         List<DiceFace> options = throwDices(p);
         if(options.isEmpty()){
             finishRoundZero(p);
@@ -208,7 +207,6 @@ public class Game {
         ensurePlaying();
         Player p = getCurrentPlayer();
 
-        if (!p.getDiceRoll().canRollPreCheck()){throw new IllegalStateException("Cannot throw anymore");}
         List<DiceFace> options = throwDices(p);
         if(options.isEmpty()){
             finishRound();

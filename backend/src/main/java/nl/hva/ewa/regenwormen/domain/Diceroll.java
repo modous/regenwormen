@@ -50,6 +50,12 @@ public class Diceroll {
                 .toList();
     }
 
+    public Map<DiceFace, Long> getFullThrow() {
+        return lastRoll.stream()
+                .map(Dice::getDiceState)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    }
+
     public Map<DiceFace, Long> getOptionCounts() {
         return lastRoll.stream()
                 .map(Dice::getDiceState)
@@ -93,6 +99,11 @@ public class Diceroll {
         lastRoll = new ArrayList<>();
 
         turnState = canRollPreCheck() ? TurnState.CAN_ROLL : TurnState.ENDED;
+
+        if (turnState == TurnState.ENDED && !hasSpecial) {
+            busted = true;
+        }
+
         return getTakenScore();
     }
 

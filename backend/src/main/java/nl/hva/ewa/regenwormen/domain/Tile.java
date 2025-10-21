@@ -11,7 +11,7 @@ public class Tile {
     private final int points;
     private boolean flipped;
     private TileState state;
-    private Player owner;
+    private String ownerPlayerId;
 
     private static final int MIN_VALUE = 21;
     private static final int MAX_VALUE = 36;
@@ -24,7 +24,7 @@ public class Tile {
         this.points = calculatePoints(value);
         this.flipped = false;
         this.state = TileState.IN_POT;
-        this.owner =  null;
+        this.ownerPlayerId =  null;
     }
 
     // --- getters ---
@@ -32,7 +32,7 @@ public class Tile {
     public int getPoints() {return points;}
     public boolean isFlipped() { return flipped; }
     public TileState getState() { return state; }
-    public Player getOwner() { return owner; }
+    public String getOwner() { return ownerPlayerId; }
 
     // ---functies---
     public void flip(){
@@ -45,12 +45,12 @@ public class Tile {
         if (player == null) throw new IllegalArgumentException("Player cannot be null");
         if (flipped) throw new IllegalStateException("Cannot take a flipped tile");
         state = TileState.OWNED;
-        owner = player;
+        ownerPlayerId = player.getId();
     }
 
     public void tileToPot(){
         if(state != TileState.OWNED){ return;}
-        owner = null;
+        ownerPlayerId = null;
         state = TileState.IN_POT;
     }
 
