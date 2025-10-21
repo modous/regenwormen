@@ -18,6 +18,11 @@ public class PreGameController {
     @Autowired
     public PreGameController(PreGameService service) { this.service = service; }
 
+    @GetMapping("/games/test2")
+    public int testGame() {
+        return service.testGame();
+    }
+
     @GetMapping("/games")
     public List<Game> list() { return service.findAllPreGames(); }
 
@@ -41,13 +46,13 @@ public class PreGameController {
         return service.findAllPlayers();
     }
 
-    @PostMapping("/{gameId}/join")
-    public Game join(@PathVariable String gameId, @RequestParam String playerId) {
+    @PostMapping("/{gameId}/join/{playerId}")
+    public Game join(@PathVariable String gameId, @PathVariable String playerId) {
         return service.addPlayer(gameId, playerId);
     }
 
-    @PostMapping("/{gameId}/leave")
-    public Game leave(@PathVariable String gameId, @RequestBody String playerId) {
+    @PostMapping("/{gameId}/leave/{playerId}")
+    public Game leave(@PathVariable String gameId, @PathVariable String playerId) {
         return service.leavePlayer(gameId, playerId);
     }
 
