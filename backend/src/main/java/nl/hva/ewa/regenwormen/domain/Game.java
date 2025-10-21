@@ -248,7 +248,7 @@ public class Game {
     }
 
     //Action after throwing
-    public void claimFromPot() {
+    public TilesPot claimFromPot() {
         ensurePlaying();
         Player p = getCurrentPlayer();
 
@@ -260,9 +260,10 @@ public class Game {
         p.setEndTurn();
         if(endGameCheck()){endGame();}
         setNextPlayersTurn();
+        return getTilesPot();
     }
 
-    public void stealTopTile(String victimId) {
+    public TilesPot stealTopTile(String victimId) {
         ensurePlaying();
 
         Player thief = getCurrentPlayer();
@@ -285,6 +286,8 @@ public class Game {
         thief.addTile(top);
         thief.setEndTurn();
         setNextPlayersTurn();
+
+        return getTilesPot();
     }
 
 
@@ -322,6 +325,11 @@ public class Game {
             }
         }
         return playerFound;
+    }
+
+    public boolean hasPlayer(Player player) {
+        Player getPlayer = findPlayerById(player.getId());
+        return getPlayer != null ? true : false;
     }
 
     private void ensurePlaying() {
@@ -432,6 +440,5 @@ public class Game {
         Game other = (Game) obj;
         return id.equals(other.id);
     }
-
 
 }
