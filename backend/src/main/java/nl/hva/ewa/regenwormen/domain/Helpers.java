@@ -18,4 +18,6 @@ public class Helpers {
                 .replace("-", "")
                 .substring(0, Math.min(length, 32)); // 32 is max zonder '-'
     }
+
+
 }
