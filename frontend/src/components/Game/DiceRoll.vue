@@ -1,7 +1,7 @@
 <template>
   <div class="dice-roll-container">
     <h2 class="section-title">Gooi de dobbelstenen</h2>
-    <button @click="rollDice" class="btn-roll">Gooi</button>
+    <button @click="rollDiceHandler" class="btn-roll">Gooi</button>
 
     <div class="dice-container">
       <div
@@ -43,7 +43,13 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import { listGames, createGame, getGame, joinGame, startGame } from "../../api/gameApi.js";
+import {
+  rollDice,
+  listGames,
+  createGame,
+  joinGame,
+  getGame,
+} from "@/api/gameApi.js";
 
 export default {
   name: "DiceRoll",
@@ -52,6 +58,12 @@ export default {
     const gameState = ref({ collectedDice: [] });
     const currentGameId = ref(null);
     const currentPlayerId = ref("player1");
+
+    async function refreshGameState() {
+      if (!currentGameId.value) return;
+      const game = await getGame(currentGameId.value);
+      gameState.value = game;
+    }
 
     async function initGame() {
       const games = await listGames();
@@ -65,19 +77,9 @@ export default {
       await refreshGameState();
     }
 
-    async function refreshGameState() {
-      if (!currentGameId.value) return;
-      const game = await getGame(currentGameId.value);
-      gameState.value = game;
-    }
-
-    // placeholder-functies, want backend heeft nog geen dice-logica
-    async function rollDice() {
-      // tijdelijk lokale simulatie tot backend dit ondersteunt
-      const rolled = Array.from({ length: 5 }, () =>
-          Math.ceil(Math.random() * 6)
-      );
-      dice.value = rolled.map((d) => ({
+    async function rollDiceHandler() {
+      const result = await rollDice(currentGameId.value, currentPlayerId.value);
+      dice.value = result.rolledDice.map((d) => ({
         value: d,
         img: `/assets/dice/dice-${d}.png`,
       }));
@@ -85,11 +87,7 @@ export default {
     }
 
     async function pickDie(die) {
-      // zelfde: geen backend-logica, enkel UI update
-      gameState.value.collectedDice.push({
-        value: die.value,
-        img: die.img,
-      });
+      gameState.value.collectedDice.push(die);
       dice.value = dice.value.filter((d) => d.value !== die.value);
     }
 
@@ -98,59 +96,9 @@ export default {
     return {
       dice,
       gameState,
-      rollDice,
+      rollDiceHandler,
       pickDie,
     };
   },
 };
 </script>
-
-<style>
-.dice-roll-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dice-container,
-.collected-dice {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.dice {
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0);
-}
-
-.dice.collected {
-  background-color: rgba(238, 238, 238, 0);
-}
-
-.dice-img {
-  width: 100%;
-  height: 100%;
-}
-
-.dice-number {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: black;
-}
-
-.btn-roll {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-</style>

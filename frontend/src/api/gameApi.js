@@ -2,6 +2,26 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:8080/pregame"; // pas poort aan als nodig
 
+export async function getGameState(gameId, playerId) {
+    const res = await axios.get(`${API_BASE}/game/${gameId}/state`, {
+        params: { playerId }
+    });
+    return res.data;
+}
+
+export async function rollDice(gameId, playerId) {
+    const res = await axios.post(`${API_BASE}/game/${gameId}/roll`, { playerId });
+    return res.data;
+}
+
+export async function pickTile(gameId, playerId, tileValue) {
+    const res = await axios.post(`${API_BASE}/game/${gameId}/pick`, {
+        playerId,
+        tileValue,
+    });
+    return res.data;
+}
+
 export async function listGames() {
     const res = await axios.get(`${API_BASE}/games`);
     return res.data;

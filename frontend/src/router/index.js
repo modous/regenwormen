@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import StartScreen from '../components/StartScreen.vue';
-import HowToPlay from '../components/HowToPlay.vue';
-import Credits from '../components/Credits.vue';
-import Login from '../components/Login.vue';
-import Register from '../components/Register.vue';
-import App from '../App.vue'; // gamecomponent
+import StartScreen from '../views/StartScreen.vue';
+import HowToPlay from '../views/HowToPlay.vue';
+import Credits from '../views/Credits.vue';
+import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
+import App from '../App.vue'; // gamecomponentai
 
 const routes = [
     { path: '/', name: 'Home', component: StartScreen },

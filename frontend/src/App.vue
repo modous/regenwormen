@@ -41,35 +41,34 @@ import TilesCollected from "./components/Game/TilesCollected.vue";
 import TilesOtherPlayer from "./components/Game/TilesOtherPlayer.vue";
 import TilesTable from "./components/Game/TilesTable.vue";
 
-import { getGameState, pickTile as apiPickTile } from "@/api/mockApi.js";
+import { getGameState, pickTile } from "@/api/gameApi.js";
+
+const gameId = 1; // tijdelijk hardcoded
+const playerId = 1; // idem
 
 const rolledDice = ref([]);
 const collectedDice = ref([]);
 const tilesOnTable = ref([]);
 const players = ref([]);
-const currentPlayerId = ref(1);
+const currentPlayerId = ref(playerId);
 
 const otherPlayers = computed(() =>
     players.value.filter((p) => p.id !== currentPlayerId.value)
 );
 
 async function loadGame() {
-  const state = await getGameState();
-  rolledDice.value = state.rolledDice;
-  collectedDice.value = state.collectedDice;
-  tilesOnTable.value = state.tilesOnTable;
-  players.value = state.players;
-  currentPlayerId.value = state.currentPlayerId;
+  const state = await getGameState(gameId, playerId);
+  rolledDice.value = state.rolledDice || [];
+  collectedDice.value = state.collectedDice || [];
+  tilesOnTable.value = state.tilesOnTable || [];
+  players.value = state.players || [];
 }
 
-async function pickTile(tile) {
-  const result = await apiPickTile(tile);
-  const playerIndex = players.value.findIndex(
-      (p) => p.id === currentPlayerId.value
-  );
-  players.value[playerIndex] = result.player;
-  tilesOnTable.value = result.tilesOnTable;
+async function pickTileHandler(tile) {
+  const result = await pickTile(gameId, playerId, tile.value);
+  await loadGame();
 }
 
 onMounted(loadGame);
 </script>
+
