@@ -1,16 +1,38 @@
 <script setup>
 import wormImage from '../assets/regenwormSpel.png'
 import { useUserStore } from '@/stores/user.js'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
+
+function goToProfile() {
+  router.push('/profile')
+}
 </script>
 
 <template>
   <section class="start-screen">
-    <!-- 👤 Username top-right -->
-    <div v-if="userStore.isAuthenticated" class="user-info">
-      <span class="username">👤 {{ userStore.user?.username || 'Player' }}</span>
-      <button class="logout-btn" @click="userStore.logout">Logout</button>
+    <!-- 👤 Profile (rechtsboven) -->
+    <div
+        v-if="userStore.isAuthenticated"
+        class="profile-header"
+        @click="goToProfile"
+        title="View Profile"
+    >
+      <img
+          v-if="userStore.user?.profilePictureUrl"
+          :src="userStore.user.profilePictureUrl"
+          alt="Profile Picture"
+          class="profile-img"
+      />
+      <img
+          v-else
+          src="../assets/default-avatar.png"
+          alt="Default Avatar"
+          class="profile-img"
+      />
+      <span class="profile-name">{{ userStore.user?.username || 'Player' }}</span>
     </div>
 
     <!-- Title -->
@@ -48,6 +70,15 @@ const userStore = useUserStore()
         Register
       </router-link>
 
+      <a
+          v-if="userStore.isAuthenticated"
+          href="#"
+          class="nav-link"
+          @click.prevent="userStore.logout"
+      >
+        Logout
+      </a>
+
       <router-link to="/exit" class="nav-link">Exit</router-link>
     </nav>
   </section>
@@ -65,33 +96,36 @@ const userStore = useUserStore()
   position: relative;
 }
 
-/* 👤 Username + logout top right */
-.user-info {
+/* 🧍 Profile top-right */
+.profile-header {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   padding: 0.4rem 0.8rem;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: 0.2s;
 }
-.username {
+.profile-header:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+}
+.profile-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #b10c96;
+}
+.profile-name {
   font-weight: 600;
   color: #333;
-}
-.logout-btn {
-  background: none;
-  border: none;
-  color: #b10c96;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.logout-btn:hover {
-  color: #770494;
+  font-size: 1.05rem;
 }
 
 /* Title styling */

@@ -5,9 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link">
+      <change afterPath="$PROJECT_DIR$/frontend/src/views/Profile.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/LobbyOverview.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/LobbyOverview.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Credits.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Credits.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Login.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Register.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Register.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,7 +39,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature-show-username" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -69,7 +78,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature-show-username-on-startscreen",
+    "git-widget-placeholder": "feature-profile-page",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
     "node.js.detected.package.eslint": "true",
