@@ -8,21 +8,23 @@ import Register from '../views/Register.vue';
 import GameMain from '../components/Game/GameMain.vue';
 import LobbyOverview from "@/views/LobbyOverview.vue";
 import LobbyRoom from "@/views/LobbyRoom.vue";
+import Profile from "@/views/Profile.vue";
 
 const routes = [
-  { path: '/', name: 'Home', component: StartScreen },
-  { path: '/how-to-play', name: 'HowToPlay', component: HowToPlay },
-  { path: '/credits', name: 'Credits', component: Credits },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/register', name: 'Register', component: Register },
+    { path: '/', name: 'Home', component: StartScreen },
+    { path: '/how-to-play', name: 'HowToPlay', component: HowToPlay },
+    { path: '/credits', name: 'Credits', component: Credits },
+    { path: '/login', name: 'Login', component: Login },
+    { path: '/register', name: 'Register', component: Register },
     { path: '/lobbies', component: LobbyOverview },
     { path: '/lobby/:id', component: LobbyRoom },
     { path: '/game', name: 'GameMain', component: GameMain },
+    { path: '/profile', name: 'Profile', component: Profile },
 ];
 
 const router = createRouter({
-  history: createWebHistory(), 
-  routes,
+    history: createWebHistory(),
+    routes,
 });
 
 export default router;

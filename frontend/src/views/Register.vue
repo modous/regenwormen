@@ -62,12 +62,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.js'
 
 const email = ref('')
 const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const router = useRouter()
+const userStore = useUserStore()
 
 async function handleRegister() {
   if (password.value !== confirmPassword.value) {
@@ -93,10 +95,21 @@ async function handleRegister() {
       return
     }
 
-    alert("Registration successful!")
-    router.push('/login')
+    // ✅ Controleer of er een ID is (nodig voor profielpagina)
+    if (!data.id) {
+      console.error('User ID missing from response:', data)
+      alert('Registration failed: invalid server response.')
+      return
+    }
+
+    // ✅ Direct inloggen
+    userStore.login(data)
+    localStorage.setItem('user', JSON.stringify(data))
+
+    alert(`🎉 Welcome, ${data.username}! Registration successful.`)
+    router.push('/')
   } catch (err) {
-    alert("Could not reach server.")
+    alert("⚠️ Could not reach server.")
     console.error(err)
   }
 }
