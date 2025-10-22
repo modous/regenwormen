@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link">
+    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="updated communication">
+      <change afterPath="$PROJECT_DIR$/frontend/src/views/Game.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/PreGameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/PreGameController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/gameApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/gameApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +144,7 @@
       <workItem from="1760907289474" duration="658000" />
       <workItem from="1761054446240" duration="7588000" />
       <workItem from="1761157695865" duration="747000" />
-      <workItem from="1761158466094" duration="5383000" />
+      <workItem from="1761158466094" duration="5920000" />
     </task>
     <task id="LOCAL-00001" summary="feat: backend of register and login added">
       <option name="closed" value="true" />
@@ -219,7 +218,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760797923987</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="updated communication">
+      <option name="closed" value="true" />
+      <created>1761164392767</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1761164392767</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -242,6 +249,7 @@
     <MESSAGE value="feat: added lobbys + you can ready/unready and start a game" />
     <MESSAGE value="feat: can now leave lobbys and properly show amount of players in the lobby" />
     <MESSAGE value="feat: can now invite players to lobby with a invite link" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: can now invite players to lobby with a invite link" />
+    <MESSAGE value="updated communication" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated communication" />
   </component>
 </project>
