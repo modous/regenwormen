@@ -37,7 +37,7 @@ public class Player {
 
     public int getPoints(){
         return ownedTiles.stream()
-                .filter(t -> t.getOwner()==this)
+                .filter(t -> t.getOwner()==this.getId())
                 .mapToInt(t -> (t.getValue() == doublePointsTile) ? t.getPoints() * 2 : t.getPoints())
                 .sum();
     }

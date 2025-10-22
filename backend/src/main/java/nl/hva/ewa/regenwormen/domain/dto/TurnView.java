@@ -11,6 +11,7 @@ public record TurnView(
         String playerId,                    //SpelerID
         int takenScore,                     //tussentijdse Dice value
         List<Dice> chosenDices,             //List gekozen Dices
+        Map<DiceFace, Long> fullThrow,
         List<DiceFace> options,             // kiesbare gezichten (leeg = bust of einde) deze throw
         Map<DiceFace, Long> optionCounts,
         boolean hasSpecial,                 // SPECIAL al gekozen?
@@ -21,6 +22,7 @@ public record TurnView(
         return new TurnView(p.getId(),
                 p.getDiceRoll().getTakenScore(),
                 p.getDiceRoll().getChosenDices(),
+                p.getDiceRoll().getFullThrow(),
                 options,
                 p.getDiceRoll().getOptionCounts(),
                 p.getDiceRoll().hasSpecial(),
@@ -31,6 +33,7 @@ public record TurnView(
         return new TurnView(p.getId(),
                 p.getDiceRoll().getTakenScore(),
                 p.getDiceRoll().getChosenDices(),
+                Map.of(),
                 List.of(),
                 Map.of(),
                 p.getDiceRoll().hasSpecial(),
@@ -38,6 +41,6 @@ public record TurnView(
                 false);
     }
     public static TurnView bust(Player p) {
-        return new TurnView(p.getId(), 0, List.of(), List.of(), Map.of(), false, false, true);
+        return new TurnView(p.getId(), 0, List.of(), Map.of(), List.of(), Map.of(), false, false, true);
     }
 }
