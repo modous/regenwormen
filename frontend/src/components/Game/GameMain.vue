@@ -28,6 +28,11 @@
           :tiles="player.tiles"
       />
     </div>
+
+    <button class="help-button" @click="showRules = true">❓</button>
+
+    <HowToPlayButton :visible="showRules" @close="showRules = false" />
+
   </div>
 </template>
 
@@ -38,7 +43,9 @@ import DiceCollected from "./DiceCollected.vue";
 import TilesCollected from "./TilesCollected.vue";
 import TilesOtherPlayer from "./TilesOtherPlayer.vue";
 import TilesTable from "./TilesTable.vue";
+import HowToPlayButton from "./HowToPlayButton.vue";
 
+const showRules = ref(false);
 const rolledDice = ref([]);
 const collectedDice = ref([]);
 const tilesOnTable = ref([
@@ -76,4 +83,27 @@ function pickTile(tile) {
   players.value[0].tiles.push(tile);
   tilesOnTable.value = tilesOnTable.value.filter(t => t.value !== tile.value);
 }
+
+
 </script>
+
+
+<style scoped>
+.help-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: background-color 0.2s ease;
+}
+.help-button:hover {
+  background-color: #e0e0e0;
+}
+</style>
