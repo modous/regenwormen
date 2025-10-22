@@ -48,14 +48,12 @@ export async function listPlayers() {
 }
 
 export async function joinGame(gameId, playerId) {
-    const res = await axios.post(`${API_BASE}/${gameId}/join?playerId=${playerId}`);
+    const res = await axios.post(`${API_BASE}/${gameId}/join/${playerId}`);
     return res.data;
 }
 
 export async function leaveGame(gameId, playerId) {
-    const res = await axios.post(`${API_BASE}/${gameId}/leave`, playerId, {
-        headers: { "Content-Type": "text/plain" }
-    });
+    const res = await axios.post(`${API_BASE}/${gameId}/leave/${playerId}`);
     return res.data;
 }
 
