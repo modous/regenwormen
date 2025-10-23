@@ -126,7 +126,8 @@ public class InGameService {
     public TilesPot stealTopTileFromPlayer(String gameId, String currentPlayerId, String victimId) {
         Game game = guards.getGameOrThrow(gameId);
         Player current = guards.getPlayerOrThrow(currentPlayerId);
-        Player victim  = guards.getPlayerOrThrow(victimId);
+        String victimIdClean = victimId == null ? null : victimId.trim().replace("\"", "");
+        Player victim = guards.getPlayerOrThrow(victimIdClean);
         guards.ensurePlayerInGame(game, current);
         guards.ensurePlayerInGame(game, victim);
         guards.ensureYourTurn(game, current);
