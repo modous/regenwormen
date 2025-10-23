@@ -5,19 +5,83 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link">
-      <change afterPath="$PROJECT_DIR$/frontend/src/views/Profile.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/api/LobbyControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/service/PreGameServiceTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cypress/fixtures/test-avatar.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/config/WebConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Credits.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Credits.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Login.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Register.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Register.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/StartScreen.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/PlayerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/TilePotTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/TilePotTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/TileTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/TileTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/node-which" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/node-which" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/semver" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/semver" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@esbuild/win32-x64/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@esbuild/win32-x64/esbuild.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@esbuild/win32-x64/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@rollup/rollup-win32-x64-msvc/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@rollup/rollup-win32-x64-msvc/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/api.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/component.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/context.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/hooks.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/api/util.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/const.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/env.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/plugin.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/proxy.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/cjs/time.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/api.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/api.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/app.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/component.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/component.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/context.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/context.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/hooks.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/hooks.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/util.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/api/util.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/const.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/const.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/env.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/env.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/index.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/plugin.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/plugin.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/proxy.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/proxy.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/time.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/lib/esm/time.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-api/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-core/node_modules/.bin/nanoid" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-core/node_modules/.bin/nanoid.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/@vue/devtools-core/node_modules/.bin/nanoid.ps1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.cjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.cjs.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.cjs.prod.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.esm-browser.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.esm-browser.prod.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.esm-bundler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.global.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.global.prod.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.node.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/dist/vue-router.prod.cjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/vetur/attributes.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/vetur/tags.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/vue-router-auto-routes.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/vue-router/vue-router-auto.d.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +103,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="feat-backEnd-tests-mo" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -78,7 +142,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature-profile-page",
+    "git-widget-placeholder": "feat-backend&&frontend-tests-mohamed",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
     "node.js.detected.package.eslint": "true",
@@ -86,6 +150,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   },
@@ -98,11 +163,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cypress/fixtures" />
       <recent name="$PROJECT_DIR$/frontend/src/views" />
       <recent name="$PROJECT_DIR$/frontend/src/components" />
       <recent name="$PROJECT_DIR$/frontend/src" />
       <recent name="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen" />
-      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormen\frontend" />
     </key>
   </component>
   <component name="RunManager">
