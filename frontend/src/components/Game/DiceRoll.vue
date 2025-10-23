@@ -43,13 +43,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import {
-  rollDice,
-  listGames,
-  createGame,
-  joinGame,
-  getGame,
-} from "@/api/gameApi.js";
+import { startRoll, listGames, createGame, joinGame, getGame, startGame, listPlayers } from "@/api/gameApi.js";
 
 export default {
   name: "DiceRoll",
@@ -73,12 +67,22 @@ export default {
       } else {
         currentGameId.value = games[0].id;
       }
+
+      const players = await listPlayers();
+      let player = players.find(p => p.username === "player1");
+      if (!player) player = players[players.length - 1];
+      currentPlayerId.value = player.id;
+
       await joinGame(currentGameId.value, currentPlayerId.value);
+
+      // Start de game zodat rollen mogelijk is
+      await startGame(currentGameId.value);
+
       await refreshGameState();
     }
 
     async function rollDiceHandler() {
-      const result = await rollDice(currentGameId.value, currentPlayerId.value);
+      const result = await startRoll(currentGameId.value, currentPlayerId.value);
       dice.value = result.rolledDice.map((d) => ({
         value: d,
         img: `/assets/dice/dice-${d}.png`,
