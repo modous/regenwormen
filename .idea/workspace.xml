@@ -5,10 +5,63 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: can now invite players to lobby with a invite link">
+      <change afterPath="$PROJECT_DIR$/frontend/cypress/component/HowToPlayButton.cy.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/cypress/component/MusicButton.cy.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/assets/audio/tune1.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/assets/audio/tune2.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/assets/audio/tune3.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/MusicButton.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/gameApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/gameApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/DiceRoll.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/DiceRoll.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/tiles.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/tiles.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vite/deps/_metadata.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vite/deps/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/DiceRollTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/DiceRollTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/GameTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/GameTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress/fixtures/test-avatar.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/baseline-browser-mapping.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/baseline-browser-mapping.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/browserslist.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/browserslist.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/esbuild.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/esbuild.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/is-docker.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/is-docker.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/is-inside-container.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/is-inside-container.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/jsesc.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/jsesc.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/json5.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/json5.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/nanoid.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/nanoid.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/node-which.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/node-which.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/parser.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/parser.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/rollup.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/rollup.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/semver.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/semver.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/update-browserslist-db.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/update-browserslist-db.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.bin/vite.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.bin/vite.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/chunk-PZ5AY32C.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/chunk-PZ5AY32C.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/chunk-SFGEOVP2.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/chunk-SFGEOVP2.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/@vue/devtools-core/node_modules/.bin/nanoid.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/@vue/devtools-core/node_modules/.bin/nanoid.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/esbuild/bin/esbuild" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/esbuild/bin/esbuild" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/esbuild.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/esbuild.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/nanoid.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/nanoid.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/node-which" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/node-which" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/node-which.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/node-which.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/parser.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/parser.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/rollup.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/rollup.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/semver" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/semver" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/semver.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/semver.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/vite.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/vite.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,18 +119,21 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Cypress.all tests in MusicButton.cy.js.executor": "Run",
+    "JUnit.DicerollTest.executor": "Run",
+    "JUnit.GameTest.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Tim-frontend-game",
+    "git-widget-placeholder": "feature-bas-music",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
+    "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/frontend/src/Audio",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.2.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -88,15 +144,95 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormen\frontend\src\Audio" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormen\frontend\src\assets" />
+      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormen\frontend\public" />
       <recent name="$PROJECT_DIR$/frontend/src/views" />
       <recent name="$PROJECT_DIR$/frontend/src/components" />
       <recent name="$PROJECT_DIR$/frontend/src" />
-      <recent name="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen" />
-      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormen\frontend" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.RegenwormenBackendApplicationTests">
+    <configuration name="DicerollTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="regenwormen-backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="nl.hva.ewa.regenwormen.domain.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="nl.hva.ewa.regenwormen.domain" />
+      <option name="MAIN_CLASS_NAME" value="nl.hva.ewa.regenwormen.domain.DicerollTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="regenwormen-backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="nl.hva.ewa.regenwormen.domain.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="nl.hva.ewa.regenwormen.domain" />
+      <option name="MAIN_CLASS_NAME" value="nl.hva.ewa.regenwormen.domain.GameTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameTest.setNextPlayersTurn_wraps_to_zero_and_increments_round" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="regenwormen-backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="nl.hva.ewa.regenwormen.domain.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="nl.hva.ewa.regenwormen.domain" />
+      <option name="MAIN_CLASS_NAME" value="nl.hva.ewa.regenwormen.domain.GameTest" />
+      <option name="METHOD_NAME" value="setNextPlayersTurn_wraps_to_zero_and_increments_round" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GameTest.startGame_transitions_to_PLAYING_and_inits_tilespot" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="regenwormen-backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="nl.hva.ewa.regenwormen.domain.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="nl.hva.ewa.regenwormen.domain" />
+      <option name="MAIN_CLASS_NAME" value="nl.hva.ewa.regenwormen.domain.GameTest" />
+      <option name="METHOD_NAME" value="startGame_transitions_to_PLAYING_and_inits_tilespot" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RegenwormenBackendApplicationTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="regenwormen-backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="nl.hva.ewa.regenwormen.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="nl.hva.ewa.regenwormen" />
+      <option name="MAIN_CLASS_NAME" value="nl.hva.ewa.regenwormen.RegenwormenBackendApplicationTests" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="ewa_regenwormen" />
       <method v="2">
@@ -108,6 +244,15 @@
       <option name="filePath" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.RegenwormenBackendApplicationTests" />
+        <item itemvalue="JUnit.GameTest" />
+        <item itemvalue="JUnit.GameTest.setNextPlayersTurn_wraps_to_zero_and_increments_round" />
+        <item itemvalue="JUnit.GameTest.startGame_transitions_to_PLAYING_and_inits_tilespot" />
+        <item itemvalue="JUnit.DicerollTest" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
