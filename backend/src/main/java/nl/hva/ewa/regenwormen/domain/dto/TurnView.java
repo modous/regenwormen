@@ -1,46 +1,69 @@
 package nl.hva.ewa.regenwormen.domain.dto;
 
-import nl.hva.ewa.regenwormen.domain.Dice;
+import nl.hva.ewa.regenwormen.domain.Diceroll;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Player;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public record TurnView(
-        String playerId,                    //SpelerID
-        int takenScore,                     //tussentijdse Dice value
-        List<Dice> chosenDices,             //List gekozen Dices
-        Map<DiceFace, Long> fullThrow,
-        List<DiceFace> options,             // kiesbare gezichten (leeg = bust of einde) deze throw
-        Map<DiceFace, Long> optionCounts,
-        boolean hasSpecial,                 // SPECIAL al gekozen?
-        boolean hasMinValue,                    // mag je stoppen? (regels bepalen dit)
-        boolean busted                      // is de speler zojuist gebust?
+        String playerId,
+        int takenScore,                     // total score from taken dice
+        Map<DiceFace, Long> fullThrow,      // all dice rolled this throw (8 dice total)
+        Map<DiceFace, Long> optionCounts,   // counts of pickable faces this throw
+        Set<DiceFace> chosenFaces,          // faces locked already in this turn
+        List<DiceFace> disabledFaces,       // rolled but unavailable (already chosen)
+        boolean hasSpecial,
+        boolean hasMinValue,
+        boolean busted
 ) {
-    public static TurnView turnViewThrown(Player p, List<DiceFace> options ,boolean hasMinValue) {
-        return new TurnView(p.getId(),
-                p.getDiceRoll().getTakenScore(),
-                p.getDiceRoll().getChosenDices(),
-                p.getDiceRoll().getFullThrow(),
-                options,
-                p.getDiceRoll().getOptionCounts(),
-                p.getDiceRoll().hasSpecial(),
+
+    /** Create TurnView for a dice throw */
+    public static TurnView turnViewThrown(Player p, List<DiceFace> options, boolean hasMinValue) {
+        Diceroll roll = p.getDiceRoll();
+        return new TurnView(
+                p.getId(),
+                roll.getTakenScore(),
+                roll.getFullThrow(),
+                roll.getOptionCounts(),
+                roll.getChosenFaces(),
+                roll.getDisabledFaces(),
+                roll.hasSpecial(),
                 hasMinValue,
-                false);
+                roll.getBusted()
+        );
     }
+
+    /** Create TurnView after picking a dice face */
     public static TurnView turnViewChosen(Player p, boolean hasMinValue) {
-        return new TurnView(p.getId(),
-                p.getDiceRoll().getTakenScore(),
-                p.getDiceRoll().getChosenDices(),
-                Map.of(),
-                List.of(),
-                Map.of(),
-                p.getDiceRoll().hasSpecial(),
+        Diceroll roll = p.getDiceRoll();
+        return new TurnView(
+                p.getId(),
+                roll.getTakenScore(),
+                roll.getFullThrow(),
+                roll.getOptionCounts(),
+                roll.getChosenFaces(),
+                roll.getDisabledFaces(),
+                roll.hasSpecial(),
                 hasMinValue,
-                false);
+                roll.getBusted()
+        );
     }
+
+    /** Create TurnView when player busts */
     public static TurnView bust(Player p) {
-        return new TurnView(p.getId(), 0, List.of(), Map.of(), List.of(), Map.of(), false, false, true);
+        return new TurnView(
+                p.getId(),
+                0,
+                Map.of(),
+                Map.of(),
+                Set.of(),
+                List.of(),
+                false,
+                false,
+                true
+        );
     }
 }

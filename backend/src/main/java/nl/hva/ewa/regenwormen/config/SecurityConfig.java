@@ -17,10 +17,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                        // ✅ add all your public endpoints here:
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/lobbies/**",
+                                "/pregame/**",
+                                "/h2-console/**"
+                        ).permitAll()
                         .anyRequest().permitAll()
                 )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // H2 console
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // for H2 console
         return http.build();
     }
 

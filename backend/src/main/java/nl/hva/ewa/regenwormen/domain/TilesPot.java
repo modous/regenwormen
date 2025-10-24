@@ -6,18 +6,18 @@ import java.util.Comparator;
 import java.util.List;
 
 public class TilesPot {
-    private List<Tile> tiles = new ArrayList<>();
+    private final List<Tile> tiles = new ArrayList<>();
 
     private static final int MIN_VALUE = 21;
     private static final int MAX_VALUE = 36;
-    
-    public TilesPot(){
+
+    public TilesPot() {
         createTiles();
     }
-    
-    private void createTiles(){
-        if(tiles.size() > 0){return;}
-        for(int i = MIN_VALUE; i <= MAX_VALUE; i++){
+
+    private void createTiles() {
+        if (!tiles.isEmpty()) return;
+        for (int i = MIN_VALUE; i <= MAX_VALUE; i++) {
             tiles.add(new Tile(i));
         }
     }
@@ -33,7 +33,7 @@ public class TilesPot {
         return null;
     }
 
-    public Tile findAvailableTileByScore(int score){
+    public Tile findAvailableTileByScore(int score) {
         List<Tile> availableTiles = getAvailableTiles();
         availableTiles.sort(Comparator.comparingInt(Tile::getValue).reversed());
         for (Tile tile : availableTiles) {
@@ -44,7 +44,7 @@ public class TilesPot {
         return null;
     }
 
-    public List<Tile> getAvailableTiles(){
+    public List<Tile> getAvailableTiles() {
         List<Tile> available = new ArrayList<>();
         for (Tile t : tiles) {
             if (t.isAvailableInPot()) {
@@ -54,11 +54,11 @@ public class TilesPot {
         return available;
     }
 
-    public int amountAvailableTiles(){
+    public int amountAvailableTiles() {
         return getAvailableTiles().size();
     }
 
-    public Tile getHighestAvailableTile(){
+    public Tile getHighestAvailableTile() {
         Tile highest = null;
         for (Tile t : tiles) {
             if (t.isAvailableInPot()) {
@@ -69,11 +69,10 @@ public class TilesPot {
         }
         return highest;
     }
-    public int getHighestAvailableTileValue () {
-        Tile HighestTile = getHighestAvailableTile();
-        if (HighestTile == null){return 0;}
-        int highestTileValue = HighestTile.getValue();
-        return highestTileValue;
+
+    public int getHighestAvailableTileValue() {
+        Tile highestTile = getHighestAvailableTile();
+        return highestTile == null ? 0 : highestTile.getValue();
     }
 
     public void flipHighestAvailableTileIfAny() {
@@ -95,10 +94,23 @@ public class TilesPot {
         return lowest;
     }
 
-    public int getLowestAvailableTileValue () {
+    public int getLowestAvailableTileValue() {
         Tile lowestTile = getLowestAvailableTile();
-        if (lowestTile == null){return 0;}
-        int lowestTileValue = lowestTile.getValue();
-        return lowestTileValue;
+        return lowestTile == null ? 0 : lowestTile.getValue();
+    }
+
+    // 🧩 Used by Game.claimFromPot() – finds the best available tile ≤ score
+    public Tile findHighestAvailableTileAtOrBelow(int score) {
+        return getAvailableTiles().stream()
+                .filter(t -> t.getValue() <= score)
+                .max(Comparator.comparingInt(Tile::getValue))
+                .orElse(null);
+    }
+
+    // ✅ NEW — Removes a tile from the pot entirely when claimed
+    public void removeTile(Tile tile) {
+        if (tile != null) {
+            tiles.remove(tile);
+        }
     }
 }
