@@ -8,7 +8,7 @@ import nl.hva.ewa.regenwormen.domain.Enum.TileState;
  */
 public class Tile {
     private final int value;
-    private final int points;
+    private final int points; // number of worms on the tile
     private boolean flipped;
     private TileState state;
     private String ownerPlayerId;
@@ -18,44 +18,43 @@ public class Tile {
 
     public Tile(int value) {
         if (value < MIN_VALUE || value > MAX_VALUE) {
-            throw new IllegalArgumentException("Tile value must be between "+MIN_VALUE+ " and "+MAX_VALUE);
+            throw new IllegalArgumentException("Tile value must be between " + MIN_VALUE + " and " + MAX_VALUE);
         }
         this.value = value;
         this.points = calculatePoints(value);
         this.flipped = false;
         this.state = TileState.IN_POT;
-        this.ownerPlayerId =  null;
+        this.ownerPlayerId = null;
     }
 
-    // --- getters ---
-    public int getValue() {return value;}
-    public int getPoints() {return points;}
+    // --- Getters ---
+    public int getValue() { return value; }
+    public int getPoints() { return points; }
     public boolean isFlipped() { return flipped; }
     public TileState getState() { return state; }
     public String getOwner() { return ownerPlayerId; }
 
-    // ---functies---
-    public void flip(){
-        if(flipped){return;}
+    // --- Tile actions ---
+    public void flip() {
+        if (flipped) return;
         tileToPot();
         flipped = true;
     }
 
-    public void takeTile(Player player){
+    public void takeTile(Player player) {
         if (player == null) throw new IllegalArgumentException("Player cannot be null");
         if (flipped) throw new IllegalStateException("Cannot take a flipped tile");
         state = TileState.OWNED;
         ownerPlayerId = player.getId();
     }
 
-    public void tileToPot(){
-        if(state != TileState.OWNED){ return;}
+    public void tileToPot() {
+        if (state != TileState.OWNED) return;
         ownerPlayerId = null;
         state = TileState.IN_POT;
     }
 
-
-    // --- private helper ---
+    // --- Worm points logic ---
     private int calculatePoints(int value) {
         if (value <= 24) return 1;
         if (value <= 28) return 2;
@@ -72,7 +71,7 @@ public class Tile {
     public String toString() {
         return "Tile{" +
                 "value=" + value +
-                ", points=" + points +
+                ", worms=" + points +
                 '}';
     }
 

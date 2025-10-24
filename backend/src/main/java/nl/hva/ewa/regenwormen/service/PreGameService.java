@@ -1,14 +1,12 @@
 package nl.hva.ewa.regenwormen.service;
 
 import jakarta.transaction.Transactional;
-import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
 import nl.hva.ewa.regenwormen.repository.PlayerRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 
 import java.util.List;
 
@@ -71,14 +69,51 @@ public class PreGameService {
         return gameRepo.save(game);
     }
 
+    /**
+     * ✅ Start a game using only the actual backend gameId (short hex).
+     */
     public Game startGame(String gameId) {
+        System.out.println("🎯 Starting game: " + gameId +
+                " | repo currently holds " + gameRepo.findAll().size() + " games");
+
         Game game = guards.getGameOrThrow(gameId);
 
+        if (game.getGameState() == GameState.PLAYING) {
+            System.out.println("⚠️ Game " + gameId + " already in PLAYING state, skipping re-start");
+            return game;
+        }
+
         game.startGame();
-        return gameRepo.save(game);
+        Game saved = gameRepo.save(game);
+        System.out.println("✅ Game " + saved.getId() + " started successfully (state=" + saved.getGameState() + ")");
+        return saved;
     }
 
-    // ---------- TEST (optioneel houden) ----------
+    /**
+     * ✅ Direct start — frontend always sends real gameId (hex).
+     * No numeric or fallback logic anymore.
+     */
+    public Game startGameByIdOrLobby(String gameId) {
+        System.out.println("🚀 [Simplified] Starting game with ID: " + gameId);
+        return startGame(gameId);
+    }
+
+    /**
+     * ✅ Ensure all players exist in the game before starting.
+     */
+    private void syncLobbyPlayersIfNeeded(Game game) {
+        List<Player> allPlayers = playerRepo.findAll();
+        for (Player p : allPlayers) {
+            if (!game.getPlayers().contains(p)) {
+                try {
+                    game.addPlayer(p);
+                } catch (Exception ignored) {}
+            }
+        }
+        gameRepo.save(game);
+    }
+
+    // ---------- TEST ----------
     public int testGame() {
         List<Player> allPlayers = playerRepo.findAll();
         List<Game> allGames = gameRepo.findAllPreGames();
