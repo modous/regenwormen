@@ -6,7 +6,6 @@ import nl.hva.ewa.regenwormen.domain.dto.CreateGameRequest;
 import nl.hva.ewa.regenwormen.service.PreGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 import java.util.List;
 
@@ -61,18 +60,5 @@ public class PreGameController {
     public Game start(@PathVariable String gameId) {
         return service.startGame(gameId);
     }
-
-    @GetMapping("/game/{gameId}/state")
-    public Game getGameState(@PathVariable String gameId, @RequestParam String playerId) {
-        return service.findGameByID(gameId); // tijdelijk: stuur hele game object terug
-    }
-
-    @PostMapping("/game/{gameId}/roll")
-    public Game rollDice(@PathVariable String gameId, @RequestBody Map<String,String> body) {
-        String playerId = body.get("playerId");
-        // tijdelijk: doe niets behalve game terugsturen
-        return service.findGameByID(gameId);
-    }
-
 
 }
