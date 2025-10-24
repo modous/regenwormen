@@ -112,10 +112,10 @@ export default {
 /* Tegel styling */
 .grid {
   display: flex;
-  flex-wrap: wrap; /* voeg dit toe */
-  gap: 10px;       /* optioneel voor spacing */
+  overflow-x: auto;
+  padding: 1rem 0;
+  scroll-behavior: smooth;
 }
-
 
 .tile {
   width: 120px;

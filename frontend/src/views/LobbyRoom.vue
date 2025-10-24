@@ -5,15 +5,21 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const lobby = ref(null)
-const countdown = ref(null)
-let timer = null
+const gameId = ref(null)
 let poller = null
 
 const user = JSON.parse(localStorage.getItem('user'))
 
+// === API CALLS ===
 async function loadLobby() {
   const res = await fetch(`http://localhost:8080/api/lobbies/${route.params.id}`)
+  if (!res.ok) throw new Error('Failed to load lobby')
   lobby.value = await res.json()
+
+  // ✅ Always capture real backend gameId if available
+  if (lobby.value.gameId) {
+    gameId.value = lobby.value.gameId
+  }
 }
 
 async function toggleReady() {
@@ -23,9 +29,6 @@ async function toggleReady() {
     body: JSON.stringify({ username: user.username })
   })
   await loadLobby()
-
-  // stop countdown if someone unreadies
-  if (!allPlayersReady()) stopCountdown()
 }
 
 async function leaveLobby() {
@@ -34,39 +37,48 @@ async function leaveLobby() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: user.username })
   })
-
   clearInterval(poller)
-  stopCountdown()
   router.push('/lobbies')
 }
 
-function startCountdown() {
-  if (countdown.value) return
-  countdown.value = 10
-  timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
-      timer = null
-      router.push('/game')
+// === START GAME LOGIC ===
+async function startGame() {
+  try {
+    console.log('🚀 Manually starting game for lobby:', route.params.id)
+    const res = await fetch(`http://localhost:8080/api/lobbies/${route.params.id}/start`, {
+      method: 'POST'
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Cannot start game: ' + (err.error || err.message || 'Unknown error'))
+      return
     }
-  }, 1000)
+
+    const updatedLobby = await res.json()
+    console.log('✅ Game started successfully:', updatedLobby)
+
+    // ✅ Save backend gameId so GameMain.vue knows what to load
+    localStorage.setItem('gameId', updatedLobby.gameId)
+    router.push('/game')
+  } catch (err) {
+    console.error('Failed to start game:', err)
+    alert('Could not start game — check backend connection.')
+  }
 }
 
-function stopCountdown() {
-  if (timer) clearInterval(timer)
-  timer = null
-  countdown.value = null
-}
 
+// === HELPER ===
 function allPlayersReady() {
-  return lobby.value?.players.length > 0 && lobby.value.players.every(p => p.ready)
+  return lobby.value?.players.length >= 2 && lobby.value.players.every(p => p.ready)
 }
 
+// === LIFECYCLE ===
 onMounted(async () => {
   await loadLobby()
 
-  const alreadyIn = lobby.value.players.some(p => p.username === user.email)
+  // Auto-join if not already in lobby
+  const alreadyIn = lobby.value.players.some(p => p.username === user.username)
   if (!alreadyIn && !lobby.value.isFull) {
     await fetch(`http://localhost:8080/api/lobbies/join/${route.params.id}`, {
       method: 'POST',
@@ -76,18 +88,24 @@ onMounted(async () => {
     await loadLobby()
   }
 
+  // Poll every 2 s for lobby updates
   poller = setInterval(async () => {
-    await loadLobby()
-    if (allPlayersReady() && !countdown.value) {
-      startCountdown()
+    try {
+      await loadLobby()
+
+      // ✅ If backend reports game started, redirect all players
+      if (lobby.value?.gameStarted && lobby.value?.gameId && !window.location.pathname.includes('/game')) {
+        console.log('🎮 Game started — redirecting player to game screen...')
+        localStorage.setItem('gameId', lobby.value.gameId)
+        router.push('/game')
+      }
+    } catch (err) {
+      console.warn('Polling failed:', err)
     }
   }, 2000)
 })
 
-onBeforeUnmount(() => {
-  clearInterval(poller)
-  stopCountdown()
-})
+onBeforeUnmount(() => clearInterval(poller))
 
 async function copyInviteLink() {
   const inviteLink = `${window.location.origin}/lobby/${route.params.id}`
@@ -111,7 +129,6 @@ async function copyInviteLink() {
     </ul>
 
     <div class="buttons">
-      <!-- Ready / Unready -->
       <button
           @click="toggleReady"
           :style="{ background: lobby.players.find(p => p.username === user.username)?.ready ? 'red' : 'green' }"
@@ -123,12 +140,15 @@ async function copyInviteLink() {
         }}
       </button>
 
-      <!-- Leave Lobby -->
       <button class="leave-btn" @click="leaveLobby">Leave Lobby</button>
     </div>
+
     <button class="invite-link-btn" @click="copyInviteLink">Invite via Link</button>
 
-    <div v-if="countdown" class="countdown">Game starting in {{ countdown }}</div>
+    <!-- ✅ Start Game Button appears when all ready -->
+    <div v-if="allPlayersReady()" class="start-game-container">
+      <button class="start-btn" @click="startGame">🚀 Start Game</button>
+    </div>
   </section>
 </template>
 
@@ -161,18 +181,12 @@ button {
   transition: 0.3s;
 }
 .leave-btn {
-  background-color: #000000;
+  background-color: #000;
 }
 .leave-btn:hover {
   background-color: #7a0606;
   transform: translateY(-2px);
 }
-.countdown {
-  margin-top: 1rem;
-  font-size: 1.3rem;
-  font-weight: bold;
-}
-
 .invite-link-btn {
   background-color: #0077cc;
   margin-top: 20px;
@@ -180,6 +194,18 @@ button {
 }
 .invite-link-btn:hover {
   background-color: #005fa3;
+  transform: translateY(-2px);
+}
+.start-game-container {
+  margin-top: 2rem;
+}
+.start-btn {
+  background-color: #28a745;
+  font-size: 1.2rem;
+  padding: 0.8rem 1.5rem;
+}
+.start-btn:hover {
+  background-color: #218838;
   transform: translateY(-2px);
 }
 </style>
