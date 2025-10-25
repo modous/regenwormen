@@ -5,12 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: 2 working frontend + backend tests (Cypress install)">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/LobbyWebSocketController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/DiceRollTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/DiceRollTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/GameTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/nl/hva/ewa/regenwormen/domain/GameTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/GameWebSocketController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/GameWebSocketController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/LobbyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/LobbyController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/InGameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/InGameService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/assets/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/assets/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/LobbyRoom.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,7 +38,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="feat-steal-opponent-tiles" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -72,7 +78,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feat-main-css-fix",
+    "git-widget-placeholder": "feat-turn-timers",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
     "node.js.detected.package.eslint": "true",
