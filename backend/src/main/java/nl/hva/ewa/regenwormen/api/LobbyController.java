@@ -7,6 +7,8 @@ import nl.hva.ewa.regenwormen.domain.dto.LobbyPlayer;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
 import nl.hva.ewa.regenwormen.repository.LobbyRepository;
 import nl.hva.ewa.regenwormen.repository.PlayerRepository;
+import nl.hva.ewa.regenwormen.service.InGameService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,13 +21,22 @@ public class LobbyController {
     private final LobbyRepository lobbyRepo;
     private final GameRepository gameRepo;
     private final PlayerRepository playerRepo;
+    private final LobbyWebSocketController lobbyWs;
+    private final InGameService inGameService;
 
-    public LobbyController(LobbyRepository lobbyRepo,
-                           GameRepository gameRepo,
-                           PlayerRepository playerRepo) {
+    @Autowired
+    public LobbyController(
+            LobbyRepository lobbyRepo,
+            GameRepository gameRepo,
+            PlayerRepository playerRepo,
+            LobbyWebSocketController lobbyWs,
+            InGameService inGameService
+    ) {
         this.lobbyRepo = lobbyRepo;
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
+        this.lobbyWs = lobbyWs;
+        this.inGameService = inGameService;
     }
 
     // ----------- BASIC LOBBY ACTIONS -----------
@@ -50,6 +61,8 @@ public class LobbyController {
 
         if (!alreadyIn && !lobby.isFull()) {
             lobby.getPlayers().add(lobbyPlayer);
+            // 🔔 Notify all lobby members about the join
+            lobbyWs.broadcastLobbyUpdate(id);
         }
 
         // ✅ Ensure backend Player exists in repository (for /ingame lookups)
@@ -78,7 +91,8 @@ public class LobbyController {
             }
         });
 
-        // no auto-start
+        // 🔔 Notify others that ready status changed
+        lobbyWs.broadcastLobbyUpdate(id);
         return lobby;
     }
 
@@ -107,10 +121,10 @@ public class LobbyController {
             }
         });
 
-        // ✅ Crucial step: actually start the game state
+        // ✅ Start the game
         game.startGame();
 
-        // ✅ Save it after starting (so state & turnIndex persist)
+        // ✅ Save it
         gameRepo.save(game);
 
         lobby.setGameId(game.getId());
@@ -119,6 +133,22 @@ public class LobbyController {
         System.out.println("🚀 Game manually started for lobby " + lobby.getId()
                 + " → " + game.getId()
                 + " with " + game.getPlayers().size() + " players");
+
+        // 🕒 Start timer for first player (after a short delay to allow clients to connect)
+        if (!game.getPlayers().isEmpty()) {
+            Player firstPlayer = game.getPlayers().get(0);
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000); // wait 1s to let clients connect
+                    inGameService.startInitialTurnTimer(game, firstPlayer);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+
+        // 🔔 Broadcast that the game started so clients redirect
+        lobbyWs.broadcastLobbyUpdate(id);
 
         return lobby;
     }
@@ -131,6 +161,9 @@ public class LobbyController {
         if (lobby == null) return null;
 
         lobby.getPlayers().removeIf(p -> p.getUsername().equals(player.getUsername()));
+
+        // 🔔 Notify all clients that someone left
+        lobbyWs.broadcastLobbyUpdate(id);
         return lobby;
     }
 

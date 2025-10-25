@@ -10,6 +10,22 @@
     <div v-else>
       <h3>Game ID: {{ gameId }}</h3>
       <h4>Jij: {{ username }}</h4>
+
+      <!-- 💬 System messages -->
+      <div v-if="gameMessage" class="system-msg">
+        {{ gameMessage }}
+      </div>
+
+      <!-- 🕒 Turn timer box (always visible) -->
+      <div class="timer-box" v-if="timeLeft > 0 || currentTimerPlayer">
+        <p v-if="currentTimerPlayer === username">
+          ⏳ Jouw beurt: <strong>{{ timeLeft }}s</strong> over
+        </p>
+        <p v-else>
+          🧍 {{ currentTimerPlayer }} is aan de beurt ({{ timeLeft }}s)
+        </p>
+      </div>
+
       <p v-if="turnInfo" class="turn">Beurt: {{ turnInfo }}</p>
 
       <!-- 🧮 Points counter -->
@@ -22,7 +38,7 @@
           v-if="currentPlayerId === username && !isBusted"
           class="roll-btn"
           @click="rollDice"
-          :disabled="rolling"
+          :disabled="rolling || (timeLeft <= 0 && currentPlayerId !== username)"
       >
         {{ hasStartedRoll ? "🎯 Roll Again" : "🎲 Roll Dice" }}
       </button>
@@ -62,15 +78,13 @@
       <div class="my-tiles" v-if="myTiles.length">
         <h3>🧱 My Tiles</h3>
         <div class="my-tiles-list">
-          <div
-              v-for="t in myTiles"
-              :key="t.value"
-              class="my-tile"
-          >
+          <div v-for="t in myTiles" :key="t.value" class="my-tile">
             {{ t.value }} <small>🪱 x{{ t.points }}</small>
           </div>
         </div>
-        <p class="my-score">💰 Total Tile Points: <strong>{{ myTilesScore }}</strong></p>
+        <p class="my-score">
+          💰 Total Tile Points: <strong>{{ myTilesScore }}</strong>
+        </p>
       </div>
 
       <!-- 👥 Players overview -->
@@ -94,18 +108,25 @@ import { ref, computed, onMounted, onUnmounted } from "vue"
 import DiceCollected from "./DiceCollected.vue"
 import TilesCollected from "./TilesCollected.vue"
 import HowToPlayButton from "./HowToPlayButton.vue"
+import SockJS from "sockjs-client"
+import { Client } from "@stomp/stompjs"
 
+// --- 🔗 API + STOMP/SockJS ---
 const API_INGAME = "http://localhost:8080/ingame"
+const SOCKJS_URL = "http://localhost:8080/ws"
 
+let stompClient = null
+
+// --- USER / GAME STATE ---
 const user = JSON.parse(localStorage.getItem("user"))
 const username = user?.username || user?.name || "Guest"
-
 const gameId = ref(localStorage.getItem("gameId") || null)
 const gameReady = ref(!!gameId.value)
 const errorMsg = ref("")
 const showRules = ref(false)
 const rolling = ref(false)
 
+// --- GAME DATA ---
 const rolledDice = ref([])
 const disabledFaces = ref([])
 const chosenFaces = ref([])
@@ -119,29 +140,23 @@ const busted = ref(false)
 const roundPoints = ref(0)
 const myTiles = ref([])
 
-let pollInterval = null
-let pollPaused = false
+// --- ⏳ TIMER & MESSAGE STATE ---
+const timeLeft = ref(0)
+const currentTimerPlayer = ref("")
+const gameMessage = ref("") // 💬 from backend (/message)
 
+// --- COMPUTED ---
 const turnInfo = computed(() => {
   if (!players.value?.length || currentTurnIndex.value == null) return ""
   const p = players.value[currentTurnIndex.value]
   return p ? `${p.name ?? p.id}` : ""
 })
-
 const isBusted = computed(() => busted.value)
-
-// ✅ FIXED: sum worm points, not tile values
 const myTilesScore = computed(() =>
     myTiles.value.reduce((sum, t) => sum + (t.points || 0), 0)
 )
 
 // === FETCH HELPERS ===
-async function get(url) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`GET failed: ${res.status}`)
-  return res.json()
-}
-
 async function post(url, body = null) {
   const res = await fetch(url, {
     method: "POST",
@@ -149,64 +164,150 @@ async function post(url, body = null) {
     body: body ? JSON.stringify(body) : null,
   })
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Backend error ${res.status}: ${text}`)
+    const t = await res.text().catch(() => "")
+    throw new Error(`Backend error ${res.status}: ${t}`)
   }
   const type = res.headers.get("content-type") || ""
   return type.includes("application/json") ? res.json() : null
 }
 
-// === 🔁 GAME STATE POLLING ===
-async function refreshGameState() {
-  if (!gameId.value || pollPaused) return
-  try {
-    const game = await get(`${API_INGAME}/${gameId.value}`)
-    players.value = game.players || []
-    tilesOnTable.value = game.tilesPot?.tiles || []
-    currentTurnIndex.value = game.turnIndex ?? null
-    currentPlayerId.value = players.value[game.turnIndex]?.name ?? null
+// === 🧠 Apply game snapshot from WS ===
+function applyGame(game) {
+  if (!game) return
 
-    const me = players.value.find(p => p.name === username || p.id === username)
-    if (me?.tiles && Array.isArray(me.tiles) && me.tiles.length > 0) {
-      const backendVals = me.tiles.map(t => t.value)
-      const localVals = myTiles.value.map(t => t.value)
-      const merged = [
-        ...myTiles.value,
-        ...me.tiles.filter(t => !localVals.includes(t.value)),
-      ]
-      if (merged.length !== myTiles.value.length) myTiles.value = merged
-    }
-  } catch (err) {
-    console.warn("Could not refresh game state:", err.message)
+  const previousPlayer = currentPlayerId.value
+
+  players.value = game.players || []
+  tilesOnTable.value = game.tilesPot?.tiles || []
+  currentTurnIndex.value = game.turnIndex ?? null
+  currentPlayerId.value = players.value[game.turnIndex]?.name ?? null
+
+  // 🧩 If it's a new round and now your turn — reset your UI
+  if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
+    resetRound()
+    busted.value = false
+    gameMessage.value = "🎯 It's your turn!"
   }
+
+  // Sync my tiles from snapshot
+  const me = players.value.find(p => p.name === username || p.id === username)
+  myTiles.value = Array.isArray(me?.tiles) ? me.tiles : myTiles.value
+}
+
+
+// === 🔌 STOMP/SockJS SETUP ===
+function connectStomp() {
+  const sock = new SockJS(SOCKJS_URL)
+  stompClient = new Client({
+    debug: () => {},
+    reconnectDelay: 500,
+    webSocketFactory: () => sock,
+  })
+
+  stompClient.onConnect = () => {
+    // --- Game state updates ---
+    stompClient.subscribe(`/topic/game/${gameId.value}`, (msg) => {
+      try {
+        const game = JSON.parse(msg.body)
+        applyGame(game)
+        gameReady.value = true
+      } catch (e) {
+        console.warn("Failed parsing game snapshot:", e)
+      }
+    })
+
+    // --- Timer updates ---
+    stompClient.subscribe(`/topic/game/${gameId.value}/timer`, (msg) => {
+      try {
+        const data = JSON.parse(msg.body)
+        currentTimerPlayer.value = data.player
+        timeLeft.value = data.timeLeft
+      } catch (e) {}
+    })
+
+    // --- Turn timeout ---
+    stompClient.subscribe(`/topic/game/${gameId.value}/turnTimeout`, (msg) => {
+      try {
+        const data = JSON.parse(msg.body)
+
+        // Always stop local timer
+        timeLeft.value = 0
+
+        // 🔔 Notify all players
+        if (data.player === username) {
+          gameMessage.value = "⏰ Your turn expired! You lost this round."
+        } else {
+          gameMessage.value = `⚠️ ${data.player}'s turn expired!`
+        }
+
+        // 🧹 Reset the local round state if backend requests it
+        if (data.reset) {
+          resetRound()
+          busted.value = true
+        }
+
+        // Clear message after 5 seconds
+        setTimeout(() => (gameMessage.value = ""), 5000)
+      } catch (e) {
+        console.warn("Failed to process turn timeout:", e)
+      }
+    })
+
+
+    // --- 💬 System messages ---
+    stompClient.subscribe(`/topic/game/${gameId.value}/message`, (msg) => {
+      try {
+        const data = JSON.parse(msg.body)
+        gameMessage.value = data.text
+        setTimeout(() => (gameMessage.value = ""), 5000)
+      } catch (e) {
+        console.warn("Invalid system message:", e)
+      }
+    })
+
+
+    // Request initial state
+    stompClient.publish({ destination: "/app/timerSync", body: gameId.value })
+    stompClient.publish({ destination: "/app/sync", body: gameId.value })
+  }
+
+  stompClient.onStompError = (frame) => {
+    console.error("Broker error:", frame.headers["message"])
+    errorMsg.value = "WebSocket broker error."
+  }
+
+  stompClient.onWebSocketError = (e) => {
+    console.error("WebSocket error:", e)
+    errorMsg.value = "WebSocket connection failed."
+  }
+
+  stompClient.activate()
 }
 
 // === LIFECYCLE ===
-onMounted(async () => {
+onMounted(() => {
   if (!gameId.value) {
     errorMsg.value = "No active game found — start one from lobby."
     return
   }
-  gameReady.value = true
-  await refreshGameState()
-  pollInterval = setInterval(refreshGameState, 2000)
+  connectStomp()
+})
+onUnmounted(() => {
+  if (stompClient) stompClient.deactivate()
 })
 
-onUnmounted(() => clearInterval(pollInterval))
-
-// === 🎲 DICE ACTIONS ===
+// === 🎲 GAME ACTIONS ===
 async function rollDice() {
   rolling.value = true
   try {
     const endpoint = hasStartedRoll.value ? "reroll" : "startroll"
     const data = await post(`${API_INGAME}/${gameId.value}/${endpoint}/${username}`)
     if (!data || data.fullThrow == null) {
-      alert("💀 You busted! Your turn is over.")
+      gameMessage.value = "💀 You busted! Your turn is over."
       busted.value = true
       resetRound()
       return
     }
-
     rolledDice.value = Object.entries(data.fullThrow).flatMap(([face, count]) =>
         Array(count).fill(face)
     )
@@ -214,37 +315,32 @@ async function rollDice() {
     chosenFaces.value = Array.from(data.chosenFaces || [])
     hasStartedRoll.value = true
   } catch {
-    alert("Something went wrong while rolling dice.")
+    gameMessage.value = "Something went wrong while rolling dice."
   } finally {
     rolling.value = false
   }
 }
 
 async function trySelectDie(face) {
-  if (disabledFaces.value.includes(face)) return
-  if (chosenFaces.value.includes(face)) return
-
+  if (disabledFaces.value.includes(face) || chosenFaces.value.includes(face)) return
   try {
     const data = await post(`${API_INGAME}/${gameId.value}/pickdice/${username}`, face)
     if (!data || data.fullThrow == null) {
-      alert("💀 You busted after this pick! Turn over.")
+      gameMessage.value = "💀 You busted after this pick! Turn over."
       busted.value = true
       resetRound()
       return
     }
-
     const pickedCount = rolledDice.value.filter(f => f === face).length
     for (let i = 0; i < pickedCount; i++) collectedDice.value.push(face)
-
     updateRoundPoints()
-
     rolledDice.value = Object.entries(data.fullThrow || {}).flatMap(([f, count]) =>
         Array(count).fill(f)
     )
     disabledFaces.value = data.disabledFaces || []
     chosenFaces.value = Array.from(data.chosenFaces || [])
   } catch {
-    alert("Failed to select dice face.")
+    gameMessage.value = "Failed to select dice face."
   }
 }
 
@@ -252,42 +348,21 @@ async function trySelectDie(face) {
 function canClaim(tile) {
   return roundPoints.value >= tile.value
 }
-
-function tryPickTile(tile) {
+async function tryPickTile(tile) {
   if (!canClaim(tile)) return
-  pickTile(tile)
+  await pickTile(tile)
 }
-
 async function pickTile(tile) {
   try {
-    pollPaused = true
-
-    const game = await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
-
-    if (!myTiles.value.find(t => t.value === tile.value)) {
-      myTiles.value.push(tile)
-    }
-
-    tilesOnTable.value = tilesOnTable.value.filter(t => t.value !== tile.value)
-
-    players.value = game.players || []
-    currentTurnIndex.value = game.turnIndex ?? null
-    currentPlayerId.value = players.value[game.turnIndex]?.name ?? null
-
+    await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
     resetRound()
     busted.value = false
-
-    setTimeout(() => {
-      pollPaused = false
-      refreshGameState()
-    }, 1000)
-  } catch (e) {
-    alert("Failed to claim tile.")
-    pollPaused = false
+  } catch {
+    gameMessage.value = "Failed to claim tile."
   }
 }
 
-// === 🧮 HELPERS ===
+// === HELPERS ===
 function updateRoundPoints() {
   const faceValue = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5, SPECIAL: 5 }
   const counts = collectedDice.value.reduce((acc, f) => {
@@ -297,7 +372,6 @@ function updateRoundPoints() {
   roundPoints.value = Object.entries(counts)
       .reduce((total, [face, count]) => total + (faceValue[face] || 0) * count, 0)
 }
-
 function resetRound() {
   rolledDice.value = []
   collectedDice.value = []
@@ -306,7 +380,6 @@ function resetRound() {
   hasStartedRoll.value = false
   roundPoints.value = 0
 }
-
 function faceEmoji(face) {
   const map = { ONE: "1️⃣", TWO: "2️⃣", THREE: "3️⃣", FOUR: "4️⃣", FIVE: "5️⃣", SPECIAL: "🪱" }
   return map[face] || face
@@ -322,9 +395,24 @@ function faceEmoji(face) {
   text-align: center;
   font-family: "Inter", sans-serif;
 }
-
 h1, h3, h4, p { color: #111; }
-.points { margin: 0.5rem 0 1rem; font-weight: 700; color: #2c7a2c; font-size: 1.2rem; }
+.points {
+  margin: 0.5rem 0 1rem;
+  font-weight: 700;
+  color: #2c7a2c;
+  font-size: 1.2rem;
+}
+
+.timer-box {
+  margin: 1rem 0;
+  font-weight: bold;
+  color: #e63946;
+  background: #fff3cd;
+  border-radius: 8px;
+  padding: .5rem 1rem;
+  display: inline-block;
+  transition: all 0.4s ease;
+}
 
 .roll-btn {
   background: #4caf50;
@@ -339,25 +427,94 @@ h1, h3, h4, p { color: #111; }
 .roll-btn:hover { background: #43a047; transform: scale(1.05); }
 .roll-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-.dice-area { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0; }
-.die { font-size: 2.2rem; width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease; }
+.dice-area {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.die {
+  font-size: 2.2rem;
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 .die.disabled { opacity: 0.4; cursor: not-allowed; background: #ddd; }
 .die.chosen { background: #e3f8d3; border: 2px solid #4caf50; }
 
-.tiles-table { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
-.tile { background: #fff; border: 2px solid #4caf50; border-radius: 10px; padding: 10px 15px; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+.tiles-table {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.tile {
+  background: #fff;
+  border: 2px solid #4caf50;
+  border-radius: 10px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
 .tile:hover { background: #e8f5e9; transform: scale(1.05); }
-.tile.disabled { border-color: #aaa; background: #f3f3f3; color: #999; cursor: not-allowed; transform: none; }
+.tile.disabled {
+  border-color: #aaa;
+  background: #f3f3f3;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+}
 .worms { display: block; font-size: 0.8rem; color: #555; }
 
 .my-tiles { margin-top: 2rem; }
-.my-tiles-list { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
-.my-tile { background: #fefefe; border: 2px solid #2196f3; border-radius: 8px; padding: 6px 12px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+.my-tiles-list {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.my-tile {
+  background: #fefefe;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
 .my-tile small { font-size: 0.8rem; margin-left: 4px; color: #444; }
 .my-score { font-weight: 700; color: #1565c0; margin-top: 0.5rem; }
 
-.players { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
-.help-button { position: fixed; bottom: 20px; right: 20px; background: #eee; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 22px; cursor: pointer; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
+.players {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.help-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #eee;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 22px;
+  cursor: pointer;
+  color: #333;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
 .help-button:hover { background: #ddd; transform: scale(1.05); }
 .err { color: #b00020; margin-top: .5rem; font-weight: 600; }
 .turn { margin: .25rem 0 1rem; font-weight: 600; color: #333; }
