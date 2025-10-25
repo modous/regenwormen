@@ -352,7 +352,7 @@ async function tryPickTile(tile) {
   if (!canClaim(tile)) return
   await pickTile(tile)
 }
-async function pickTile() {
+async function pickTile(tile) {
   try {
     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
     resetRound()
@@ -447,6 +447,8 @@ h1, h3, h4, p { color: #111; }
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.die.disabled { opacity: 0.4; cursor: not-allowed; background: #ddd; }
+.die.chosen { background: #e3f8d3; border: 2px solid #4caf50; }
 
 .tiles-table {
   display: flex;
@@ -465,7 +467,13 @@ h1, h3, h4, p { color: #111; }
   transition: all 0.2s ease;
 }
 .tile:hover { background: #e8f5e9; transform: scale(1.05); }
-
+.tile.disabled {
+  border-color: #aaa;
+  background: #f3f3f3;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+}
 .worms { display: block; font-size: 0.8rem; color: #555; }
 
 .my-tiles { margin-top: 2rem; }
