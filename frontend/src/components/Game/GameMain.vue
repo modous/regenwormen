@@ -8,6 +8,8 @@
     </div>
 
     <div v-else>
+      <button class="back-button" @click="goToLobby">⬅️ Terug naar Lobby</button>
+
       <h3>Game ID: {{ gameId }}</h3>
       <h4>Jij: {{ username }}</h4>
       <p v-if="turnInfo" class="turn">Beurt: {{ turnInfo }}</p>
@@ -24,7 +26,7 @@
           @click="rollDice"
           :disabled="rolling"
       >
-        {{ hasStartedRoll ? "🎯 Roll Again" : "🎲 Roll Dice" }}
+        {{ hasStartedRoll ? "Roll Again" : "🎲 Roll Dice" }}
       </button>
 
       <!-- 🎲 Dice area -->
@@ -58,29 +60,31 @@
         </div>
       </div>
 
-      <!-- 👤 My tiles & score -->
-      <div class="my-tiles" v-if="myTiles.length">
-        <h3>🧱 My Tiles</h3>
-        <div class="my-tiles-list">
+      <!-- 👤 & 👥 Players section -->
+      <div class="game-board">
+        <!-- 👤 My tiles & score -->
+        <div class="my-section">
+          <h3>Mijn Tegels</h3>
+          <div class="my-tiles-list">
+            <div v-for="t in myTiles" :key="t.value" class="my-tile">
+              {{ t.value }} <small>🪱 x{{ t.points }}</small>
+            </div>
+          </div>
+          <p class="my-score">Totale punten: <strong>{{ myTilesScore }}</strong></p>
+        </div>
+
+        <!-- 👥 Other players -->
+        <div class="others-section">
           <div
-              v-for="t in myTiles"
-              :key="t.value"
-              class="my-tile"
+              v-for="p in players.filter(pl => pl.name !== username)"
+              :key="p?.id || p?.name"
+              class="other-player"
           >
-            {{ t.value }} <small>🪱 x{{ t.points }}</small>
+            <h4>{{ p.name || 'Unknown' }}</h4>
+            <p>Total Tile Points: <strong>{{ playerScore(p) }}</strong></p>
+            <TilesOtherPlayer :tiles="p.tiles || []" />
           </div>
         </div>
-        <p class="my-score">💰 Total Tile Points: <strong>{{ myTilesScore }}</strong></p>
-      </div>
-
-      <!-- 👥 Players overview -->
-      <div class="players">
-        <TilesCollected
-            v-for="p in players"
-            :key="p.id"
-            :tiles="p.tiles || []"
-            :isCurrentPlayer="p.name === currentPlayerId"
-        />
       </div>
 
       <button class="help-button" @click="showRules = true">❓</button>
@@ -91,9 +95,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue"
+import { useRouter } from "vue-router"
 import DiceCollected from "./DiceCollected.vue"
 import TilesCollected from "./TilesCollected.vue"
+import TilesOtherPlayer from "./TilesOtherPlayer.vue"
 import HowToPlayButton from "./HowToPlayButton.vue"
+
+const router = useRouter()
 
 const API_INGAME = "http://localhost:8080/ingame"
 
@@ -130,10 +138,14 @@ const turnInfo = computed(() => {
 
 const isBusted = computed(() => busted.value)
 
-// ✅ FIXED: sum worm points, not tile values
 const myTilesScore = computed(() =>
     myTiles.value.reduce((sum, t) => sum + (t.points || 0), 0)
 )
+
+function playerScore(player) {
+  if (!player || !player.tiles || !Array.isArray(player.tiles)) return 0
+  return player.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
+}
 
 // === FETCH HELPERS ===
 async function get(url) {
@@ -164,7 +176,7 @@ async function refreshGameState() {
     players.value = game.players || []
     tilesOnTable.value = game.tilesPot?.tiles || []
     currentTurnIndex.value = game.turnIndex ?? null
-    currentPlayerId.value = players.value[game.turnIndex]?.name ?? null
+    currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
 
     const me = players.value.find(p => p.name === username || p.id === username)
     if (me?.tiles && Array.isArray(me.tiles) && me.tiles.length > 0) {
@@ -311,6 +323,10 @@ function faceEmoji(face) {
   const map = { ONE: "1️⃣", TWO: "2️⃣", THREE: "3️⃣", FOUR: "4️⃣", FIVE: "5️⃣", SPECIAL: "🪱" }
   return map[face] || face
 }
+
+function goToLobby() {
+  router.push("/lobbies")
+}
 </script>
 
 <style scoped>
@@ -339,6 +355,21 @@ h1, h3, h4, p { color: #111; }
 .roll-btn:hover { background: #43a047; transform: scale(1.05); }
 .roll-btn:disabled { background: #aaa; cursor: not-allowed; }
 
+.back-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #eee;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+.back-button:hover { background: #ddd; }
+
+
 .dice-area { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0; }
 .die { font-size: 2.2rem; width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease; }
 .die.disabled { opacity: 0.4; cursor: not-allowed; background: #ddd; }
@@ -350,13 +381,14 @@ h1, h3, h4, p { color: #111; }
 .tile.disabled { border-color: #aaa; background: #f3f3f3; color: #999; cursor: not-allowed; transform: none; }
 .worms { display: block; font-size: 0.8rem; color: #555; }
 
-.my-tiles { margin-top: 2rem; }
+.game-board { display: flex; justify-content: space-between; margin-top: 2rem; gap: 2rem; flex-wrap: wrap; }
+.my-section, .others-section { flex: 1; min-width: 200px; }
 .my-tiles-list { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
 .my-tile { background: #fefefe; border: 2px solid #2196f3; border-radius: 8px; padding: 6px 12px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
 .my-tile small { font-size: 0.8rem; margin-left: 4px; color: #444; }
 .my-score { font-weight: 700; color: #1565c0; margin-top: 0.5rem; }
 
-.players { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
+.other-player { margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fff; }
 .help-button { position: fixed; bottom: 20px; right: 20px; background: #eee; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 22px; cursor: pointer; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
 .help-button:hover { background: #ddd; transform: scale(1.05); }
 .err { color: #b00020; margin-top: .5rem; font-weight: 600; }
