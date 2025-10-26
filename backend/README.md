@@ -121,3 +121,57 @@ src
 
 
 
+## Checkpoint 2 – Domeinlaag, DTO’s en Services
+
+In deze fase hebben we de kern van het spel geïmplementeerd:
+
+Game-entiteit: beheert spelers, tegels, dobbelstenen en spelstatus.
+
+Player-entiteit: houdt naam, score en verzamelde tegels bij.
+
+DTO’s: maken veilige dataoverdracht tussen backend en frontend mogelijk (GameDTO, PlayerDTO, enz.).
+
+Service-laag: bevat spel- en beurtlogica en verbindt controllers met repositories.
+
+Repository-laag: gestart met een MockRepository (later uitbreidbaar naar JPA).
+
+Controller-laag: biedt endpoints voor het aanmaken van games, spelers en beurten.
+
+### Belangrijke REST-endpoints
+Methode	Endpoint	Beschrijving
+GET	/api/ping	Health check
+POST	/api/auth/register	Gebruiker registreren
+POST	/api/auth/login	Gebruiker inloggen
+GET	/api/lobbies	Alle beschikbare lobbies ophalen
+POST	/api/lobbies	Nieuwe lobby aanmaken
+POST	/api/lobbies/{id}/join	Speler toevoegen aan lobby
+POST	/api/lobbies/{id}/ready	Speler markeren als ready
+GET	/api/games/{id}	Game-status ophalen
+POST	/api/games/{id}/roll	Dobbelsteen gooien
+POST	/api/games/{id}/pickTile	Tegel kiezen
+
+De frontend communiceert via fetch() en JSON met deze REST API.
+
+## Checkpoint 3 – WebSockets & Real-time Functionaliteit
+
+Om polling te vervangen door realtime-updates hebben we een WebSocket-systeem geïmplementeerd.
+
+Belangrijkste componenten
+
+WebSocketConfig: stelt STOMP-over-SockJS in en staat verbindingen toe vanaf http://localhost:5173.
+
+GameWebSocketController: stuurt updates naar alle spelers bij acties zoals gooien, tegel pakken of beurt wisselen.
+
+Turn Timer: houdt automatisch de tijd per speler bij en stuurt meldingen als een beurt bijna voorbij is.
+
+Real-time synchronisatie: alle clients ontvangen direct updates, zonder de pagina te verversen.
+
+Commit-samenvatting
+
+feat: add real-time turn system with WebSocket sync and countdown timer (removed polling)
+
+## Database
+
+Tijdens de ontwikkeling gebruiken we H2 (in-memory).
+Voor productie is een PostgreSQL database voorbereid via Flyway-migraties.
+De volgende migratiebestanden zijn toegevoegd in src/main/resources/db/migration/.
