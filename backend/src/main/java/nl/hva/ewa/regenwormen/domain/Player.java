@@ -103,3 +103,30 @@ public class Player {
 
 
 }
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class Player {
+    // bestaande velden en methoden...
+
+    @JsonProperty("points")
+    public int jsonPoints() {
+        return getPoints();
+    }
+
+    @JsonProperty("topTile")
+    public Tile jsonTopTile() {
+        return getTopTile();
+    }
+
+    @JsonIgnore
+    public List<Tile> getOwnedTiles() {
+        return ownedTiles;
+    }
+
+    @JsonProperty("tiles")
+    public List<Tile> jsonTiles() {
+        return ownedTiles;
+    }
+}

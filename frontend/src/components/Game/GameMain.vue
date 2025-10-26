@@ -81,8 +81,8 @@
               class="other-player"
           >
             <h4>{{ p.name || 'Unknown' }}</h4>
-            <p>Total Tile Points: <strong>{{ playerScore(p) }}</strong></p>
-            <TilesOtherPlayer :tiles="p.tiles || []" />
+            <p>Total Tile Points: <strong>{{ p.points ?? playerScore(p) }}</strong></p>
+            <TilesOtherPlayer :tiles="p.tiles || []" :topTile="p.topTile" />
           </div>
         </div>
       </div>
