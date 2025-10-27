@@ -376,6 +376,30 @@ public class Game {
         return points >= lowestPot || topTileValues.contains(points);
     }
 
+    // === FORCE SKIP SUPPORT ===
+    /**
+     * Used when a player's turn expires or must be skipped.
+     * It safely advances to the next player without requiring
+     * any dice roll or points, cleans up dice state, and ensures
+     * the game stays valid.
+     */
+    public void forceNextPlayer() {
+        if (gameState != GameState.PLAYING) return;
+
+        Player current = getCurrentPlayer();
+        if (current != null) {
+            // 🧹 End their turn cleanly
+            current.setEndTurn();
+
+            // 🪱 Apply optional bust penalty logic
+            tilesPot.flipHighestAvailableTileIfAny();
+        }
+
+        // ⏩ Move to next player's turn
+        setNextPlayersTurn();
+    }
+
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
