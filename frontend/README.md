@@ -27,3 +27,13 @@ npm run dev
 ```sh
 npm run build
 ```
+
+## API calls 
+
+### in GameMain.vue
+
+rollDice() Roept POST /ingame/{gameId}/startroll/{username} of POST /ingame/{gameId}/reroll/{username} aan om dobbelstenen te rollen.
+
+trySelectDie(face) Roept POST /ingame/{gameId}/pickdice/{username} aan om een dobbelsteen te kiezen.
+
+pickTile(tile) Roept POST /ingame/{gameId}/claimfrompot/{username} aan om een tegel te claimen.
