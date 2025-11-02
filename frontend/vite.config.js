@@ -18,5 +18,10 @@ export default defineConfig({
     // 🩵 Fix SockJS expecting Node "global"
     define: {
         global: 'window'
+    },
+
+    // Vitest config
+    test: {
+        environment: 'jsdom'
     }
 })

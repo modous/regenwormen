@@ -30,12 +30,12 @@
 
       <p v-if="turnInfo" class="turn">Beurt: {{ turnInfo }}</p>
 
-      <!-- 🧮 Points counter -->
+      <!-- Points counter -->
       <p v-if="hasStartedRoll" class="points">
-        🎯 Points this round: <strong>{{ roundPoints }}</strong>
+        Points this round: <strong>{{ roundPoints }}</strong>
       </p>
 
-      <!-- 🎲 Roll button -->
+      <!-- Roll button -->
       <button
           v-if="currentPlayerId === username && !isBusted"
           class="roll-btn"
@@ -45,7 +45,7 @@
         {{ hasStartedRoll ? "Roll Again" : "🎲 Roll Dice" }}
       </button>
 
-      <!-- 🎲 Dice area -->
+      <!-- Dice area -->
       <div class="dice-area" v-if="rolledDice.length">
         <div
             v-for="(face, idx) in rolledDice"
@@ -60,10 +60,10 @@
         </div>
       </div>
 
-      <!-- 🧱 Collected dice summary -->
+      <!-- Collected dice summary -->
       <DiceCollected :collectedDice="collectedDice" />
 
-      <!-- 🧩 Tiles to claim -->
+      <!-- Tiles to claim -->
       <div class="tiles-table">
         <div
             v-for="tile in tilesOnTable"
@@ -76,9 +76,9 @@
         </div>
       </div>
 
-      <!-- 👤 & 👥 Players section -->
+      <!-- Players section -->
       <div class="game-board">
-        <!-- 👤 My tiles & score -->
+        <!-- My tiles & score -->
         <div class="my-section">
           <h3>Mijn Tegels</h3>
           <div class="my-tiles-list">
@@ -89,7 +89,7 @@
           <p class="my-score">Totale punten: <strong>{{ myTilesScore }}</strong></p>
         </div>
 
-        <!-- 👥 Other players -->
+        <!-- Other players -->
         <div class="others-section">
           <div
               v-for="p in players.filter(pl => pl.name !== username)"
@@ -121,7 +121,7 @@ import { Client } from "@stomp/stompjs"
 
 const router = useRouter()
 
-// --- 🔗 API + STOMP/SockJS ---
+// --- API + STOMP/SockJS ---
 const API_INGAME = "http://localhost:8080/ingame"
 const SOCKJS_URL = "http://localhost:8080/ws"
 
@@ -150,10 +150,10 @@ const busted = ref(false)
 const roundPoints = ref(0)
 const myTiles = ref([])
 
-// --- ⏳ TIMER & MESSAGE STATE ---
+// --- TIMER & MESSAGE STATE ---
 const timeLeft = ref(0)
 const currentTimerPlayer = ref("")
-const gameMessage = ref("") // 💬 from backend (/message)
+const gameMessage = ref("") // message from backend (/message)
 
 // --- COMPUTED ---
 const turnInfo = computed(() => {
@@ -187,7 +187,7 @@ async function post(url, body = null) {
   return type.includes("application/json") ? res.json() : null
 }
 
-// === 🧠 Apply game snapshot from WS ===
+// === Apply game snapshot from WS ===
 function applyGame(game) {
   if (!game) return
 
@@ -198,11 +198,11 @@ function applyGame(game) {
   currentTurnIndex.value = game.turnIndex ?? null
   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
 
-  // 🧩 If it's a new round and now your turn — reset your UI
+  // If it's a new round and now your turn — reset your UI
   if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
     resetRound()
     busted.value = false
-    gameMessage.value = "🎯 It's your turn!"
+    gameMessage.value = "It's your turn!"
   }
 
   // Sync my tiles from snapshot
@@ -249,14 +249,14 @@ function connectStomp() {
         // Always stop local timer
         timeLeft.value = 0
 
-        // 🔔 Notify all players
+        // Notify all players
         if (data.player === username) {
           gameMessage.value = "⏰ Your turn expired! You lost this round."
         } else {
           gameMessage.value = `⚠️ ${data.player}'s turn expired!`
         }
 
-        // 🧹 Reset the local round state if backend requests it
+        // Reset the local round state if backend requests it
         if (data.reset) {
           resetRound()
           busted.value = true
@@ -270,7 +270,7 @@ function connectStomp() {
     })
 
 
-    // --- 💬 System messages ---
+    // --- System messages ---
     stompClient.subscribe(`/topic/game/${gameId.value}/message`, (msg) => {
       try {
         const data = JSON.parse(msg.body)
@@ -312,7 +312,7 @@ onUnmounted(() => {
   if (stompClient) stompClient.deactivate()
 })
 
-// === 🎲 GAME ACTIONS ===
+// === GAME ACTIONS ===
 async function rollDice() {
   rolling.value = true
   try {
@@ -360,7 +360,7 @@ async function trySelectDie(face) {
   }
 }
 
-// === 🧩 TILE LOGIC ===
+// === TILE LOGIC ===
 function canClaim(tile) {
   return roundPoints.value >= tile.value
 }
