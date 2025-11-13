@@ -107,10 +107,4 @@ public class TilesPot {
                 .orElse(null);
     }
 
-    // ✅ NEW — Removes a tile from the pot entirely when claimed
-    public void removeTile(Tile tile) {
-        if (tile != null) {
-            tiles.remove(tile);
-        }
-    }
 }
