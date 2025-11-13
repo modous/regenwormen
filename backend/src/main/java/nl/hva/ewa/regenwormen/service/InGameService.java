@@ -242,7 +242,12 @@ public class InGameService {
         guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
-        game.claimFromPot(); // advances to next player inside Game
+        try {
+            game.claimFromPot();
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Claim not possible");
+        }
         cancelTurnTimer(game.getId());
         Game updated = persistAndReturn(game, game);
 
