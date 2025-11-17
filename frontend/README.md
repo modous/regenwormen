@@ -32,8 +32,13 @@ npm run build
 
 ### in GameMain.vue
 
-rollDice() Roept POST /ingame/{gameId}/startroll/{username} of POST /ingame/{gameId}/reroll/{username} aan om dobbelstenen te rollen.
+rollDice() Roept 
+POST /ingame/{gameId}/startroll/{username} om de dobbelsteen de eerste keer te rollen 
+en 
+POST /ingame/{gameId}/reroll/{username} aan om dobbelstenen opnieuw te rollen.
 
-trySelectDie(face) Roept POST /ingame/{gameId}/pickdice/{username} aan om een dobbelsteen te kiezen.
+trySelectDie(face) Roept 
+POST /ingame/{gameId}/pickdice/{username} aan om een dobbelsteen te kiezen.
 
-pickTile(tile) Roept POST /ingame/{gameId}/claimfrompot/{username} aan om een tegel te claimen.
+pickTile(tile) Roept 
+POST /ingame/{gameId}/claimfrompot/{username} aan om een tegel te claimen.

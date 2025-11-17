@@ -181,7 +181,9 @@ const myTilesScore = computed(() =>
     myTiles.value.reduce((sum, t) => sum + (t.points || 0), 0)
 )
 
+// -----------------------------
 // Utility: calculate score for any player
+// -----------------------------
 function playerScore(player) {
   if (!player || !player.tiles || !Array.isArray(player.tiles)) return 0
   return player.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
