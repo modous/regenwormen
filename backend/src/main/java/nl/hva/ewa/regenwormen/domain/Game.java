@@ -222,9 +222,6 @@ public class Game {
         claimedTile.takeTile(player);
         player.addTile(claimedTile);
 
-        // ✅ Remove tile from pot so others can’t claim it anymore
-        tilesPot.removeTile(claimedTile);
-
         player.setEndTurn();
         if (endGameCheck()) endGame();
         else setNextPlayersTurn();
