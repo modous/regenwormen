@@ -31,7 +31,7 @@ public class InGameService {
     private final Map<String, ScheduledFuture<?>> activeTimers = new ConcurrentHashMap<>();
     private final Map<String, Integer> remainingTimes = new ConcurrentHashMap<>();
 
-    private static final int TURN_SECONDS = 10;
+//    private static final int TURN_SECONDS = 10;
 
     public InGameService(GameRepository gameRepo,
                          PlayerRepository playerRepo,
@@ -67,32 +67,76 @@ public class InGameService {
     }
 
     // ---------------------- 🔥 TURN TIMER LOGIC ----------------------
+//    private void startTurnTimer(Game game, Player player) {
+//        String gameId = game.getId();
+//        cancelTurnTimer(gameId);
+//
+//        final int[] timeLeft = {TURN_SECONDS};
+//        remainingTimes.put(gameId, timeLeft[0]);
+//
+//        // Immediately broadcast first tick so clients show correct player+10s
+//        ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
+//
+//        ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
+//            try {
+//                timeLeft[0]--;
+//                if (timeLeft[0] <= 0) {
+//                    cancelTurnTimer(gameId);
+//                    handleTurnTimeout(game, player);
+//                    return;
+//                }
+//                remainingTimes.put(gameId, timeLeft[0]);
+//                ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }, 1, 1, TimeUnit.SECONDS);
+//
+//        activeTimers.put(gameId, timer);
+//    }
+
+    private static final int TURN_SECONDS = 10;
+    private static final int TIMER_DELAY_SECONDS = 5;
+
     private void startTurnTimer(Game game, Player player) {
         String gameId = game.getId();
         cancelTurnTimer(gameId);
 
         final int[] timeLeft = {TURN_SECONDS};
+
+        // Timer wordt nog niet getoond → frontend laat hem zien zodra de eerste broadcast komt
         remainingTimes.put(gameId, timeLeft[0]);
 
-        // Immediately broadcast first tick so clients show correct player+10s
-        ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
+        // Wacht 5 seconden vóór eerste broadcast + vóór start aftellen
+        ScheduledFuture<?> delayTask = scheduler.schedule(() -> {
 
-        ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
-            try {
-                timeLeft[0]--;
-                if (timeLeft[0] <= 0) {
-                    cancelTurnTimer(gameId);
-                    handleTurnTimeout(game, player);
-                    return;
+            // Eerste keer broadcast: timer verschijnt op 10
+            ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
+
+            // Start het echte aftellen
+            ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
+                try {
+                    timeLeft[0]--;
+                    if (timeLeft[0] <= 0) {
+                        cancelTurnTimer(gameId);
+                        handleTurnTimeout(game, player);
+                        return;
+                    }
+
+                    remainingTimes.put(gameId, timeLeft[0]);
+                    ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                remainingTimes.put(gameId, timeLeft[0]);
-                ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, 1, 1, TimeUnit.SECONDS);
+            }, 1, 1, TimeUnit.SECONDS);
 
-        activeTimers.put(gameId, timer);
+            activeTimers.put(gameId, timer);
+
+        }, TIMER_DELAY_SECONDS, TimeUnit.SECONDS);
+
+        // SLA DE DELAY OOK OP, anders kun je hem niet cancellen
+        activeTimers.put(gameId, delayTask);
     }
 
     private void startNextPlayerTimerAndAnnounce(Game game) {

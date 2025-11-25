@@ -64,17 +64,23 @@
 
 
 <!--</style>-->
-
 <template>
   <div class="tiles-table" style="justify-content: flex-start;">
     <div
-        v-for="tile in tiles"
-        :key="tile.value"
-        class="tile"
-        style="cursor: default; transform: scale(0.8);"
+        v-for="(t, index) in tiles"
+        :key="t.value"
+        class="other-tile"
+        :class="{ last: index === tiles.length - 1 }"
+        @click="$emit('steal', t)"
     >
-      <span class="value">{{ tile.value }}</span>
-      <span class="worms">🪱 x{{ tile.points || 1 }}</span>
+      <span class="value">{{ t.value }}</span>
+      <span class="worms">🪱 x{{ t.points || 1 }}</span>
+    </div>
+
+    <!-- Optioneel: topTile apart weergeven -->
+    <div v-if="topTile" class="other-tile top-tile" @click="$emit('steal', topTile)">
+      <span class="value">{{ topTile.value }}</span>
+      <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
     </div>
   </div>
 </template>
