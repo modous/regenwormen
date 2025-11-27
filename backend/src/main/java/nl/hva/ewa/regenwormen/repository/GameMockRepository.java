@@ -2,54 +2,49 @@ package nl.hva.ewa.regenwormen.repository;
 
 import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 import nl.hva.ewa.regenwormen.domain.Game;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+@Primary
 @Repository
-public class GameMockRepository implements GameRepository{
+public class GameMockRepository implements GameRepository {
 
-    private final List<Game> games = new ArrayList<>();
+    private final Map<String, Game> games = new HashMap<>();
 
     public GameMockRepository() {
-        games.add(new Game("Room_1", 2));
-        games.add(new Game("Room_2", 4));
+        Game g1 = new Game("Room_1", 2);
+        Game g2 = new Game("Room_2", 4);
+        games.put(g1.getId(), g1);
+        games.put(g2.getId(), g2);
     }
 
     @Override
     public List<Game> findAll() {
-        return Collections.unmodifiableList(games);
+        return new ArrayList<>(games.values());
     }
 
     @Override
-    public List<Game> findAllPreGames(){
-        List<Game> preGames= games.stream().filter(g -> g.getGameState() == GameState.PRE_GAME).toList();
-        return Collections.unmodifiableList(preGames);
+    public List<Game> findAllPreGames() {
+        return games.values().stream()
+                .filter(g -> g.getGameState() == GameState.PRE_GAME)
+                .toList();
     }
 
     @Override
-    public Game findById(String id) {
-        for(Game game: games) {
-            if (game.getId().equals(id)) {return game;}
-        }
-        return null;
+    public Optional<Game> findById(String id) {
+        return Optional.ofNullable(games.get(id));
     }
 
     @Override
     public Game save(Game game) {
-        Game found = findById(game.getId());
-        if(found != null){games.remove(found);}
-        games.add(game);
+        games.put(game.getId(), game);
         return game;
     }
 
     @Override
     public Game deleteById(String id) {
-        Game found = findById(id);
-        if(found == null) {return null;}
-        games.remove(found);
-        return found;
+        return games.remove(id);
     }
 }

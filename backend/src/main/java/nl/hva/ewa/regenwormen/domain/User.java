@@ -19,6 +19,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private String location;
+    private String profilePictureUrl;
+
     public User() {}
 
     public User(String email, String username, String password) {
@@ -37,4 +40,11 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getProfilePictureUrl() { return profilePictureUrl; }
+    public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+
 }

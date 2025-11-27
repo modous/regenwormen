@@ -54,25 +54,33 @@ async function handleLogin() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         identifier: identifier.value,
-        password: password.value
+        password: password.value,
       }),
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (!response.ok) {
-      alert(data.error || 'Invalid credentials')
-      return
+      alert(data.error || 'Invalid credentials');
+      return;
     }
 
-    // Save the user data to Pinia
-    userStore.login(data)
+    // ✅ Ensure the user object has an ID (needed for Profile.vue)
+    if (!data.id) {
+      console.error('User ID missing from response:', data);
+      alert('Login failed: invalid server response.');
+      return;
+    }
 
-    alert('Login successful!')
-    router.push('/')
+    // ✅ Save the full user object to Pinia + localStorage
+    userStore.login(data);
+    localStorage.setItem('user', JSON.stringify(data));
+
+    alert(`Welcome back, ${data.username}!`);
+    router.push('/');
   } catch (err) {
-    alert('Could not reach server.')
-    console.error(err)
+    console.error('Login error:', err);
+    alert('⚠️ Could not reach server.');
   }
 }
 </script>
