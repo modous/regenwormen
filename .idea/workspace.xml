@@ -5,10 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)">
+      <change afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/easycode/codebase-v2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/ErrorReportController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/Enum/ErrorStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/dto/ErrorReportDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/errorForm/ErrorReport.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/repository/ErrorReportMockRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/repository/ErrorReportRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/ErrorReportService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__create_error_reports_table.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/ErrorHandelingForm.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/HowToPlayButton.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/HowToPlayButton.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +38,7 @@
         <option value="Vue Options API Component" />
         <option value="JavaScript File" />
         <option value="Vue Composition API Component" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -48,7 +66,7 @@
   <component name="GitLabMergeRequestsSettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;first&quot;: &quot;https://gitlab.fdmci.hva.nl/ewa-dt/2526/regenwormen/ewa_regenwormen.git&quot;,
-    &quot;second&quot;: &quot;166c9e2d-3ca7-4dab-aa79-92117a277b12&quot;
+    &quot;second&quot;: &quot;bed5d94b-34d4-4ef2-a172-fcad4642a5fc&quot;
   }
 }</component>
   <component name="ProblemsViewState">
@@ -67,21 +85,26 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.RegenwormenBackendApplication.executor": "Run",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Feat-game-error-form",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
+    "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormenNEW/frontend/src/components/Game/game_assistance",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "C:/Users/kraco/AppData/Roaming/JetBrains/IntelliJIdea2024.3/node/versions/24.11.0/node",
+    "nodejs_interpreter_path": "node",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.pluginManager",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.2.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -92,12 +115,15 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormenNEW\frontend\src\components\Game\game_assistance" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\basje\IdeaProjects\ewa_regenwormenNEW\frontend\src\components\Game\game_assistance" />
       <recent name="$PROJECT_DIR$/cypress/fixtures" />
       <recent name="$PROJECT_DIR$/frontend/src/views" />
       <recent name="$PROJECT_DIR$/frontend/src/components" />
       <recent name="$PROJECT_DIR$/frontend/src" />
-      <recent name="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen" />
     </key>
   </component>
   <component name="RunManager">
@@ -135,12 +161,15 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+        <option value="bundled-jdk-9823dce3aa75-84258761d1cc-intellij.indexing.shared.core-IU-243.28141.18" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.28141.18" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="StructureViewState">
+    <option name="selectedTab" value="Logical" />
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="" />
@@ -156,6 +185,11 @@
       <workItem from="1758916847883" duration="1673000" />
       <workItem from="1761657473870" duration="1004000" />
       <workItem from="1762112628889" duration="5410000" />
+      <workItem from="1763803607946" duration="1597000" />
+      <workItem from="1763805231745" duration="142000" />
+      <workItem from="1763805387855" duration="2711000" />
+      <workItem from="1763808165979" duration="83000" />
+      <workItem from="1764412332733" duration="10197000" />
     </task>
     <task id="LOCAL-00001" summary="feat: backend of register and login added">
       <option name="closed" value="true" />
@@ -288,7 +322,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -306,5 +352,9 @@
     <MESSAGE value="added junit and gamemain tests" />
     <MESSAGE value="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)" />
     <option name="LAST_COMMIT_MESSAGE" value="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
