@@ -1,5 +1,6 @@
 package nl.hva.ewa.regenwormen.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import nl.hva.ewa.regenwormen.domain.errorForm.ErrorReport;
 import nl.hva.ewa.regenwormen.domain.dto.ErrorReportDTO;
 import nl.hva.ewa.regenwormen.domain.Enum.ErrorStatus;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/error-reports")
 @CrossOrigin(origins = "*")
@@ -44,6 +46,7 @@ public class ErrorReportController {
             @RequestPart("errorReport") String errorReportJson,
             @RequestPart(value = "snapshot", required = false) MultipartFile snapshotFile) {
         try {
+            log.info("Received error report JSON: {}", errorReportJson);
             // Parse JSON string naar ErrorReportDTO
             ErrorReportDTO errorReportDTO = objectMapper.readValue(errorReportJson, ErrorReportDTO.class);
 

@@ -4,28 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)">
-      <change afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/easycode/codebase-v2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/ErrorReportController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/Enum/ErrorStatus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/dto/ErrorReportDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/domain/errorForm/ErrorReport.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/repository/ErrorReportMockRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/repository/ErrorReportRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/ErrorReportService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__create_error_reports_table.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/ErrorHandelingForm.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="Error Form">
+      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/ErrorReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/ErrorReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/ErrorReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/service/ErrorReportService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/GameMain.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/HowToPlayButton.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/HowToPlayButton.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/ErrorHandelingForm.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Game/game_assistance/ErrorHandelingForm.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,6 +91,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_interpreter_path": "node",
     "nodejs_package_manager_path": "npm",
+    "npm.dev.executor": "Run",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.2.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
@@ -126,7 +115,7 @@
       <recent name="$PROJECT_DIR$/frontend/src" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Spring Boot.RegenwormenBackendApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="ewa_regenwormen" />
       <method v="2">
@@ -152,9 +141,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/frontend/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Spring Boot.RegenwormenBackendApplication" />
+        <item itemvalue="npm.dev" />
       </list>
     </recent_temporary>
   </component>
@@ -189,7 +189,8 @@
       <workItem from="1763805231745" duration="142000" />
       <workItem from="1763805387855" duration="2711000" />
       <workItem from="1763808165979" duration="83000" />
-      <workItem from="1764412332733" duration="10197000" />
+      <workItem from="1764412332733" duration="10429000" />
+      <workItem from="1764612552178" duration="5980000" />
     </task>
     <task id="LOCAL-00001" summary="feat: backend of register and login added">
       <option name="closed" value="true" />
@@ -311,7 +312,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763035857470</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Error Form">
+      <option name="closed" value="true" />
+      <created>1764604659261</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1764604659261</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -351,7 +360,8 @@
     <MESSAGE value="feat: bugfixes" />
     <MESSAGE value="added junit and gamemain tests" />
     <MESSAGE value="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)" />
+    <MESSAGE value="Error Form" />
+    <option name="LAST_COMMIT_MESSAGE" value="Error Form" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

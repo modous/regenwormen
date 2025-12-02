@@ -1,5 +1,6 @@
 package nl.hva.ewa.regenwormen.service;
 
+import lombok.extern.slf4j.Slf4j;
 import nl.hva.ewa.regenwormen.domain.errorForm.ErrorReport;
 import nl.hva.ewa.regenwormen.domain.Enum.ErrorStatus;
 import nl.hva.ewa.regenwormen.domain.Game;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+@Slf4j
 @Service
 public class ErrorReportService {
 
@@ -52,7 +53,7 @@ public class ErrorReportService {
 
         // Bouw ErrorReport
         ErrorReport errorReport = new ErrorReport(name, topic, category, priority, details, gameStateJson);
-
+        log.info("Creating ErrorReport: {}", errorReport);
         // Extra velden
         if (userId != null) {
             errorReport.setUserId(userId);

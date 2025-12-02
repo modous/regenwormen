@@ -14,10 +14,10 @@ const errorDescription = ref("");
 const snapshotFile = ref(null);
 const fileError = ref("");
 const snapshotInput = ref(null);
+const submitStatus = ref('idle');
+const submitMessage = ref('');
 
-const hasSnapshot = computed(() => {
-  return snapshotFile.value ? true : false;
-});
+const hasSnapshot = computed(() => !!snapshotFile.value);
 
 const props = defineProps({
   visible: { type: Boolean, required: true },
@@ -39,25 +39,29 @@ function onSnapshotChange(e) {
 
 async function takeSnapshot() {
   try {
+    //1. sluiten
     close()
     await nextTick()
+    // 2. snapshot maken
     const canvas = await html2canvas(document.body);
+
+    //3. omzetten naar file
     const dataURL = canvas.toDataURL("image/png")
     const blob = await (await fetch (dataURL)).blob()
     snapshotFile.value = new File([blob], "snapshot.png", {type: "image/png"});
     console.log("Snapshot taken:", snapshotFile);
-    fileCheck(snapshotFile.value);
+    await fileCheck(snapshotFile.value);
 
   } catch (e) {
     console.error("Error taking snapshot:", e);
   } finally {
     emits("open")
     await nextTick()
-    if(!snapshotFile.value){
-      console.log("No snapshot file found...");
+    if(!snapshotFile.value){ console.log("No snapshot file found...");
       return;
     }
 
+    // 5. File in <input type="file"> zetten
     const dt = new DataTransfer();
     dt.items.add(snapshotFile.value);
     snapshotInput.value.files = dt.files;
@@ -65,6 +69,7 @@ async function takeSnapshot() {
 }
 
 async function fileCheck(file) {
+  if (!file) return true;
   if (file.size > MAX_FILE_SIZE) {
     fileError.value = "File size exceeds the maximum limit of 2MB.";
     snapshotFile.value = null;
@@ -81,6 +86,8 @@ async function submitErrorReport() {
   }
 
   try {
+    submitStatus.value = 'loading';
+    submitMessage.value = '';
 
     const errorReportData = {
       name: "Game Error Report",
@@ -111,16 +118,45 @@ async function submitErrorReport() {
     if (response.ok) {
       const result = await response.json();
       console.log("Error report submitted successfully:", result);
-      alert("✅ Error report submitted successfully!");
-      resetForm();
-      close();
+
+      // show success feedback for 2s, then reset and close
+      submitStatus.value = 'success';
+      submitMessage.value = 'Report submitted';
+
+      setTimeout(() => {
+        resetForm();
+        submitStatus.value = 'idle';
+        submitMessage.value = '';
+        close();
+      }, 2000);
+
     } else {
       const errorText = await response.text();
       console.error("Failed to submit error report:", response.status, errorText);
+
+      // show error feedback for 2s
+      submitStatus.value = 'error';
+      submitMessage.value = 'Failed to submit report';
+
+      setTimeout(() => {
+        submitStatus.value = 'idle';
+        submitMessage.value = '';
+      }, 2000);
+
       alert("❌ Failed to submit error report. Try again.");
     }
   } catch (error) {
     console.error("Error submitting error report:", error);
+
+    // show error feedback for 2s
+    submitStatus.value = 'error';
+    submitMessage.value = 'Error submitting report';
+
+    setTimeout(() => {
+      submitStatus.value = 'idle';
+      submitMessage.value = '';
+    }, 2000);
+
     alert("❌ Error submitting report: " + error.message);
   }
 }
@@ -145,16 +181,24 @@ function resetForm() {
     <div class="error-form">
       <h2 class="title">Error Report</h2>
       <button id="close-button" @click="close">✖</button>
+
+      <!-- Feedback banner -->
+      <div v-if="submitStatus !== 'idle'" :class="['feedback', submitStatus === 'success' ? 'feedback--success' : submitStatus === 'error' ? 'feedback--error' : 'feedback--loading']">
+        <span v-if="submitStatus === 'success'">✔️ {{ submitMessage || 'Submitted' }}</span>
+        <span v-else-if="submitStatus === 'error'">❌ {{ submitMessage || 'Failed' }}</span>
+        <span v-else>⏳ Sending...</span>
+      </div>
+
       <form @submit.prevent="submitErrorReport">
         <h3>Report an Issue</h3>
-        <h3>{{ user }} - {{ gameId }}</h3>
+        <h3>{{ user.username }} - {{ gameId }}</h3>
         <div id="error-topic">
           <label for="topic">Topic:</label>
-          <input type="text" id="topic" name="topic" placeholder="Briefly summarize the error" required maxlength="100" v-model="topic"/>
+          <input type="text" id="topic" name="topic" placeholder="Briefly summarize the error" required maxlength="100" v-model="topic" :disabled="submitStatus === 'loading'"/>
           <div class="row-2col">
             <div class="field-block">
               <label for="category">Category:</label>
-              <select id="category" v-model="category" required>
+              <select id="category" v-model="category" required :disabled="submitStatus === 'loading'">
                 <option value="" disabled>Select category</option>
                 <option value="functionality_issue">Functionality Issue</option>
                 <option value="ui_bug">UI Bug</option>
@@ -167,7 +211,7 @@ function resetForm() {
 
             <div class="field-block">
               <label for="priority">Priority:</label>
-              <select id="priority" name="priority" v-model="priority" required>
+              <select id="priority" name="priority" v-model="priority" required :disabled="submitStatus === 'loading'">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -179,20 +223,20 @@ function resetForm() {
         <div id="error-details">
           <label for="error-description">Describe the issue:</label>
           <textarea id="error-description" v-model="errorDescription" rows="6" cols="40" maxlength="1000"
-                    placeholder="Please provide details about the error. What happened and when did this occur?" required></textarea>
+                    placeholder="Please provide details about the error. What happened and when did this occur?" required :disabled="submitStatus === 'loading'"></textarea>
         </div>
         <div class="field-block">
           <label for="snapshot">Snapshot (helpful):</label>
           <div class="row-2col">
-            <input type="file" id="snapshot" ref="snapshotInput" name="snapshot" accept="image/png, image/jpeg" @change="onSnapshotChange"/>
+            <input type="file" id="snapshot" ref="snapshotInput" name="snapshot" accept="image/png, image/jpeg" @change="onSnapshotChange" :disabled="submitStatus === 'loading'"/>
             <p v-if="hasSnapshot">✔️ Screenshot captured!</p>
             <p v-else>❌ No screenshot</p>
           </div>
           <p v-if="fileError" style="color: red;">{{ fileError }}</p>
         </div>
         <div id="action-buttons">
-          <button type="button" id="auto-snapshot" @click="takeSnapshot">📸 Take snapshot</button>
-          <button type="submit">Submit Report</button>
+          <button type="button" id="auto-snapshot" @click="takeSnapshot" :disabled="submitStatus === 'loading'">📸 Take snapshot</button>
+          <button type="submit" :disabled="submitStatus === 'loading'">Submit Report</button>
         </div>
       </form>
     </div>
@@ -227,6 +271,35 @@ function resetForm() {
   box-sizing: border-box;
   border: 1px solid #e5e7eb;
 }
+
+/* Feedback banner styles */
+.feedback {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-sizing: border-box;
+}
+.feedback--success {
+  background: #ecfdf5; /* light green */
+  color: #065f46; /* dark green */
+  border: 1px solid #10b98133;
+}
+.feedback--error {
+  background: #fef2f2; /* light red */
+  color: #991b1b; /* dark red */
+  border: 1px solid #ef444433;
+}
+.feedback--loading {
+  background: #eff6ff; /* light blue */
+  color: #1e40af; /* dark blue */
+  border: 1px solid #3b82f633;
+}
+
 
 /* Titel */
 .title {
