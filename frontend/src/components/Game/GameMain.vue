@@ -102,6 +102,13 @@
           </div>
         </div>
       </div>
+      <button class="error-button" @click="showErrorForm = true">❗</button>
+      <ErrorHandelingForm
+        :visible="showErrorForm"
+        :gameState="getCurrentGameState()"
+        @close="showErrorForm = false"
+        @open="showErrorForm = true"
+      />
 
       <button class="help-button" @click="showRules = true">❓</button>
       <HowToPlayButton :visible="showRules" @close="showRules = false" />
@@ -114,8 +121,9 @@ import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useRouter } from "vue-router"
 import DiceCollected from "./DiceCollected.vue"
 import TilesCollected from "./TilesCollected.vue"
+import ErrorHandelingForm from "@/components/Game/game_assistance/ErrorHandelingForm.vue";
 import TilesOtherPlayer from "./TilesOtherPlayer.vue"
-import HowToPlayButton from "./HowToPlayButton.vue"
+import HowToPlayButton from "./game_assistance/HowToPlayButton.vue"
 import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
 
@@ -134,6 +142,7 @@ const gameId = ref(localStorage.getItem("gameId") || null)
 const gameReady = ref(!!gameId.value)
 const errorMsg = ref("")
 const showRules = ref(false)
+const showErrorForm = ref(false)
 const rolling = ref(false)
 
 // --- GAME DATA ---
@@ -404,6 +413,24 @@ function faceEmoji(face) {
 function goToLobby() {
   router.push("/lobbies")
 }
+
+// === 🎮 GET GAME STATE FOR ERROR REPORT ===
+function getCurrentGameState() {
+  return {
+    gameId: gameId.value,
+    currentPlayer: currentPlayerId.value,
+    currentTurnIndex: currentTurnIndex.value,
+    players: players.value,
+    tilesOnTable: tilesOnTable.value,
+    rolledDice: rolledDice.value,
+    collectedDice: collectedDice.value,
+    roundPoints: roundPoints.value,
+    myTiles: myTiles.value,
+    timeLeft: timeLeft.value,
+    hasStartedRoll: hasStartedRoll.value,
+    busted: busted.value,
+  }
+}
 </script>
 
 <style scoped>
@@ -533,7 +560,7 @@ h1, h3, h4, p { color: #111; }
 .other-player {
   margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fff;
 }
-.help-button {
+.help-button, .error-button{
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -547,7 +574,13 @@ h1, h3, h4, p { color: #111; }
   color: #333;
   box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
-.help-button:hover { background: #ddd; transform: scale(1.05); }
+
+.error-button{
+  right: 70px;
+}
+.help-button:hover, .error-button:hover { background: #ddd; transform: scale(1.05); }
+
+
 .err { color: #b00020; margin-top: .5rem; font-weight: 600; }
 .turn { margin: .25rem 0 1rem; font-weight: 600; color: #333; }
 </style>
