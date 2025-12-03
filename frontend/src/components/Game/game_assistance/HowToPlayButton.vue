@@ -34,9 +34,9 @@ function close() {
   z-index: 1000;
 }
 
-.rules-content {
-  position: relative;
-}
+  .rules-content {
+    position: relative;
+  }
 
 .close-button {
   position: absolute;
