@@ -17,17 +17,8 @@ h1, h3, h4, p { color: #111; }
     font-size: 1.2rem;
 }
 
-.system-msg {
-    background: #e3f2fd;
-    color: #0d47a1;
-    padding: 10px;
-    border-radius: 8px;
-    margin: 10px 0;
-    border: 1px solid #bbdefb;
-}
-
-.err { color: #b00020; margin-top: .5rem; font-weight: 600; }
 .turn { margin: .25rem 0 1rem; font-weight: 600; color: #333; }
+.err { color: #b00020; margin-top: .5rem; font-weight: 600; }
 
 /* Timer */
 .timer-box {
@@ -39,19 +30,25 @@ h1, h3, h4, p { color: #111; }
     padding: .5rem 1rem;
     display: inline-block;
     transition: all 0.4s ease;
+    min-height: 40px;
 }
 
 /* Knoppen */
+.roll-btn, .back-button, .help-button, .error-button {
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
 .roll-btn {
     background: #4caf50;
-    color: white;
-    border: none;
+    color: #fff;
     padding: 12px 25px;
     font-size: 1.2rem;
     border-radius: 10px;
-    cursor: pointer;
     margin-top: 1rem;
 }
+
 .roll-btn:hover { background: #43a047; transform: scale(1.05); }
 .roll-btn:disabled { background: #aaa; cursor: not-allowed; }
 
@@ -60,30 +57,51 @@ h1, h3, h4, p { color: #111; }
     bottom: 20px;
     left: 20px;
     background: #eee;
-    border: none;
     padding: 10px 16px;
     border-radius: 8px;
-    cursor: pointer;
     font-size: 16px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
+
 .back-button:hover { background: #ddd; }
 
-.help-button {
+.help-button, .error-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
     background: #eee;
-    border: none;
     border-radius: 50%;
     width: 45px;
     height: 45px;
     font-size: 22px;
-    cursor: pointer;
     color: #333;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
+
 .help-button:hover { background: #ddd; transform: scale(1.05); }
+
+/* System Messages */
+.system-msg, .system-popup {
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #bbdefb;
+}
+
+.system-msg { margin: 10px 0; }
+
+.system-popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.system-popup.visible { opacity: 1; }
 
 /* Dobbelstenen */
 .dice-area {
@@ -93,6 +111,7 @@ h1, h3, h4, p { color: #111; }
     gap: 1rem;
     margin: 1.5rem 0;
 }
+
 .die {
     font-size: 2.2rem;
     width: 55px;
@@ -106,74 +125,84 @@ h1, h3, h4, p { color: #111; }
     cursor: pointer;
     transition: all 0.2s ease;
 }
+
 .die.disabled { opacity: 0.4; cursor: not-allowed; background: #ddd; }
 .die.chosen { background: #e3f8d3; border: 2px solid #4caf50; }
 .die-collected { font-size: 1.5rem; margin: 0 5px; }
 
 /* Tegels */
-.tiles-table {
+.tiles-table, .my-tiles-list {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 0.8rem;
     margin-top: 1rem;
 }
+
+.tile, .my-tile, .other-tile {
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
 .tile {
     background: #fff;
     border: 2px solid #4caf50;
-    border-radius: 10px;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s ease;
-    min-width: 40px;
 }
+
 .tile:hover { background: #e8f5e9; transform: scale(1.05); }
-.tile.disabled {
-    border-color: #aaa;
-    background: #f3f3f3;
-    color: #999;
-    cursor: not-allowed;
-    transform: none;
-}
-.worms { display: block; font-size: 0.8rem; color: #555; }
+.tile.disabled { border-color: #aaa; background: #f3f3f3; color: #999; cursor: not-allowed; transform: none; }
 
-/* Spelers Secties */
-.game-board { display: flex; justify-content: space-between; margin-top: 2rem; gap: 2rem; flex-wrap: wrap; }
-.my-section, .others-section { flex: 1; min-width: 200px; }
-
-.my-tiles-list {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
 .my-tile {
     background: #fefefe;
     border: 2px solid #2196f3;
-    border-radius: 8px;
     padding: 6px 12px;
     font-weight: 600;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
+
 .my-tile small { font-size: 0.8rem; margin-left: 4px; color: #444; }
 .my-score { font-weight: 700; color: #1565c0; margin-top: 0.5rem; }
 
+.other-tile { border: 2px solid #ccc; padding: 8px; }
+.other-tile.last { border-color: #4caf50; background: #e8f5e9; }
+
+.worms { display: block; font-size: 0.8rem; color: #555; }
+
+/* Spelers Secties */
+.game-board {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+    min-height: 100px;
+}
+
+.my-section, .others-section { flex: 1; min-width: 200px; }
+
 .other-player {
-    margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fff;
+    margin-bottom: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
 }
 
+/* Game Arena */
 .game-arena {
-    background-color: #ffffff;
-    border: 3px solid #4caf50; /* Een stevige groene rand (Regenwormen stijl) */
-    border-radius: 20px;       /* Mooie ronde hoeken */
-    padding: 2rem;             /* Ruimte aan de binnenkant */
-    margin: 2rem 0;            /* Ruimte aan de buitenkant */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Diepte effect */
+    background: #fff;
+    border: 3px solid #4caf50;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     position: relative;
+    min-height: 300px;
 }
 
-/* Een labeltje bovenaan het kader (optioneel, staat leuk) */
 .game-arena::before {
     content: "Speelveld";
     position: absolute;
@@ -181,14 +210,13 @@ h1, h3, h4, p { color: #111; }
     left: 50%;
     transform: translateX(-50%);
     background: #4caf50;
-    color: white;
+    color: #fff;
     padding: 2px 15px;
     border-radius: 10px;
     font-weight: bold;
     font-size: 0.9rem;
 }
 
-/* De scheidingslijn tussen dobbellen en de pot */
 .arena-divider {
     border: 0;
     height: 1px;
@@ -196,38 +224,122 @@ h1, h3, h4, p { color: #111; }
     margin: 2rem 0;
 }
 
-/* Fixed system popup */
-.system-popup {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #e3f2fd;
-    color: #0d47a1;
-    padding: 12px 18px;
-    border-radius: 10px;
-    border: 1px solid #bbdefb;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
+
+.tiles-table {
+    margin-top: auto; /* duwt de tiles naar de bodem van de container */
 }
 
-.system-popup.visible {
+.game-arena {
+    display: flex;
+    flex-direction: column;   /* verticale stapeling van inhoud */
+    justify-content: space-between; /* ruimte tussen top en bottom opvullen */
+    min-height: 300px;       /* zorgt voor vaste hoogte */
+    padding: 2rem;
+}
+
+.game-arena {
+    display: flex;
+    flex-direction: column; /* stapel alles verticaal */
+    min-height: 300px;      /* vaste hoogte zodat het speelveld niet springt */
+    padding: 2rem;
+}
+
+.arena-divider,
+.tiles-table {
+    margin-top: auto; /* duwt deze elementen naar de onderkant */
+}
+.timer-box {
+    min-height: 40px;       /* behoudt ruimte */
+    transition: opacity 0.3s ease;
     opacity: 1;
 }
 
-.timer-box {
-    min-height: 40px; /* ruimte blijft behouden */
+.timer-box.hidden {
+    opacity: 0;             /* verberg visueel */
+    pointer-events: none;   /* niet klikbaar */
 }
 
-.other-tile {
-    border: 2px solid #ccc;
-    padding: 8px;
+.tile-item {
+    background: #fefefe;
+    border: 2px solid #2196f3;
     border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
-.other-tile.last {
+
+.tile-item:hover {
+    transform: scale(1.05);
+    background: #e8f5e9;
+}
+
+.worms {
+    font-size: 0.8rem;
+    color: #444;
+}
+
+/* Specifiek voor andere speler, optioneel */
+.tile-item.other-player {
+    border-color: #ccc;
+    background: #fff;
+}
+
+.tile-item.other-player.last {
     border-color: #4caf50;
     background: #e8f5e9;
 }
 
+.tiles-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.tile-item {
+    background: #fefefe;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tile-item:hover {
+    transform: scale(1.05);
+    background: #e8f5e9;
+}
+
+.tile-item.other-player {
+    border-color: #ccc;
+    background: #fff;
+}
+
+.tile-item.other-player.last {
+    border-color: #4caf50;
+    background: #e8f5e9;
+}
+
+.worms {
+    font-size: 0.8rem;
+    color: #444;
+}
+
+.my-score {
+    font-weight: 700;
+    color: #1565c0;
+    margin-top: 0.5rem;
+}

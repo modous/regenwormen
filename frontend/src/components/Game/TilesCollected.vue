@@ -16,11 +16,11 @@
 <!--</script>-->
 
 <template>
-  <div class="my-section">
+  <div class="tiles-collected">
     <h3>Mijn Tegels</h3>
-    <div class="my-tiles-list">
-      <div v-for="t in tiles" :key="t.value" class="my-tile">
-        {{ t.value }} <small>🪱 x{{ t.points }}</small>
+    <div class="tiles-list">
+      <div v-for="t in tiles" :key="t.value" class="tile-item">
+        {{ t.value }} <span class="worms">🪱 x{{ t.points || 1 }}</span>
       </div>
     </div>
     <p class="my-score">Totale punten: <strong>{{ totalScore }}</strong></p>
@@ -28,13 +28,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps({
   tiles: { type: Array, default: () => [] }
-});
+})
 
 const totalScore = computed(() =>
     props.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
-);
+)
 </script>

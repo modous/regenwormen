@@ -65,11 +65,11 @@
 
 <!--</style>-->
 <template>
-  <div class="tiles-table" style="justify-content: flex-start;">
+  <div class="tiles-list">
     <div
         v-for="(t, index) in tiles"
         :key="t.value"
-        class="other-tile"
+        class="tile-item other-player"
         :class="{ last: index === tiles.length - 1 }"
         @click="$emit('steal', t)"
     >
@@ -77,8 +77,7 @@
       <span class="worms">🪱 x{{ t.points || 1 }}</span>
     </div>
 
-    <!-- Optioneel: topTile apart weergeven -->
-    <div v-if="topTile" class="other-tile top-tile" @click="$emit('steal', topTile)">
+    <div v-if="topTile" class="tile-item other-player top-tile" @click="$emit('steal', topTile)">
       <span class="value">{{ topTile.value }}</span>
       <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
     </div>
