@@ -28,7 +28,7 @@
 
       <div
           class="timer-box"
-          :class="{ hidden: timeLeft > 5 }"
+          :class="{ hidden: timeLeft > 9 }"
       >
         <p v-if="currentTimerPlayer === username">
           ⏳ Jouw beurt: <strong>{{ timeLeft }}s</strong> over
@@ -69,24 +69,38 @@
           :hasStartedRoll="hasStartedRoll"
       />
 
+<!--      <div class="game-board">-->
+<!--        <TilesCollected :tiles="myTiles" />-->
+
+<!--        <div class="others-section">-->
+<!--          <div-->
+<!--              v-for="p in players.filter(function(pl) { return pl.name !== username })"-->
+<!--              :key="p.id || p.name"-->
+<!--              class="other-player"-->
+<!--          >-->
+<!--            <h4>{{ p.name || 'Unknown' }}</h4>-->
+<!--            <p>Total Tile Points: <strong>{{ playerScore(p) }}</strong></p>-->
+
+<!--            <TilesOtherPlayer-->
+<!--                :tiles="p.tiles || []"-->
+<!--                :topTile="p.topTile"-->
+<!--                @steal="tile => stealTile(p.name, tile)"-->
+<!--            />-->
+<!--          </div>-->
+<!--        </div>-->
+
       <div class="game-board">
         <TilesCollected :tiles="myTiles" />
 
         <div class="others-section">
-          <div
-              v-for="p in players.filter(function(pl) { return pl.name !== username })"
+          <TilesOtherPlayer
+              v-for="p in players.filter(pl => pl.name !== username)"
               :key="p.id || p.name"
-              class="other-player"
-          >
-            <h4>{{ p.name || 'Unknown' }}</h4>
-            <p>Total Tile Points: <strong>{{ playerScore(p) }}</strong></p>
-
-            <TilesOtherPlayer
-                :tiles="p.tiles || []"
-                :topTile="p.topTile"
-                @steal="tile => stealTile(p.name, tile)"
-            />
-          </div>
+              :playerName="p.name || 'Unknown'"
+              :tiles="p.tiles || []"
+              :topTile="p.topTile"
+              @steal="tile => stealTile(p.name, tile)"
+          />
         </div>
 
         <button class="error-button" @click="showErrorForm = true">❗</button>
@@ -100,8 +114,21 @@
         <button class="help-button" @click="showRules = true">❓</button>
         <HowToPlayButton :visible="showRules" @close="showRules = false" />
       </div>
+
+
+      <button class="error-button" @click="showErrorForm = true">❗</button>
+        <ErrorHandelingForm
+            :visible="showErrorForm"
+            :gameState="getCurrentGameState()"
+            @close="showErrorForm = false"
+            @open="showErrorForm = true"
+        />
+
+        <button class="help-button" @click="showRules = true">❓</button>
+        <HowToPlayButton :visible="showRules" @close="showRules = false" />
+      </div>
     </div>
-  </div>
+
 </template>
 
 <script setup>
@@ -190,7 +217,7 @@ function applyGame(game) {
   const previousPlayer = currentPlayerId.value
 
   players.value = game.players || []
-  tilesOnTable.value = game.tilesPot?.tiles || []
+  tilesOnTable.value = (game.tilesPot?.tiles || []).filter(t => t.availableInPot)
   currentTurnIndex.value = game.turnIndex ?? null
   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
 
@@ -270,6 +297,7 @@ onUnmounted(() => { if (stompClient) stompClient.deactivate() })
 
 // Game actions
 async function rollDice() {
+  showTimer.value = false
   rolling.value = true
   try {
     const endpoint = hasStartedRoll.value ? "reroll" : "startroll"
@@ -302,16 +330,31 @@ async function tryPickTile(tile) {
   if (roundPoints.value < tile.value) return
   await pickTile(tile)
 }
+
+// async function pickTile(tile) {
+//   try {
+//     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
+//     tilesOnTable.value = tilesOnTable.value.filter(t => t.value !== tile.value)
+//     resetRound()
+//     busted.value = false
+//   } catch {
+//     gameMessage.value = "Failed to claim tile."
+//   }
+// }
+
 async function pickTile(tile) {
   try {
     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
-    tilesOnTable.value = tilesOnTable.value.filter(t => t.value !== tile.value)
+    // verwijder exact die tile uit de array, niet op basis van value
+    tilesOnTable.value = tilesOnTable.value.filter(t => t !== tile)
+    myTiles.value.push(tile)
     resetRound()
     busted.value = false
   } catch {
     gameMessage.value = "Failed to claim tile."
   }
 }
+
 
 async function stealTile(playerName, tile) {
   try {
