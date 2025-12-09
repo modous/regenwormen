@@ -127,7 +127,14 @@
         <button class="help-button" @click="showRules = true">❓</button>
         <HowToPlayButton :visible="showRules" @close="showRules = false" />
       </div>
-    </div>
+
+    <GameEndPopup
+        :visible="gameStateEnded"
+        :won="playerWon"
+        @close="handleGameEndClose"
+    />
+
+  </div>
 
 </template>
 
@@ -146,6 +153,7 @@ import HowToPlayButton from "./game_assistance/HowToPlayButton.vue"
 import ErrorHandelingForm from "@/components/Game/game_assistance/ErrorHandelingForm.vue"
 
 import "./game.css"
+import GameEndPopup from "@/components/Game/GameEndPopup.vue";
 
 const router = useRouter()
 const showTimer = ref(false)
