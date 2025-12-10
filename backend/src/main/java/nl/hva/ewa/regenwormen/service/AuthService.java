@@ -1,23 +1,26 @@
 package nl.hva.ewa.regenwormen.service;
 
-import nl.hva.ewa.regenwormen.domain.User;
+import nl.hva.ewa.regenwormen.entity.UserEntity;
 import nl.hva.ewa.regenwormen.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User register(String email, String username, String password) {
+    public UserEntity register(String email, String username, String password) {
         if (email == null || username == null || password == null) {
             throw new IllegalArgumentException("email, username, and password are required");
         }
@@ -30,22 +33,36 @@ public class AuthService {
             throw new IllegalArgumentException("Username already taken");
         }
 
-        User user = new User(email, username, passwordEncoder.encode(password));
+        UserEntity user = new UserEntity(
+                UUID.randomUUID().toString(),
+                email,
+                passwordEncoder.encode(password),
+                username,
+                null,
+                null
+        );
+
         return userRepository.save(user);
     }
 
-    public User login(String identifier, String password) {
+
+    public UserEntity login(String identifier, String password) {
         if (identifier == null || password == null) {
             throw new IllegalArgumentException("identifier and password are required");
         }
 
-        Optional<User> userOpt = userRepository.findByEmail(identifier);
-        if (userOpt.isEmpty()) userOpt = userRepository.findByUsername(identifier);
+        Optional<UserEntity> userOpt = userRepository.findByEmail(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByUsername(identifier);
+        }
 
-        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
+        UserEntity user = userOpt
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Invalid credentials");
         }
 
-        return userOpt.get();
+        return user;
     }
 }

@@ -1,4 +1,4 @@
-package nl.hva.ewa.regenwormen.controller;
+package nl.hva.ewa.regenwormen.api;
 
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;

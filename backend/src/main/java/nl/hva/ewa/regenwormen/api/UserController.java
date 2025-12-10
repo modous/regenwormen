@@ -1,6 +1,6 @@
 package nl.hva.ewa.regenwormen.api;
 
-import nl.hva.ewa.regenwormen.domain.User;
+import nl.hva.ewa.regenwormen.entity.UserEntity;
 import nl.hva.ewa.regenwormen.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,31 +19,44 @@ public class UserController {
         this.userService = userService;
     }
 
+    // ✅ Alle users
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserEntity> getAllUsers() {
         return userService.getAllUsers();
     }
 
+    // ✅ User by id
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
+    public ResponseEntity<UserEntity> getUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getById(id));
     }
 
+    // ✅ Update location
     @PutMapping("/{id}/location")
-    public ResponseEntity<?> updateLocation(@PathVariable String id, @RequestBody User updatedUser) {
-        userService.updateLocation(id, updatedUser.getLocation());
+    public ResponseEntity<Void> updateLocation(
+            @PathVariable String id,
+            @RequestBody UserEntity body
+    ) {
+        userService.updateLocation(id, body.getLocation());
         return ResponseEntity.ok().build();
     }
 
+    // ✅ Update password
     @PutMapping("/{id}/password")
-    public ResponseEntity<?> updatePassword(@PathVariable String id, @RequestBody User updatedUser) {
-        userService.updatePassword(id, updatedUser.getPassword());
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable String id,
+            @RequestBody UserEntity body
+    ) {
+        userService.updatePassword(id, body.getPassword());
         return ResponseEntity.ok().build();
     }
 
+    // ✅ Upload profile photo
     @PostMapping("/{id}/photo")
-    public ResponseEntity<String> uploadPhoto(@PathVariable String id, @RequestParam("file") MultipartFile file) {
-        String photoUrl = userService.saveProfilePhoto(id, file);
-        return ResponseEntity.ok(photoUrl);
+    public ResponseEntity<String> uploadPhoto(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(userService.saveProfilePhoto(id, file));
     }
 }
