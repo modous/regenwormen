@@ -17,16 +17,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ add all your public endpoints here:
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/lobbies/**",
-                                "/pregame/**",
-                                "/h2-console/**"
+                                "/pregame/**"
                         ).permitAll()
                         .anyRequest().permitAll()
-                )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // for H2 console
+                );
+
         return http.build();
     }
 
@@ -35,3 +33,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

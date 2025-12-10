@@ -1,7 +1,7 @@
 package nl.hva.ewa.regenwormen.service;
 
 import jakarta.transaction.Transactional;
-import nl.hva.ewa.regenwormen.controller.GameWebSocketController;
+import nl.hva.ewa.regenwormen.api.GameWebSocketController;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;

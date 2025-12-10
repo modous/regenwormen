@@ -1,11 +1,9 @@
 package nl.hva.ewa.regenwormen.repository;
 
 import nl.hva.ewa.regenwormen.domain.Player;
-import nl.hva.ewa.regenwormen.domain.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class PlayerMockRepository implements PlayerRepository {

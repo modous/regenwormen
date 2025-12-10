@@ -53,13 +53,6 @@
 <!--            <artifactId>flyway-database-postgresql</artifactId>-->
 <!--        </dependency>-->
 
-        <!-- Dev database -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Production database -->
         <dependency>
             <groupId>org.postgresql</groupId>

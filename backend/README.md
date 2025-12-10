@@ -175,3 +175,208 @@ feat: add real-time turn system with WebSocket sync and countdown timer (removed
 Tijdens de ontwikkeling gebruiken we H2 (in-memory).
 Voor productie is een PostgreSQL database voorbereid via Flyway-migraties.
 De volgende migratiebestanden zijn toegevoegd in src/main/resources/db/migration/.
+
+
+## Supabase intergratie
+
+Een persistente database opzetten voor gebruikers (register & login), zodat:
+- gebruikers blijven bestaan na een server restart
+- we Spring Boot + JPA blijven gebruiken
+- H2 alleen optioneel is (niet meer leidend)
+- later eenvoudig security (JWT) toegevoegd kan worden
+- We gebruiken Supabase PostgreSQL als database en JPA/Hibernate als ORM.
+
+✅ Gekozen Architectuur
+
+Stack
+
+- Spring Boot 3
+- Spring Data JPA
+- PostgreSQL (Supabase)
+- Hibernate ORM
+- BCrypt voor wachtwoord-hashing
+
+Waarom deze keuze?
+
+- JPA maakt database-onafhankelijk werken mogelijk
+- Supabase levert een gratis, beheerde PostgreSQL database
+- Data blijft opgeslagen na server restarts
+- Compatibel met latere uitbreidingen (JWT, roles, permissions)
+
+🛠️ Database Configuratie
+application.yml
+
+H2 is verwijderd als primaire database.
+PostgreSQL (Supabase) wordt nu gebruikt.
+
+spring:
+application:
+name: regenwormen
+
+datasource:
+url: jdbc:postgresql://db.<SUPABASE_ID>.supabase.co:5432/postgres
+username: postgres
+password: <SUPABASE_PASSWORD>
+
+jpa:
+hibernate:
+ddl-auto: update
+show-sql: true
+
+server:
+port: 8080
+
+Belangrijke instellingen
+
+ddl-auto: update
+→ Hibernate maakt/updated tabellen automatisch op basis van entities
+
+show-sql: true
+→ SQL queries zijn zichtbaar in de console
+
+🧱 UserEntity (Database Model)
+
+De gebruiker wordt opgeslagen als een JPA Entity.
+
+@Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserEntity {
+
+    @Id
+    private String id;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    private String location;
+
+    private String profilePictureUrl;
+}
+
+Design-keuzes
+
+id is een UUID (String)
+
+email en username zijn uniek
+
+wachtwoord wordt gehashed opgeslagen
+
+extra velden voorbereid voor toekomstige features
+
+🗂️ Repository Layer
+
+Spring Data JPA repository voor database-interactie:
+
+@Repository
+public interface UserRepository extends JpaRepository<UserEntity, String> {
+
+    Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByUsername(String username);
+
+    boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
+}
+
+
+Geen SQL nodig — JPA genereert queries automatisch.
+
+🔐 AuthService (Business Logic)
+
+Verantwoordelijk voor:
+
+registreren
+
+inloggen
+
+validatie
+
+password hashing
+
+Registratie
+public UserEntity register(String email, String username, String password) {
+if (userRepository.existsByEmail(email)) {
+throw new IllegalArgumentException("Email already registered");
+}
+if (userRepository.existsByUsername(username)) {
+throw new IllegalArgumentException("Username already taken");
+}
+
+    UserEntity user = new UserEntity(
+        UUID.randomUUID().toString(),
+        email,
+        passwordEncoder.encode(password),
+        username,
+        null,
+        null
+    );
+
+    return userRepository.save(user);
+}
+
+Login
+public UserEntity login(String identifier, String password) {
+UserEntity user = userRepository.findByEmail(identifier)
+.or(() -> userRepository.findByUsername(identifier))
+.orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        throw new IllegalArgumentException("Invalid credentials");
+    }
+
+    return user;
+}
+
+🌐 AuthController (API)
+
+Endpoints:
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+Register request (JSON)
+{
+"email": "test@supabase.com",
+"username": "mohamed",
+"password": "123456"
+}
+
+Succes-response
+{
+"id": "5309dc2c-88a8-41c0-add5-6eec2a355cd5",
+"email": "test@supabase.com",
+"password": "$2a$10$...",
+"username": "mohamed",
+"location": null,
+"profilePictureUrl": null
+}
+
+🔐 Security Config
+
+Voor ontwikkeling:
+
+CSRF uitgeschakeld
+
+Auth endpoints publiek
+
+.requestMatchers(
+"/api/auth/**",
+"/api/lobbies/**"
+).permitAll()
+
+
+✅ Resultaat
+
+✔ Gebruikers worden opgeslagen in Supabase
+✔ Data blijft bestaan na server restart
+✔ Wachtwoorden zijn veilig gehashed
+✔ Spring Boot + JPA structuur behouden
