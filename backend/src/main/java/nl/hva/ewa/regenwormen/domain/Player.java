@@ -4,8 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Player {
+    public enum PlayerStatus { CONNECTED, DISCONNECTED }
+
     private final String id;
     private final String userId;
     private String name;
@@ -13,6 +17,7 @@ public class Player {
     private Diceroll turn;
     private int doublePointsTile = -1;
     private static final int MAX_NAME_LENGTH = 16;
+    private PlayerStatus status = PlayerStatus.CONNECTED;
 
     public Player(String name) {
         setPlayerNameInternal(name);
@@ -31,6 +36,7 @@ public class Player {
     public String getUser() { return userId; }
     public Diceroll getDiceRoll() { return turn; }
     public int getDoublePointsTile() { return doublePointsTile; }
+    public PlayerStatus getStatus() { return status; }
 
     public int getPoints() {
         return ownedTiles.stream()
@@ -46,6 +52,10 @@ public class Player {
 
     public void setName(String name) { setPlayerNameInternal(name); }
     public void setDoublePointsTile(int value) { doublePointsTile = value; }
+    public void setStatus(PlayerStatus status) {
+        this.status = status;
+        log.info("Player {} status set to {}", name, status);
+    }
 
     public void setStartTurn(Diceroll dices) {
         if (turn != null) throw new IllegalStateException("Throw turn is already active");
@@ -79,6 +89,12 @@ public class Player {
             top.tileToPot();
             loseTopTileToStack();
         }
+    }
+    
+    public void resetPlayer() {
+        returnAllTilesToPot();
+        this.turn = null;
+        this.doublePointsTile = -1;
     }
 
     @Override

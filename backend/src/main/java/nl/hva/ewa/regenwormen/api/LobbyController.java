@@ -56,13 +56,31 @@ public class LobbyController {
         Lobby lobby = lobbyRepo.findById(id);
         if (lobby == null) return null;
 
+        // 🚫 CHECK: Is user already in another lobby?
+        List<Lobby> allLobbies = lobbyRepo.findAll();
+        for (Lobby otherLobby : allLobbies) {
+            boolean userInOtherLobby = otherLobby.getPlayers().stream()
+                    .anyMatch(p -> p.getUsername().equals(lobbyPlayer.getUsername()));
+
+            if (userInOtherLobby && otherLobby.getId() != id) {
+                // Remove user from the other lobby
+                otherLobby.getPlayers().removeIf(p -> p.getUsername().equals(lobbyPlayer.getUsername()));
+                lobbyRepo.save(otherLobby);
+                lobbyWs.broadcastLobbyUpdate(otherLobby.getId());
+                System.out.println("👋 Player " + lobbyPlayer.getUsername() + " automatically removed from lobby " + otherLobby.getId() + " to join lobby " + id);
+            }
+        }
+
         boolean alreadyIn = lobby.getPlayers().stream()
                 .anyMatch(p -> p.getUsername().equals(lobbyPlayer.getUsername()));
 
         if (!alreadyIn && !lobby.isFull()) {
             lobby.getPlayers().add(lobbyPlayer);
+            // 💾 Save the lobby to persist the changes
+            lobbyRepo.save(lobby);
             // 🔔 Notify all lobby members about the join
             lobbyWs.broadcastLobbyUpdate(id);
+            System.out.println("✅ Player " + lobbyPlayer.getUsername() + " joined lobby " + id);
         }
 
         // ✅ Ensure backend Player exists in repository (for /ingame lookups)
@@ -90,6 +108,9 @@ public class LobbyController {
                 p.setReady(!p.isReady());
             }
         });
+
+        // 💾 Save the lobby to persist the changes
+        lobbyRepo.save(lobby);
 
         // 🔔 Notify others that ready status changed
         lobbyWs.broadcastLobbyUpdate(id);
@@ -140,7 +161,7 @@ public class LobbyController {
             new Thread(() -> {
                 try {
                     Thread.sleep(1000); // wait 1s to let clients connect
-                    inGameService.startInitialTurnTimer(game, firstPlayer);
+                    inGameService.startTurnTimer(game, firstPlayer);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -149,6 +170,7 @@ public class LobbyController {
 
         // 🔔 Broadcast that the game started so clients redirect
         lobbyWs.broadcastLobbyUpdate(id);
+        inGameService.markAllPlayersConnected(game.getId());
 
         return lobby;
     }
@@ -162,8 +184,14 @@ public class LobbyController {
 
         lobby.getPlayers().removeIf(p -> p.getUsername().equals(player.getUsername()));
 
-        // 🔔 Notify all clients that someone left
+        // 💾 Save the lobby to persist the changes
+        lobbyRepo.save(lobby);
+
+        // 🔔 Notify all clients that someone left (specific lobby channel)
         lobbyWs.broadcastLobbyUpdate(id);
+
+        System.out.println("👋 Player " + player.getUsername() + " left lobby " + id + " - players now: " + lobby.getPlayers().size());
+
         return lobby;
     }
 

@@ -9,7 +9,10 @@ const router = useRouter()
 const lobby = ref(null)
 const gameId = ref(null)
 const user = JSON.parse(localStorage.getItem('user'))
+const username = user?.username || user?.name || 'Guest'
 let stompClient = null
+let heartbeatInterval = null
+const HEARTBEAT_INTERVAL = 5000
 
 // === API HELPERS (for actions only, not for sync) ===
 async function post(url, body) {
@@ -41,7 +44,17 @@ async function leaveLobby() {
   await post(`http://localhost:8080/api/lobbies/${route.params.id}/leave`, {
     username: user.username
   })
-  if (stompClient) stompClient.deactivate()
+  // Also notify pregame service of disconnect
+  if (gameId.value) {
+    const url = `http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`
+    navigator.sendBeacon(url)
+  }
+  // ✅ Player deliberately left the lobby - disconnect socket
+  if (stompClient) {
+    stompClient.deactivate()
+    console.log("✅ Socket deactivated - player left lobby intentionally")
+  }
+  if (heartbeatInterval) clearInterval(heartbeatInterval)
   router.push('/lobbies')
 }
 
@@ -75,6 +88,30 @@ async function copyInviteLink() {
   alert(`✅ Invite link copied!\n${inviteLink}`)
 }
 
+// === DISCONNECT/RECONNECT HANDLERS ===
+function setupDisconnectHandlers() {
+  // When user closes tab/refreshes
+  window.addEventListener('beforeunload', (event) => {
+    console.log("⚠️ beforeunload triggered - sending disconnect notification from lobby")
+    if (gameId.value) {
+      navigator.sendBeacon(`http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`)
+    }
+  })
+}
+
+function sendReconnectEvent() {
+  if (gameId.value) {
+    const url = `http://localhost:8080/pregame/${gameId.value}/reconnect/${username}`
+    console.log("✅ Sending reconnect to lobby:", url)
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    }).then(res => {
+      console.log("✅ Lobby reconnect response:", res.status)
+    }).catch(err => console.error("❌ Lobby reconnect notification failed:", err))
+  }
+}
+
 // === STOMP SOCKET ===
 function connectLobbySocket() {
   const sock = new SockJS('http://localhost:8080/ws')
@@ -92,6 +129,19 @@ function connectLobbySocket() {
     stompClient.subscribe(`/topic/lobby/${route.params.id}`, (msg) => {
       const updated = JSON.parse(msg.body)
       lobby.value = updated
+
+      // 🚫 CHECK: Is the current user still in the lobby?
+      const userStillInLobby = updated.players.some(p => p.username === user.username)
+      if (!userStillInLobby && lobby.value && lobby.value.players.length > 0) {
+        // User was removed from lobby (probably joined another lobby)
+        console.warn("⚠️ You were removed from this lobby because you joined another one")
+        alert("⚠️ You were automatically removed from this lobby because you joined a different one.")
+        if (stompClient) stompClient.deactivate()
+        if (heartbeatInterval) clearInterval(heartbeatInterval)
+        router.push('/lobbies')
+        return
+      }
+
       if (updated.gameStarted && updated.gameId) {
         console.log('🎮 Game started — redirecting...')
         localStorage.setItem('gameId', updated.gameId)
@@ -104,6 +154,30 @@ function connectLobbySocket() {
       destination: '/app/lobbySync',
       body: route.params.id
     })
+
+    // Send reconnect notification
+    sendReconnectEvent()
+
+    // ❤️‍🩹 Heartbeat
+    heartbeatInterval = setInterval(() => {
+      if (stompClient && stompClient.connected) {
+        const playerId = user?.id || username
+        stompClient.publish({
+          destination: "/app/heartbeat",
+          body: JSON.stringify({ gameId: gameId.value, playerId: playerId })
+        })
+      }
+    }, HEARTBEAT_INTERVAL)
+  }
+
+  stompClient.onDisconnect = () => {
+    console.log("⚠️ STOMP Disconnecting from lobby")
+    if (gameId.value && stompClient && stompClient.connected) {
+      stompClient.publish({
+        destination: '/app/disconnect',
+        body: JSON.stringify({ gameId: gameId.value, playerId: username })
+      })
+    }
   }
 
   stompClient.activate()
@@ -121,11 +195,18 @@ onMounted(async () => {
     })
   }
 
+  // Extract gameId if available
+  if (lobby.value.gameId) {
+    gameId.value = lobby.value.gameId
+  }
+
   connectLobbySocket()
+  setupDisconnectHandlers()
 })
 
 onBeforeUnmount(() => {
   if (stompClient) stompClient.deactivate()
+  if (heartbeatInterval) clearInterval(heartbeatInterval)
 })
 </script>
 

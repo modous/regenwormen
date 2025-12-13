@@ -8,7 +8,17 @@
     </div>
 
     <div v-else>
-      <button class="back-button" @click="goToLobby">⬅️ Terug naar Lobby</button>
+      <button class="back-button" @click="showLeaveConfirmation = true">⬅️ Leave to Lobby</button>
+
+      <!-- Leave confirmation modal -->
+      <div v-if="showLeaveConfirmation" class="modal-overlay" @click="showLeaveConfirmation = false">
+        <div class="modal-content" @click.stop>
+          <h3>Leave Game?</h3>
+          <p>Are you sure you want to leave this game? You will be removed immediately.</p>
+          <button class="btn-cancel" @click="showLeaveConfirmation = false">Cancel</button>
+          <button class="btn-confirm" @click="confirmLeave">Leave Game</button>
+        </div>
+      </div>
 
       <h3>Game ID: {{ gameId }}</h3>
       <h4>Jij: {{ username }}</h4>
@@ -16,6 +26,19 @@
       <!-- 💬 System messages -->
       <div v-if="gameMessage" class="system-msg">
         {{ gameMessage }}
+      </div>
+
+      <!-- ⚠️ Disconnect countdown alerts -->
+      <div v-if="Object.keys(disconnectedPlayers).length > 0" class="disconnect-alerts">
+        <div v-for="(secondsLeft, playerName) in disconnectedPlayers" :key="playerName" class="disconnect-alert">
+          ⚠️ <strong>{{ playerName }}</strong> is disconnected!
+          <span class="countdown">{{ secondsLeft }}s</span> to reconnect...
+        </div>
+      </div>
+
+      <!-- 🚫 Game blocked message -->
+      <div v-if="isGameBlocked && Object.keys(disconnectedPlayers).length > 0" class="game-blocked">
+        ⏸️ Game is paused - waiting for player to reconnect...
       </div>
 
       <!-- 🕒 Turn timer box (always visible) -->
@@ -40,7 +63,7 @@
           v-if="currentPlayerId === username && !isBusted"
           class="roll-btn"
           @click="rollDice"
-          :disabled="rolling || (timeLeft <= 0 && currentPlayerId !== username)"
+          :disabled="rolling || (timeLeft <= 0 && currentPlayerId !== username) || isGameBlocked"
       >
         {{ hasStartedRoll ? "Roll Again" : "🎲 Roll Dice" }}
       </button>
@@ -52,9 +75,9 @@
             :key="idx"
             :class="[
             'die',
-            { disabled: disabledFaces.includes(face), chosen: chosenFaces.includes(face) }
+            { disabled: disabledFaces.includes(face), chosen: chosenFaces.includes(face), blocked: isGameBlocked }
           ]"
-            @click="trySelectDie(face)"
+            @click="isGameBlocked ? null : trySelectDie(face)"
         >
           {{ faceEmoji(face) }}
         </div>
@@ -68,8 +91,8 @@
         <div
             v-for="tile in tilesOnTable"
             :key="tile.value"
-            :class="['tile', { disabled: !canClaim(tile) }]"
-            @click="tryPickTile(tile)"
+            :class="['tile', { disabled: !canClaim(tile) || isGameBlocked }]"
+            @click="isGameBlocked ? null : tryPickTile(tile)"
         >
           <span>{{ tile.value }}</span>
           <span class="worms">🪱 x{{ tile.points || 1 }}</span>
@@ -102,6 +125,8 @@
           </div>
         </div>
       </div>
+      <Player_status_list :players="players" />
+
       <button class="error-button" @click="showErrorForm = true">❗</button>
       <ErrorHandelingForm
         :visible="showErrorForm"
@@ -120,6 +145,7 @@
 import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useRouter } from "vue-router"
 import DiceCollected from "./DiceCollected.vue"
+import Player_status_list from "@/components/Game/game_assistance/player_status_list.vue";
 import TilesCollected from "./TilesCollected.vue"
 import ErrorHandelingForm from "@/components/Game/game_assistance/ErrorHandelingForm.vue";
 import TilesOtherPlayer from "./TilesOtherPlayer.vue"
@@ -143,7 +169,11 @@ const gameReady = ref(!!gameId.value)
 const errorMsg = ref("")
 const showRules = ref(false)
 const showErrorForm = ref(false)
-const rolling = ref(false)
+const showLeaveConfirmation = ref(false)
+
+// --- HEARTBEAT STATE ---
+let heartbeatInterval = null
+const HEARTBEAT_INTERVAL = 5000
 
 // --- GAME DATA ---
 const rolledDice = ref([])
@@ -159,10 +189,14 @@ const busted = ref(false)
 const roundPoints = ref(0)
 const myTiles = ref([])
 
-// --- ⏳ TIMER & MESSAGE STATE ---
+// --- TIMER & MESSAGE STATE ---
 const timeLeft = ref(0)
 const currentTimerPlayer = ref("")
-const gameMessage = ref("") // 💬 from backend (/message)
+const gameMessage = ref("")
+
+// --- DISCONNECT STATE ---
+const disconnectedPlayers = ref({})
+const isGameBlocked = ref(false)
 
 // --- COMPUTED ---
 const turnInfo = computed(() => {
@@ -196,31 +230,36 @@ async function post(url, body = null) {
   return type.includes("application/json") ? res.json() : null
 }
 
-// === 🧠 Apply game snapshot from WS ===
+// === APPLY GAME SNAPSHOT FROM WEBSOCKET ===
 function applyGame(game) {
   if (!game) return
 
-  const previousPlayer = currentPlayerId.value
+  if (game.gameState === "PRE_GAME" && gameReady.value) {
+    console.log("Game reset to PRE_GAME - redirecting to lobbies")
+    gameMessage.value = "Redirecting to lobby in 2 seconds..."
+    setTimeout(() => {
+      router.push("/lobbies")
+    }, 2000)
+    return
+  }
 
+  const previousPlayer = currentPlayerId.value
   players.value = game.players || []
   tilesOnTable.value = game.tilesPot?.tiles || []
   currentTurnIndex.value = game.turnIndex ?? null
   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
 
-  // 🧩 If it's a new round and now your turn — reset your UI
   if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
     resetRound()
     busted.value = false
-    gameMessage.value = "🎯 It's your turn!"
+    gameMessage.value = "It's your turn!"
   }
 
-  // Sync my tiles from snapshot
   const me = players.value.find(p => p.name === username || p.id === username)
   myTiles.value = Array.isArray(me?.tiles) ? me.tiles : myTiles.value
 }
 
-
-// === 🔌 STOMP/SockJS SETUP ===
+// === STOMP/WEBSOCKET SETUP ===
 function connectStomp() {
   const sock = new SockJS(SOCKJS_URL)
   stompClient = new Client({
@@ -230,7 +269,8 @@ function connectStomp() {
   })
 
   stompClient.onConnect = () => {
-    // --- Game state updates ---
+    console.log("STOMP Connected")
+
     stompClient.subscribe(`/topic/game/${gameId.value}`, (msg) => {
       try {
         const game = JSON.parse(msg.body)
@@ -241,7 +281,6 @@ function connectStomp() {
       }
     })
 
-    // --- Timer updates ---
     stompClient.subscribe(`/topic/game/${gameId.value}/timer`, (msg) => {
       try {
         const data = JSON.parse(msg.body)
@@ -250,36 +289,28 @@ function connectStomp() {
       } catch (e) {}
     })
 
-    // --- Turn timeout ---
     stompClient.subscribe(`/topic/game/${gameId.value}/turnTimeout`, (msg) => {
       try {
         const data = JSON.parse(msg.body)
-
-        // Always stop local timer
         timeLeft.value = 0
 
-        // 🔔 Notify all players
         if (data.player === username) {
-          gameMessage.value = "⏰ Your turn expired! You lost this round."
+          gameMessage.value = "Your turn expired! You lost this round."
         } else {
-          gameMessage.value = `⚠️ ${data.player}'s turn expired!`
+          gameMessage.value = `${data.player}'s turn expired!`
         }
 
-        // 🧹 Reset the local round state if backend requests it
         if (data.reset) {
           resetRound()
           busted.value = true
         }
 
-        // Clear message after 5 seconds
         setTimeout(() => (gameMessage.value = ""), 5000)
       } catch (e) {
         console.warn("Failed to process turn timeout:", e)
       }
     })
 
-
-    // --- 💬 System messages ---
     stompClient.subscribe(`/topic/game/${gameId.value}/message`, (msg) => {
       try {
         const data = JSON.parse(msg.body)
@@ -290,19 +321,52 @@ function connectStomp() {
       }
     })
 
+    stompClient.subscribe(`/topic/game/${gameId.value}/disconnect`, (msg) => {
+      try {
+        const data = JSON.parse(msg.body)
+        const playerName = data.player
+        const secondsLeft = data.secondsLeft
 
-    // Request initial state
+        if (secondsLeft > 0) {
+          disconnectedPlayers.value[playerName] = secondsLeft
+          isGameBlocked.value = true
+        } else {
+          delete disconnectedPlayers.value[playerName]
+          if (Object.keys(disconnectedPlayers.value).length === 0) {
+            isGameBlocked.value = false
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to process disconnect countdown:", e)
+      }
+    })
+
+    // Request initial game state
     stompClient.publish({ destination: "/app/timerSync", body: gameId.value })
     stompClient.publish({ destination: "/app/sync", body: gameId.value })
+
+    // Notify reconnect
+    sendReconnectEvent()
+
+    // Heartbeat
+    heartbeatInterval = setInterval(() => {
+      if (stompClient && stompClient.connected) {
+        const playerId = JSON.parse(localStorage.getItem("user"))?.id || username
+        stompClient.publish({
+          destination: "/app/heartbeat",
+          body: JSON.stringify({ gameId: gameId.value, playerId: playerId })
+        })
+      }
+    }, HEARTBEAT_INTERVAL)
   }
 
   stompClient.onStompError = (frame) => {
-    console.error("Broker error:", frame.headers["message"])
+    console.error("STOMP Error:", frame.headers["message"])
     errorMsg.value = "WebSocket broker error."
   }
 
   stompClient.onWebSocketError = (e) => {
-    console.error("WebSocket error:", e)
+    console.error("WebSocket Error:", e)
     errorMsg.value = "WebSocket connection failed."
   }
 
@@ -316,19 +380,43 @@ onMounted(() => {
     return
   }
   connectStomp()
-})
-onUnmounted(() => {
-  if (stompClient) stompClient.deactivate()
+  setupDisconnectHandlers()
 })
 
-// === 🎲 GAME ACTIONS ===
+onUnmounted(() => {
+  if (stompClient) stompClient.deactivate()
+  if (heartbeatInterval) clearInterval(heartbeatInterval)
+})
+
+// === UNIFIED DISCONNECT HANDLERS ===
+function setupDisconnectHandlers() {
+  console.log("Setting up disconnect handlers for gameId:", gameId.value)
+
+  window.addEventListener('beforeunload', () => {
+    console.log("Page closing - sending disconnect notification")
+    const url = `${API_INGAME}/${gameId.value}/disconnect/${username}`
+    navigator.sendBeacon(url)
+  })
+}
+
+function sendReconnectEvent() {
+  if (gameId.value) {
+    const url = `${API_INGAME}/${gameId.value}/reconnect/${username}`
+    console.log("Sending reconnect event")
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    }).catch(err => console.error("Reconnect notification failed:", err))
+  }
+}
+
+// === GAME ACTIONS ===
 async function rollDice() {
-  rolling.value = true
   try {
     const endpoint = hasStartedRoll.value ? "reroll" : "startroll"
     const data = await post(`${API_INGAME}/${gameId.value}/${endpoint}/${username}`)
     if (!data || data.fullThrow == null) {
-      gameMessage.value = "💀 You busted! Your turn is over."
+      gameMessage.value = "You busted! Your turn is over."
       busted.value = true
       resetRound()
       return
@@ -341,8 +429,6 @@ async function rollDice() {
     hasStartedRoll.value = true
   } catch {
     gameMessage.value = "Something went wrong while rolling dice."
-  } finally {
-    rolling.value = false
   }
 }
 
@@ -351,7 +437,7 @@ async function trySelectDie(face) {
   try {
     const data = await post(`${API_INGAME}/${gameId.value}/pickdice/${username}`, face)
     if (!data || data.fullThrow == null) {
-      gameMessage.value = "💀 You busted after this pick! Turn over."
+      gameMessage.value = "You busted after this pick! Turn over."
       busted.value = true
       resetRound()
       return
@@ -369,14 +455,16 @@ async function trySelectDie(face) {
   }
 }
 
-// === 🧩 TILE LOGIC ===
+// === TILE LOGIC ===
 function canClaim(tile) {
   return roundPoints.value >= tile.value
 }
+
 async function tryPickTile(tile) {
   if (!canClaim(tile)) return
   await pickTile(tile)
 }
+
 async function pickTile(tile) {
   try {
     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
@@ -397,6 +485,7 @@ function updateRoundPoints() {
   roundPoints.value = Object.entries(counts)
       .reduce((total, [face, count]) => total + (faceValue[face] || 0) * count, 0)
 }
+
 function resetRound() {
   rolledDice.value = []
   collectedDice.value = []
@@ -405,16 +494,39 @@ function resetRound() {
   hasStartedRoll.value = false
   roundPoints.value = 0
 }
+
 function faceEmoji(face) {
   const map = { ONE: "1️⃣", TWO: "2️⃣", THREE: "3️⃣", FOUR: "4️⃣", FIVE: "5️⃣", SPECIAL: "🪱" }
   return map[face] || face
 }
 
-function goToLobby() {
-  router.push("/lobbies")
+function confirmLeave() {
+  console.log("Player leaving game")
+
+  if (!gameId.value || !username) {
+    console.error("Missing gameId or username - cannot leave game")
+    gameMessage.value = "Cannot leave: missing game or player info"
+    return
+  }
+
+  const url = `${API_INGAME}/${gameId.value}/leave/${username}`
+
+  post(url)
+    .then(() => {
+      console.log("Player successfully left game")
+      if (stompClient && stompClient.connected) {
+        stompClient.deactivate()
+      }
+      localStorage.removeItem("gameId")
+      router.push("/lobbies")
+    })
+    .catch((err) => {
+      console.error("Error leaving game:", err)
+      gameMessage.value = "Failed to leave game."
+    })
 }
 
-// === 🎮 GET GAME STATE FOR ERROR REPORT ===
+// === GET GAME STATE FOR ERROR REPORT ===
 function getCurrentGameState() {
   return {
     gameId: gameId.value,
@@ -511,6 +623,11 @@ h1, h3, h4, p { color: #111; }
 }
 .die.disabled { opacity: 0.4; cursor: not-allowed; background: #ddd; }
 .die.chosen { background: #e3f8d3; border: 2px solid #4caf50; }
+.die.blocked {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f5c6cb;
+}
 
 .tiles-table {
   display: flex;
@@ -578,9 +695,87 @@ h1, h3, h4, p { color: #111; }
 .error-button{
   right: 70px;
 }
+
 .help-button:hover, .error-button:hover { background: #ddd; transform: scale(1.05); }
 
 
 .err { color: #b00020; margin-top: .5rem; font-weight: 600; }
 .turn { margin: .25rem 0 1rem; font-weight: 600; color: #333; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.btn-cancel, .btn-confirm {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+.btn-cancel {
+  background: #f44336;
+}
+.btn-cancel:hover {
+  background: #d32f2f;
+}
+.btn-confirm:hover {
+  background: #388e3c;
+}
+
+.disconnect-alerts {
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #fff3cd;
+  border-radius: 8px;
+  color: #856404;
+  font-weight: 500;
+  text-align: left;
+}
+
+.disconnect-alert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.countdown {
+  font-weight: 700;
+  color: #dc3545;
+  margin-left: 0.5rem;
+}
+
+.game-blocked {
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #f8d7da;
+  border-radius: 8px;
+  color: #721c24;
+  font-weight: 500;
+  text-align: center;
+}
 </style>

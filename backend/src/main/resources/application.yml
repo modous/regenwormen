@@ -12,6 +12,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  profiles:
+    active: dev
+
 server:
   port: 8080
 

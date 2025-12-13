@@ -1,7 +1,6 @@
 package nl.hva.ewa.regenwormen.controller;
 
 import nl.hva.ewa.regenwormen.domain.Game;
-import nl.hva.ewa.regenwormen.domain.Player;
 import nl.hva.ewa.regenwormen.domain.dto.CreateGameRequest;
 import nl.hva.ewa.regenwormen.service.PreGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +70,18 @@ public class PreGameController {
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/players")
-    public List<Player> getPlayers() {
-        return service.findAllPlayers();
+    // ✅ DISCONNECT/RECONNECT in lobby
+    @PostMapping("/{gameId}/disconnect/{username}")
+    public ResponseEntity<Void> playerDisconnectInLobby(@PathVariable String gameId,
+                                                         @PathVariable String username) {
+        service.handlePlayerDisconnectedInLobby(gameId, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{gameId}/reconnect/{username}")
+    public ResponseEntity<Void> playerReconnectInLobby(@PathVariable String gameId,
+                                                        @PathVariable String username) {
+        service.handlePlayerReconnectedInLobby(gameId, username);
+        return ResponseEntity.noContent().build();
     }
 }
