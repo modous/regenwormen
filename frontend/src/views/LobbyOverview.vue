@@ -1,9 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import SockJS from 'sockjs-client'
+import { Client } from '@stomp/stompjs'
 
 const router = useRouter()
 const lobbies = ref([])
+let stompClient = null
 
 async function loadLobbies() {
   try {
@@ -47,7 +50,78 @@ async function joinLobby(id) {
   }
 }
 
-onMounted(loadLobbies)
+// === STOMP SOCKET FOR REAL-TIME LOBBY UPDATES ===
+function connectLobbiesSocket() {
+  const sock = new SockJS('http://localhost:8080/ws')
+
+  stompClient = new Client({
+    webSocketFactory: () => sock,
+    reconnectDelay: 500,
+    debug: () => {}
+  })
+
+  stompClient.onConnect = () => {
+    console.log('✅ Connected to lobbies overview socket')
+
+    // Subscribe to all lobbies updates
+    lobbies.value.forEach(lobby => {
+      const subscriptionId = `/topic/lobby/${lobby.id}`
+      console.log(`📡 Subscribing to: ${subscriptionId}`)
+
+      stompClient.subscribe(subscriptionId, async (msg) => {
+        try {
+          const updated = JSON.parse(msg.body)
+          console.log(`📨 Received update for lobby ${updated.id}:`, updated)
+
+          // Update the specific lobby in our list
+          const index = lobbies.value.findIndex(l => l.id === updated.id)
+          if (index !== -1) {
+            lobbies.value[index] = updated
+            console.log(`✅ Lobby ${updated.id} updated - players: ${updated.players.length}/${updated.maxPlayers}`)
+          } else {
+            console.warn(`⚠️ Lobby ${updated.id} not found in list`)
+          }
+        } catch (e) {
+          console.error('Error processing lobby update:', e)
+        }
+      })
+    })
+
+    // Also subscribe to a general "all lobbies changed" channel
+    // This acts as a fallback to reload all lobbies if something changes
+    stompClient.subscribe('/topic/lobbies', async (msg) => {
+      console.log('📡 General lobbies update received - reloading all lobbies')
+      await loadLobbies()
+    })
+  }
+
+  stompClient.onDisconnect = () => {
+    console.log("⚠️ STOMP Disconnected from lobbies overview")
+  }
+
+  stompClient.activate()
+}
+
+onMounted(async () => {
+  // Load lobbies first
+  await loadLobbies()
+  console.log('📦 Loaded lobbies:', lobbies.value)
+  // THEN connect socket and subscribe to all lobbies
+  connectLobbiesSocket()
+
+  // 🔄 FALLBACK: Reload lobbies every 5 seconds as a safety net
+  // This ensures the UI stays in sync even if WebSocket updates fail
+  const pollInterval = setInterval(() => {
+    console.log('🔄 Polling for lobby updates...')
+    loadLobbies()
+  }, 5000)
+
+  // Clean up poll interval on unmount
+  onBeforeUnmount(() => {
+    clearInterval(pollInterval)
+    if (stompClient) stompClient.deactivate()
+  })
+})
 </script>
 
 <template>

@@ -48,6 +48,7 @@ public class Game {
     // === SETTERS ===
     public void setGameName(String gameName) { setGameNameInternal(gameName); }
     public void setMaxPlayers(int maxPlayers) { setMaxPlayersInternal(maxPlayers); }
+    public void setGameState (GameState gameState) { this.gameState = gameState; }
 
     // === PRE-GAME ===
     public boolean addPlayer(Player player) {
@@ -135,7 +136,7 @@ public class Game {
         else {
             if (!roll.hasSpecial()) throw new IllegalStateException("Must have SPECIAL");
             int score = roll.getTakenScore();
-            if (score < 21) throw new IllegalStateException("Min 21 points");
+            if (score < 21) throw new IllegalArgumentException("Min 21 points");
             p.setDoublePointsTile(score);
         }
         return EndTurnView.roundZero(p);
@@ -145,6 +146,27 @@ public class Game {
     public TurnView startAndRollRound() {
         ensurePlaying();
         Player p = getCurrentPlayer();
+
+        // 🔄 IDEMPOTENT: If turn is already active (e.g., after reconnect), 
+        // check if it's a stale turn that needs to be reset
+        if (p.getDiceRoll() != null) {
+            Diceroll existingRoll = p.getDiceRoll();
+            // If the roll has no available pickable faces (all chosen or bust),
+            // it's a stale turn from before disconnect - reset it
+            List<DiceFace> options = existingRoll.getPickableFaces();
+            if (options.isEmpty() && !existingRoll.getBusted()) {
+                // Stale turn - reset and start fresh
+                p.setEndTurn();
+                p.setStartTurn(new Diceroll());
+                List<DiceFace> freshOptions = p.getDiceRoll().rollRemainingDice();
+                return TurnView.turnViewThrown(p, freshOptions, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
+            } else {
+                // Turn is still valid - return current state
+                return TurnView.turnViewThrown(p, options, hasMinValueToStop(existingRoll.getTakenScore()));
+            }
+        }
+
+        // Otherwise start a new turn
         p.setStartTurn(new Diceroll());
         List<DiceFace> options = p.getDiceRoll().rollRemainingDice();
         return TurnView.turnViewThrown(p, options, hasMinValueToStop(p.getDiceRoll().getTakenScore()));
@@ -261,6 +283,28 @@ public class Game {
         if (gameState != GameState.PLAYING) return;
         gameState = GameState.ENDED;
         calculateLeaderboard();
+
+    }
+
+    /**
+     * Zet de game volledig terug naar de beginstatus (voor nieuwe ronde of na te weinig spelers).
+     */
+    public void resetGame() {
+        // Zet alle tiles van spelers terug naar de pot
+        if (players != null) {
+            for (Player p : players) {
+                p.resetPlayer(); // Zorg dat deze methode bestaat in Player
+            }
+        }
+        // Reset tilespot
+        if (tilesPot != null) tilesPot.resetTiles(); // Zorg dat deze methode bestaat
+        // Reset ronde en beurt
+        round = 0;
+        currentPlayersTurnIndex = 0;
+        // Reset leaderboard
+        if (leaderboard != null) leaderboard.clear();
+        // Zet gameState op PRE_GAME zodat je opnieuw kunt starten
+        gameState = GameState.PRE_GAME;
     }
 
     private void ensurePlaying() {

@@ -2,6 +2,7 @@ package nl.hva.ewa.regenwormen.api;
 
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;
+import nl.hva.ewa.regenwormen.domain.dto.PlayerActionDto;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
 import nl.hva.ewa.regenwormen.service.InGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class GameWebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final GameRepository gameRepo;
-    private final InGameService inGameService; // ✅ for reading timer data
+    private final InGameService inGameService;
 
     @Autowired
     public GameWebSocketController(
@@ -30,35 +31,38 @@ public class GameWebSocketController {
         this.inGameService = inGameService;
     }
 
-    // -------------------- 🧩 Sync full game state --------------------
-    @MessageMapping("/sync") // frontend sends to /app/sync
+    // -------------------- SYNC GAME STATE --------------------
+    @MessageMapping("/sync")
     public void syncGame(String gameId) {
-        Game game = gameRepo.findById(gameId).orElse(null);
-        if (game != null) {
-            messagingTemplate.convertAndSend("/topic/game/" + gameId, game);
-        }
-    }
-
-    // -------------------- 🔁 Broadcast game update --------------------
-    public void broadcastGameUpdate(String gameId) {
-        Game game = gameRepo.findById(gameId).orElse(null);
-        if (game != null) {
-            messagingTemplate.convertAndSend("/topic/game/" + gameId, game);
-        }
-    }
-
-    // -------------------- ⏳ Broadcast live timer updates --------------------
-    public void broadcastTimer(String gameId, String player, int timeLeft) {
-        messagingTemplate.convertAndSend(
-                "/topic/game/" + gameId + "/timer",
-                Map.of(
-                        "player", player,
-                        "timeLeft", timeLeft
-                )
+        gameRepo.findById(gameId).ifPresent(game ->
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, game)
         );
     }
 
-    // -------------------- 💬 Broadcast short system message --------------------
+    // -------------------- BROADCAST GAME UPDATE --------------------
+    public void broadcastGameUpdate(String gameId) {
+        gameRepo.findById(gameId).ifPresent(game ->
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, game)
+        );
+    }
+
+    // -------------------- BROADCAST TIMER UPDATES --------------------
+    public void broadcastTimer(String gameId, String player, int timeLeft) {
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + gameId + "/timer",
+                Map.of("player", player, "timeLeft", timeLeft)
+        );
+    }
+
+    // -------------------- BROADCAST DISCONNECT COUNTDOWN --------------------
+    public void broadcastDisconnectCountdown(String gameId, String playerName, int secondsLeft) {
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + gameId + "/disconnect",
+                Map.of("player", playerName, "secondsLeft", secondsLeft)
+        );
+    }
+
+    // -------------------- BROADCAST SYSTEM MESSAGE --------------------
     public void broadcastSystemMessage(String gameId, String message) {
         messagingTemplate.convertAndSend(
                 "/topic/game/" + gameId + "/message",
@@ -66,7 +70,7 @@ public class GameWebSocketController {
         );
     }
 
-    // -------------------- 🔁 Force timer sync on reconnect --------------------
+    // -------------------- SYNC TIMER ON RECONNECT --------------------
     @MessageMapping("/timerSync")
     public void sendTimerSync(String gameId) {
         Game game = gameRepo.findById(gameId).orElse(null);
@@ -75,25 +79,42 @@ public class GameWebSocketController {
         Player current = game.getCurrentPlayer();
         if (current == null) return;
 
-        // ✅ Get actual remaining time from InGameService
         int remaining = inGameService.getRemainingTime(gameId);
-        if (remaining <= 0) remaining = 10; // fallback default
+        if (remaining <= 0) remaining = 10;
 
         messagingTemplate.convertAndSend(
                 "/topic/game/" + gameId + "/timer",
-                Map.of(
-                        "player", current.getName(),
-                        "timeLeft", remaining
-                )
+                Map.of("player", current.getName(), "timeLeft", remaining)
         );
     }
 
-    // -------------------- 🚨 Broadcast turn timeout event --------------------
-    public void broadcastTurnTimeout(String gameId, String player) {
-        messagingTemplate.convertAndSend(
-                "/topic/game/" + gameId + "/turnTimeout",
-                Map.of("player", player, "reset", true)
-        );
+    // -------------------- PLAYER DISCONNECT HANDLER --------------------
+    @MessageMapping("/disconnect")
+    public void playerDisconnected(PlayerActionDto action) {
+        if (action != null && action.getGameId() != null && action.getPlayerId() != null) {
+            try {
+                inGameService.handlePlayerDisconnectedByUsername(action.getGameId(), action.getPlayerId());
+            } catch (Exception e) {
+                System.err.println("Error handling disconnect: " + e.getMessage());
+            }
+        }
     }
 
+    // -------------------- PLAYER RECONNECT HANDLER --------------------
+    @MessageMapping("/reconnect")
+    public void playerReconnected(PlayerActionDto action) {
+        if (action != null && action.getGameId() != null && action.getPlayerId() != null) {
+            try {
+                inGameService.handlePlayerReconnectedByUsername(action.getGameId(), action.getPlayerId());
+            } catch (Exception e) {
+                System.err.println("Error handling reconnect: " + e.getMessage());
+            }
+        }
+    }
+
+    // -------------------- HEARTBEAT HANDLER --------------------
+    @MessageMapping("/heartbeat")
+    public void playerHeartbeat(PlayerActionDto action) {
+        // Player is active - optional logging only
+    }
 }

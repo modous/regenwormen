@@ -44,4 +44,15 @@ public class GameGuards {
         }
     }
 
+    // 🔌 Check if any player is disconnected (game should be blocked)
+    public void ensureNoPlayersDisconnected(Game game) {
+        boolean anyDisconnected = game.getPlayers().stream()
+                .anyMatch(p -> p.getStatus() == Player.PlayerStatus.DISCONNECTED);
+
+        if (anyDisconnected) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Game is paused - waiting for disconnected player to reconnect or timeout");
+        }
+    }
+
 }

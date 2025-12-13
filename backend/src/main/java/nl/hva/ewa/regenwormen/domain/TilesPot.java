@@ -107,4 +107,9 @@ public class TilesPot {
                 .orElse(null);
     }
 
+    public void resetTiles() {
+        tiles.clear();
+        createTiles();
+    }
+
 }
