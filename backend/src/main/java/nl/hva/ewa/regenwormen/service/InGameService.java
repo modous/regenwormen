@@ -228,13 +228,14 @@ public class InGameService {
         Player player = getPlayerByUsername(game, username);
         guards.ensurePlayerInGame(game, player);
 
+        // ✅ Check of het spel nu afgelopen is
+        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
+        endGameHandler.checkAndHandleEndGame();
+
         cancelTurnTimer(game.getId());
         EndTurnView view = game.finishRoundZero(player);
         return persistAndReturn(game, view);
 
-        // ✅ Check of het spel nu afgelopen is
-        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
-        endGameHandler.checkAndHandleEndGame();
     }
 
     // ---------------------- NORMAL ROUNDS ----------------------
@@ -279,13 +280,13 @@ public class InGameService {
         guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
-        cancelTurnTimer(game.getId());
-        EndTurnView view = game.finishRound();
-        return persistAndReturn(game, view);
-
         // ✅ Check of het spel nu afgelopen is
         EndGameHandler endGameHandler = new EndGameHandler(game, ws);
         endGameHandler.checkAndHandleEndGame();
+
+        cancelTurnTimer(game.getId());
+        EndTurnView view = game.finishRound();
+        return persistAndReturn(game, view);
     }
 
     // ---------------------- TILE CLAIMING ----------------------
