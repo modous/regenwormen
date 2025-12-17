@@ -17,15 +17,6 @@
         {{ gameMessage }}
       </div>
 
-<!--      <div class="timer-box" v-if="showTimer && (timeLeft > 0 || currentTimerPlayer)">-->
-<!--        <p v-if="currentTimerPlayer === username">-->
-<!--          ⏳ Jouw beurt: <strong>{{ timeLeft }}s</strong> over-->
-<!--        </p>-->
-<!--        <p v-else>-->
-<!--          🧍 {{ currentTimerPlayer }} is aan de beurt ({{ timeLeft }}s)-->
-<!--        </p>-->
-<!--      </div>-->
-
       <div
           class="timer-box"
           :class="{ hidden: timeLeft > 9 }"
@@ -69,28 +60,11 @@
           :hasStartedRoll="hasStartedRoll"
       />
 
-<!--      <div class="game-board">-->
-<!--        <TilesCollected :tiles="myTiles" />-->
-
-<!--        <div class="others-section">-->
-<!--          <div-->
-<!--              v-for="p in players.filter(function(pl) { return pl.name !== username })"-->
-<!--              :key="p.id || p.name"-->
-<!--              class="other-player"-->
-<!--          >-->
-<!--            <h4>{{ p.name || 'Unknown' }}</h4>-->
-<!--            <p>Total Tile Points: <strong>{{ playerScore(p) }}</strong></p>-->
-
-<!--            <TilesOtherPlayer-->
-<!--                :tiles="p.tiles || []"-->
-<!--                :topTile="p.topTile"-->
-<!--                @steal="tile => stealTile(p.name, tile)"-->
-<!--            />-->
-<!--          </div>-->
-<!--        </div>-->
-
       <div class="game-board">
-        <TilesCollected :tiles="myTiles" />
+        <TilesCollected
+            :tiles="players.find(p => p.name === username)?.tiles || []"
+        />
+
 
         <div class="others-section">
           <TilesOtherPlayer
@@ -220,24 +194,47 @@ async function post(url, body = null) {
 }
 
 // Apply game snapshot
+// function applyGame(game) {
+//   if (!game) return
+//   const previousPlayer = currentPlayerId.value
+//
+//   players.value = game.players || []
+//   tilesOnTable.value = (game.tilesPot?.tiles || []).filter(t => t.availableInPot)
+//   currentTurnIndex.value = game.turnIndex ?? null
+//   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
+//
+//   if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
+//     resetRound()
+//     busted.value = false
+//     gameMessage.value = "🎯 It's your turn!"
+//   }
+//
+//   // const me = players.value.find(p => p.name === username || p.id === username)
+//   // myTiles.value = Array.isArray(me?.tiles) ? me.tiles : myTiles.value
+// }
+
 function applyGame(game) {
   if (!game) return
   const previousPlayer = currentPlayerId.value
 
+  // Backend stuurt de volledige players-array en tiles
   players.value = game.players || []
+
+  // Backend stuurt de tiles op tafel
   tilesOnTable.value = (game.tilesPot?.tiles || []).filter(t => t.availableInPot)
+
+  // Beurt info
   currentTurnIndex.value = game.turnIndex ?? null
   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
 
+  // Reset round alleen als jouw beurt net start
   if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
     resetRound()
     busted.value = false
     gameMessage.value = "🎯 It's your turn!"
   }
-
-  const me = players.value.find(p => p.name === username || p.id === username)
-  myTiles.value = Array.isArray(me?.tiles) ? me.tiles : myTiles.value
 }
+
 
 // WebSocket setup
 function connectStomp() {
@@ -342,7 +339,9 @@ async function tryPickTile(tile) {
 // async function pickTile(tile) {
 //   try {
 //     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
-//     tilesOnTable.value = tilesOnTable.value.filter(t => t.value !== tile.value)
+//     // verwijder exact die tile uit de array, niet op basis van value
+//     tilesOnTable.value = tilesOnTable.value.filter(t => t !== tile)
+//     // myTiles.value.push(tile)
 //     resetRound()
 //     busted.value = false
 //   } catch {
@@ -350,12 +349,10 @@ async function tryPickTile(tile) {
 //   }
 // }
 
+// pickTile() en stealTile() hoeven geen push/filter meer te doen
 async function pickTile(tile) {
   try {
     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
-    // verwijder exact die tile uit de array, niet op basis van value
-    tilesOnTable.value = tilesOnTable.value.filter(t => t !== tile)
-    myTiles.value.push(tile)
     resetRound()
     busted.value = false
   } catch {
@@ -363,15 +360,20 @@ async function pickTile(tile) {
   }
 }
 
-
 async function stealTile(playerName, tile) {
   try {
     await post(`${API_INGAME}/${gameId.value}/claimfromplayer/${username}`, { target: playerName })
-    const player = players.value.find(p => p.name === playerName)
-    if (player) player.tiles = player.tiles.filter(t => t.value !== tile.value)
-    myTiles.value.push(tile)
   } catch { gameMessage.value = "Failed to steal tile." }
 }
+
+// async function stealTile(playerName, tile) {
+//   try {
+//     await post(`${API_INGAME}/${gameId.value}/claimfromplayer/${username}`, { target: playerName })
+//     // const player = players.value.find(p => p.name === playerName)
+//     if (player) player.tiles = player.tiles.filter(t => t.value !== tile.value)
+//     // myTiles.value.push(tile)
+//   } catch { gameMessage.value = "Failed to steal tile." }
+// }
 
 // Helpers
 function updateRoundPoints() {
@@ -408,4 +410,38 @@ function getCurrentGameState() {
     busted: busted.value,
   }
 }
+
+import { watch } from "vue"
+
+// --- 🎮 Endgame screen ---
+const gameStateEnded = ref(false)
+const playerWon = ref(false)
+
+function calculatePoints(tiles) {
+  return tiles.reduce((sum, t) => sum + (t.points || 0), 0)
+}
+
+// Watch tilesOnTable en players om einde spel te detecteren
+watch([tilesOnTable, players], ([newTiles, newPlayers]) => {
+  if (!newTiles || !newPlayers) return
+
+  if (newTiles.length === 0 && !gameStateEnded.value) {
+    gameStateEnded.value = true
+
+    // Vind jouw punten
+    const me = newPlayers.find(p => p.name === username)
+    const myPoints = calculatePoints(me?.tiles || [])
+
+    // Vind hoogste score van andere spelers
+    const otherPoints = Math.max(...newPlayers.filter(p => p.name !== username).map(p => calculatePoints(p.tiles || [])))
+
+    playerWon.value = myPoints > otherPoints
+  }
+})
+
+function handleGameEndClose() {
+  gameStateEnded.value = false
+  router.push("/lobbies") // Of wat je wilt doen na einde spel
+}
+
 </script>
