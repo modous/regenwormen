@@ -2,6 +2,7 @@ package nl.hva.ewa.regenwormen.service;
 
 import jakarta.transaction.Transactional;
 import nl.hva.ewa.regenwormen.controller.GameWebSocketController;
+import nl.hva.ewa.regenwormen.domain.EndGameHandler;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;
@@ -230,6 +231,10 @@ public class InGameService {
         cancelTurnTimer(game.getId());
         EndTurnView view = game.finishRoundZero(player);
         return persistAndReturn(game, view);
+
+        // ✅ Check of het spel nu afgelopen is
+        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
+        endGameHandler.checkAndHandleEndGame();
     }
 
     // ---------------------- NORMAL ROUNDS ----------------------
@@ -277,6 +282,10 @@ public class InGameService {
         cancelTurnTimer(game.getId());
         EndTurnView view = game.finishRound();
         return persistAndReturn(game, view);
+
+        // ✅ Check of het spel nu afgelopen is
+        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
+        endGameHandler.checkAndHandleEndGame();
     }
 
     // ---------------------- TILE CLAIMING ----------------------

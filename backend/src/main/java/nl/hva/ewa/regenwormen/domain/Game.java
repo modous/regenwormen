@@ -44,6 +44,10 @@ public class Game {
     public int playersAmount() { return players.size(); }
     public int getTurnIndex() { return currentPlayersTurnIndex; }
     public GameState getGameState() { return gameState; }
+    public List<PlayersLeaderboardView> getLeaderboard() {
+        return leaderboard;
+    }
+
 
     // === SETTERS ===
     public void setGameName(String gameName) { setGameNameInternal(gameName); }
@@ -395,7 +399,6 @@ public class Game {
         // ⏩ Move to next player's turn
         setNextPlayersTurn();
     }
-
 
     @Override
     public boolean equals(Object obj) {

@@ -2,6 +2,7 @@ package nl.hva.ewa.regenwormen.controller;
 
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Player;
+import nl.hva.ewa.regenwormen.domain.dto.PlayersLeaderboardView;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
 import nl.hva.ewa.regenwormen.service.InGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -95,5 +97,16 @@ public class GameWebSocketController {
                 Map.of("player", player, "reset", true)
         );
     }
+
+    public void sendGameEnded(Game game, String winnerId, List<PlayersLeaderboardView> leaderboard) {
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + game.getId() + "/ended",
+                Map.of(
+                        "winnerId", winnerId,
+                        "leaderboard", leaderboard
+                )
+        );
+    }
+
 
 }
