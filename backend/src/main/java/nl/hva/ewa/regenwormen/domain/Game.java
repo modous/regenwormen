@@ -285,6 +285,7 @@ public class Game {
     // === SUPPORT / ENDGAME ===
     public void endGame() {
         if (gameState != GameState.PLAYING) return;
+        System.out.println("🛑 GAME ENDED: " + id);
         gameState = GameState.ENDED;
         calculateLeaderboard();
 

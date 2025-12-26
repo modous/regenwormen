@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: &#10;created EndGameHandler">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="feat: implement match history + game ends fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/LobbyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/api/LobbyController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/InGameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/nl/hva/ewa/regenwormen/controller/InGameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/MatchHistoryPage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/MatchHistoryPage.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +29,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="clean-gamecomponents" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -74,7 +72,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.RegenwormenBackendApplication.executor": "Run",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feature/match-history",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/basje/IdeaProjects/ewa_regenwormen/backend",
     "node.js.detected.package.eslint": "true",
@@ -87,7 +85,7 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2025.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -309,7 +307,23 @@
       <option name="project" value="LOCAL" />
       <updated>1766012519239</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="fix: remove old code (depracated) able to run backend again.">
+      <option name="closed" value="true" />
+      <created>1766753311025</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1766753311025</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat: implement match history + game ends fix">
+      <option name="closed" value="true" />
+      <created>1766767559976</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1766767559977</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -338,7 +352,9 @@
     <MESSAGE value="added junit and gamemain tests" />
     <MESSAGE value="feat: &#10;-removed: function removeTile from Tilespot.&#10;-fix: Crash loop timer bust na claim tile from pot zonder worm (try/catch block)" />
     <MESSAGE value="feat: &#10;created EndGameHandler" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: &#10;created EndGameHandler" />
+    <MESSAGE value="fix: remove old code (depracated) able to run backend again." />
+    <MESSAGE value="feat: implement match history + game ends fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: implement match history + game ends fix" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

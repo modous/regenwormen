@@ -20,13 +20,14 @@
 <!--});-->
 <!--</script>-->
 
+
 <template>
   <div class="tiles-table">
     <div
         v-for="tile in tiles"
         :key="tile.value"
         :class="['tile', { disabled: !canClaim(tile) }]"
-        @click="$emit('pickTile', tile)"
+        @click="canClaim(tile) && $emit('pickTile', tile)"
     >
       <span>{{ tile.value }}</span>
       <span class="worms">🪱 x{{ tile.points || 1 }}</span>
@@ -37,13 +38,16 @@
 <script setup>
 const props = defineProps({
   tiles: { type: Array, required: true },
-  currentPoints: { type: Number, default: 0 }
+  currentPoints: { type: Number, default: 0 },
+  hasWormInCurrentThrow: { type: Boolean, required: true }
 });
 
 defineEmits(['pickTile']);
 
 function canClaim(tile) {
-  // Een tegel kan gepakt worden als de punten van de speler >= tegelwaarde
-  return props.currentPoints >= tile.value;
+  return (
+      props.currentPoints >= tile.value &&
+      props.hasWormInCurrentThrow
+  );
 }
 </script>

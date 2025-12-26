@@ -50,6 +50,7 @@
         <TilesTable
             :tiles="tilesOnTable"
             :currentPoints="roundPoints"
+            :hasWormInCurrentThrow="hasWormInCurrentThrow"
             @pickTile="tryPickTile"
         />
       </div>
@@ -177,6 +178,10 @@ function playerScore(player) {
   if (!player || !player.tiles || !Array.isArray(player.tiles)) return 0
   return player.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
 }
+
+const hasWormInCurrentThrow = computed(() => {
+  return collectedDice.value.includes("SPECIAL")
+})
 
 // Fetch helper
 async function post(url, body = null) {

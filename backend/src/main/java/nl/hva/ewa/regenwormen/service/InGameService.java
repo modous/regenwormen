@@ -11,6 +11,7 @@ import nl.hva.ewa.regenwormen.domain.dto.EndTurnView;
 import nl.hva.ewa.regenwormen.domain.dto.TurnView;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
 import nl.hva.ewa.regenwormen.repository.PlayerRepository;
+import nl.hva.ewa.regenwormen.repository.GameResultRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +25,7 @@ public class InGameService {
 
     private final GameRepository gameRepo;
     private final PlayerRepository playerRepo;
+    private final GameResultRepository gameResultRepository;
     private final GameGuards guards;
     private final GameWebSocketController ws;
 
@@ -32,14 +34,17 @@ public class InGameService {
     private final Map<String, ScheduledFuture<?>> activeTimers = new ConcurrentHashMap<>();
     private final Map<String, Integer> remainingTimes = new ConcurrentHashMap<>();
 
-//    private static final int TURN_SECONDS = 10;
+    private static final int TURN_SECONDS = 1;
+    private static final int TIMER_DELAY_SECONDS = 1;
 
     public InGameService(GameRepository gameRepo,
                          PlayerRepository playerRepo,
+                         GameResultRepository gameResultRepository,
                          GameGuards guards,
                          GameWebSocketController ws) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
+        this.gameResultRepository = gameResultRepository;
         this.guards = guards;
         this.ws = ws;
     }
@@ -54,7 +59,7 @@ public class InGameService {
     // ---------------------- Helpers ----------------------
     private <T> T persistAndReturn(Game game, T payload) {
         gameRepo.save(game);
-        ws.broadcastGameUpdate(game.getId()); // Push live game state to all connected clients
+        ws.broadcastGameUpdate(game.getId());
         return payload;
     }
 
@@ -63,58 +68,24 @@ public class InGameService {
                 .filter(p -> p.getName().equals(username))
                 .findFirst()
                 .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Player '" + username + "' not found in game " + game.getId()));
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Player '" + username + "' not found in game " + game.getId()
+                        ));
     }
 
     // ---------------------- 🔥 TURN TIMER LOGIC ----------------------
-//    private void startTurnTimer(Game game, Player player) {
-//        String gameId = game.getId();
-//        cancelTurnTimer(gameId);
-//
-//        final int[] timeLeft = {TURN_SECONDS};
-//        remainingTimes.put(gameId, timeLeft[0]);
-//
-//        // Immediately broadcast first tick so clients show correct player+10s
-//        ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
-//
-//        ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
-//            try {
-//                timeLeft[0]--;
-//                if (timeLeft[0] <= 0) {
-//                    cancelTurnTimer(gameId);
-//                    handleTurnTimeout(game, player);
-//                    return;
-//                }
-//                remainingTimes.put(gameId, timeLeft[0]);
-//                ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }, 1, 1, TimeUnit.SECONDS);
-//
-//        activeTimers.put(gameId, timer);
-//    }
-
-    private static final int TURN_SECONDS = 10;
-    private static final int TIMER_DELAY_SECONDS = 5;
-
     private void startTurnTimer(Game game, Player player) {
         String gameId = game.getId();
         cancelTurnTimer(gameId);
 
         final int[] timeLeft = {TURN_SECONDS};
-
-        // Timer wordt nog niet getoond → frontend laat hem zien zodra de eerste broadcast komt
         remainingTimes.put(gameId, timeLeft[0]);
 
-        // Wacht 5 seconden vóór eerste broadcast + vóór start aftellen
         ScheduledFuture<?> delayTask = scheduler.schedule(() -> {
 
-            // Eerste keer broadcast: timer verschijnt op 10
             ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
 
-            // Start het echte aftellen
             ScheduledFuture<?> timer = scheduler.scheduleAtFixedRate(() -> {
                 try {
                     timeLeft[0]--;
@@ -126,7 +97,6 @@ public class InGameService {
 
                     remainingTimes.put(gameId, timeLeft[0]);
                     ws.broadcastTimer(gameId, player.getName(), timeLeft[0]);
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -136,21 +106,17 @@ public class InGameService {
 
         }, TIMER_DELAY_SECONDS, TimeUnit.SECONDS);
 
-        // SLA DE DELAY OOK OP, anders kun je hem niet cancellen
         activeTimers.put(gameId, delayTask);
     }
 
     private void startNextPlayerTimerAndAnnounce(Game game) {
-        String gameId = game.getId();
         Player next = game.getCurrentPlayer();
         if (next == null) return;
 
-        // Broadcast updated game state (turn index changed) and fresh timer instantly
-        ws.broadcastGameUpdate(gameId);
-        remainingTimes.put(gameId, TURN_SECONDS);
-        ws.broadcastTimer(gameId, next.getName(), TURN_SECONDS);
+        ws.broadcastGameUpdate(game.getId());
+        remainingTimes.put(game.getId(), TURN_SECONDS);
+        ws.broadcastTimer(game.getId(), next.getName(), TURN_SECONDS);
 
-        // Begin ticking after a small delay so clients can render the new state
         scheduler.schedule(() -> startTurnTimer(game, next), 1, TimeUnit.SECONDS);
     }
 
@@ -161,31 +127,30 @@ public class InGameService {
     }
 
     private void handleTurnTimeout(Game game, Player player) {
-        System.out.println("⏰ Turn expired for player " + player.getName());
         ws.broadcastTurnTimeout(game.getId(), player.getName());
 
         try {
-            // Always safe-skip on timeout (treat as bust/skip)
             game.forceNextPlayer();
+            handleEndGameIfNeeded(game);
             persistAndReturn(game, game);
-        } catch (Exception e) {
-            System.out.println("⚠️ Could not force next player after timeout for "
-                    + player.getName() + ": " + e.getMessage());
+        } catch (Exception ignored) {}
+
+        if (game.getGameState() == nl.hva.ewa.regenwormen.domain.Enum.GameState.ENDED) {
+            // ❌ game voorbij → GEEN nieuwe timers
+            return;
         }
 
-        // Announce switch
-        Player nextPlayer = game.getCurrentPlayer();
-        if (nextPlayer != null) {
-            String msg = "⚠️ " + player.getName()
-                    + "'s turn expired — it's now " + nextPlayer.getName() + "'s turn!";
-            ws.broadcastSystemMessage(game.getId(), msg);
+        Player next = game.getCurrentPlayer();
+        if (next != null) {
+            ws.broadcastSystemMessage(
+                    game.getId(),
+                    "⚠️ " + player.getName() + "'s turn expired — it's now " + next.getName() + "'s turn!"
+            );
         }
 
-        // Start next player's timer (and push instant 10s)
         startNextPlayerTimerAndAnnounce(game);
     }
 
-    // ---------------------- 🧮 Expose remaining time ----------------------
     public int getRemainingTime(String gameId) {
         return remainingTimes.getOrDefault(gameId, 0);
     }
@@ -198,7 +163,6 @@ public class InGameService {
 
         TurnView view = game.startAndRollRoundZero(player);
         persistAndReturn(game, view);
-
         startTurnTimer(game, player);
         return view;
     }
@@ -226,28 +190,24 @@ public class InGameService {
     public EndTurnView finishRoundZero(String gameId, String username) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
 
-        // ✅ Check of het spel nu afgelopen is
-        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
-        endGameHandler.checkAndHandleEndGame();
+        EndGameHandler handler =
+                new EndGameHandler(game, ws, gameResultRepository);
+        handler.checkAndHandleEndGame();
 
         cancelTurnTimer(game.getId());
         EndTurnView view = game.finishRoundZero(player);
         return persistAndReturn(game, view);
-
     }
 
     // ---------------------- NORMAL ROUNDS ----------------------
     public TurnView startAndRollRound(String gameId, String username) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
         TurnView view = game.startAndRollRound();
         persistAndReturn(game, view);
-
         startTurnTimer(game, player);
         return view;
     }
@@ -255,7 +215,6 @@ public class InGameService {
     public TurnView pickDiceFace(String gameId, String username, DiceFace diceFace) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
         TurnView view = game.pickDiceFace(diceFace);
@@ -266,7 +225,6 @@ public class InGameService {
     public TurnView reRoll(String gameId, String username) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
         TurnView view = game.reRollRound();
@@ -277,12 +235,11 @@ public class InGameService {
     public EndTurnView finishRound(String gameId, String username) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
-        // ✅ Check of het spel nu afgelopen is
-        EndGameHandler endGameHandler = new EndGameHandler(game, ws);
-        endGameHandler.checkAndHandleEndGame();
+        EndGameHandler handler =
+                new EndGameHandler(game, ws, gameResultRepository);
+        handler.checkAndHandleEndGame();
 
         cancelTurnTimer(game.getId());
         EndTurnView view = game.finishRound();
@@ -293,50 +250,47 @@ public class InGameService {
     public Game claimTileFromPot(String gameId, String username) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
-        guards.ensurePlayerInGame(game, player);
         guards.ensureYourTurn(game, player);
 
-        try {
-            game.claimFromPot();
-        } catch (IllegalStateException e) {
-            System.out.println(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Claim not possible");
-        }
+        game.claimFromPot();
+
+        handleEndGameIfNeeded(game);
         cancelTurnTimer(game.getId());
-        Game updated = persistAndReturn(game, game);
-
-        // start next player's timer immediately
+        persistAndReturn(game, game);
         startNextPlayerTimerAndAnnounce(game);
-
-        return updated;
-    }
-
-    // 🕒 Used by LobbyController to start the timer after game creation
-    public void startInitialTurnTimer(Game game, Player player) {
-        scheduler.schedule(() -> startTurnTimer(game, player), 1, TimeUnit.SECONDS);
+        return game;
     }
 
     // ---------------------- TILE STEALING ----------------------
     public TilesPot stealTopTileFromPlayer(String gameId, String currentUsername, String victimUsername) {
         Game game = guards.getGameOrThrow(gameId);
         Player current = getPlayerByUsername(game, currentUsername);
+        Player victim = getPlayerByUsername(game, victimUsername.trim().replace("\"", ""));
 
-        String victimClean = (victimUsername == null)
-                ? null
-                : victimUsername.trim().replace("\"", "");
-        Player victim = getPlayerByUsername(game, victimClean);
-
-        guards.ensurePlayerInGame(game, current);
-        guards.ensurePlayerInGame(game, victim);
         guards.ensureYourTurn(game, current);
 
-        TilesPot result = game.stealTopTile(victim.getId()); // advances turn
+        TilesPot result = game.stealTopTile(victim.getId());
+        handleEndGameIfNeeded(game);
         cancelTurnTimer(game.getId());
         persistAndReturn(game, result);
-
-        // start next player's timer immediately
         startNextPlayerTimerAndAnnounce(game);
-
         return result;
+    }
+    // 🕒 Used by LobbyController to start the timer after game creation
+    public void startInitialTurnTimer(Game game, Player player) {
+        scheduler.schedule(
+                () -> startTurnTimer(game, player),
+                1,
+                TimeUnit.SECONDS
+        );
+    }
+
+    private void handleEndGameIfNeeded(Game game) {
+        System.out.println("🧪 handleEndGameIfNeeded called for game " + game.getId()
+                + " | state=" + game.getGameState()
+                + " | tilesLeft=" + game.getTilesPot().amountAvailableTiles());
+        EndGameHandler handler =
+                new EndGameHandler(game, ws, gameResultRepository);
+        handler.checkAndHandleEndGame();
     }
 }
