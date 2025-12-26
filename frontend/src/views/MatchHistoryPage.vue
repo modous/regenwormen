@@ -1,90 +1,104 @@
 <template>
   <div class="mh-page">
-    <header class="mh-header">
-      <div class="mh-header-left">
-        <button class="mh-back" @click="goHome">
-          ← Back to home
-        </button>
+    <div class="mh-container"> <button class="mh-back" @click="goHome">
+      ← Back
+    </button>
+      <!-- HEADER -->
+      <header class="mh-header">
+        <div class="mh-header-left">
 
-        <div>
-          <h1 class="mh-title">Match history</h1>
-          <p class="mh-subtitle">All games you played, with result.</p>
+
+          <div>
+            <h1 class="mh-title">Match history</h1>
+            <p class="mh-subtitle">
+              All games you played, with result.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div class="mh-controls">
-        <select v-model="resultFilter" class="mh-select">
-          <option value="all">All</option>
-          <option value="win">Wins</option>
-          <option value="loss">Losses</option>
-        </select>
+        <div class="mh-controls">
+          <select v-model="resultFilter" class="mh-select">
+            <option value="all">All</option>
+            <option value="win">Wins</option>
+            <option value="loss">Losses</option>
+          </select>
 
-        <input
-            v-model="query"
-            class="mh-input"
-            type="search"
-            placeholder="Search by game id..."
-        />
-      </div>
-    </header>
+          <input
+              v-model="query"
+              class="mh-input"
+              type="search"
+              placeholder="Search by game id..."
+          />
+        </div>
+      </header>
 
-    <section class="mh-list">
-      <div v-if="filtered.length === 0" class="mh-empty">
-        No matches found.
-      </div>
+      <!-- LIST -->
+      <section class="mh-list">
+        <div v-if="filtered.length === 0" class="mh-empty">
+          No matches found.
+        </div>
 
-      <article v-for="m in filtered" :key="m.id" class="mh-card">
-        <!-- MAIN ROW -->
-        <div class="mh-row">
-          <div class="mh-card-left">
-            <div class="mh-date">
+        <article
+            v-for="m in filtered"
+            :key="m.id"
+            class="mh-card"
+        >
+          <div class="mh-grid">
+            <!-- LEFT: GAME INFO -->
+            <div class="mh-info">
               <div class="mh-date-main">{{ formatDate(m.finishedAt) }}</div>
               <div class="mh-date-sub">{{ formatTime(m.finishedAt) }}</div>
-            </div>
 
-            <div class="mh-meta">
               <div class="mh-gameid">
-                Game: <span>{{ m.gameId }}</span>
+                Game <span>#{{ m.gameId }}</span>
               </div>
-              <div class="mh-small">
-                Players: <strong>{{ m.playerCount }}</strong>
-                · Duration: <strong>{{ m.durationMin }}m</strong>
+
+              <div class="mh-meta">
+                Players <strong>{{ m.playerCount }}</strong>
+                · Duration <strong>{{ m.durationMin }}m</strong>
               </div>
+            </div>
+
+            <!-- CENTER: RESULT -->
+            <div class="mh-result">
+      <span
+          :class="['mh-badge', m.result === 'WIN' ? 'win' : 'loss']"
+      >
+        {{ m.result }}
+      </span>
+
+              <div class="mh-score">
+                Score <strong>{{ m.score }}</strong>
+              </div>
+            </div>
+
+            <!-- RIGHT: ACTION -->
+            <div class="mh-actions">
+              <button class="mh-btn" @click="toggleDetails(m.id)">
+                {{ openMatchId === m.id ? 'Hide details' : 'View details' }}
+              </button>
             </div>
           </div>
 
-          <div class="mh-card-right">
-            <span :class="['mh-badge', m.result === 'WIN' ? 'win' : 'loss']">
-              {{ m.result }}
-            </span>
+          <!-- DETAILS -->
+          <div v-if="openMatchId === m.id" class="mh-details">
+            <div class="mh-details-title">Players</div>
 
-            <div class="mh-score">
-              Score: <strong>{{ m.score }}</strong>
-            </div>
-
-            <button class="mh-btn" @click="toggleDetails(m.id)">
-              {{ openMatchId === m.id ? "Hide details" : "Details" }}
-            </button>
+            <ul class="mh-player-list">
+              <li
+                  v-for="p in m.players"
+                  :key="p"
+                  :class="{ winner: p === m.winner }"
+              >
+                {{ p }}
+                <span v-if="p === m.winner">🏆</span>
+              </li>
+            </ul>
           </div>
-        </div>
+        </article>
 
-        <!-- DETAILS -->
-        <div v-if="openMatchId === m.id" class="mh-details">
-          <div class="mh-details-title">Players</div>
-
-          <ul class="mh-player-list">
-            <li
-                v-for="p in m.players"
-                :key="p"
-                :class="{ winner: p === m.winner }"
-            >
-              {{ p }}
-              <span v-if="p === m.winner">🏆</span>
-            </li>
-          </ul>
-        </div>
-      </article>
-    </section>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -92,11 +106,10 @@
 import { useRouter } from "vue-router";
 import { computed, onMounted, ref } from "vue";
 
-
 const router = useRouter();
 
 function goHome() {
-  router.push("/"); // of "/start" of "/home" afhankelijk van je router
+  router.push("/");
 }
 
 type MatchResult = "WIN" | "LOSS";
@@ -121,9 +134,12 @@ const openMatchId = ref<string | null>(null);
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 const username = user.username;
 
-
 onMounted(async () => {
-  const res = await fetch(`http://localhost:8080/api/history/${username}`);
+  if (!username) return;
+
+  const res = await fetch(
+      `http://localhost:8080/api/history/${username}`
+  );
   const data = await res.json();
 
   history.value = data.map((r: any) => ({
@@ -144,7 +160,7 @@ const filtered = computed(() => {
 
   return history.value.filter((m) => {
     const matchesQuery =
-        q.length === 0 || m.gameId.toLowerCase().includes(q);
+        !q || m.gameId.toLowerCase().includes(q);
 
     const matchesResult =
         resultFilter.value === "all" ||
@@ -175,157 +191,210 @@ function formatTime(iso: string) {
 }
 </script>
 
-
 <style scoped>
-/* ---------- PAGE ---------- */
+/* ===== PAGE BACKGROUND (same as homepage) ===== */
 .mh-page {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
-  background: #f6f7f9;
   min-height: 100vh;
-  color: #111827;
+  padding: 4rem 2rem 2rem;
+  background: #faf9fc;
 }
 
-/* ---------- HEADER ---------- */
+/* ===== CONTAINER CARD ===== */
+.mh-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 18px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* ===== HEADER ===== */
+.mh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  gap: 1rem;
+}
 
 .mh-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.mh-back {
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.mh-back:hover {
-  background: #f3f4f6;
-}
-
-.mh-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 1rem;
 }
 
 .mh-title {
-  font-size: 28px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #b10c96;
   margin: 0;
 }
 
 .mh-subtitle {
-  margin: 6px 0 0;
-  color: #6b7280;
+  color: #555;
+  margin-top: 0.3rem;
 }
 
-/* ---------- CONTROLS ---------- */
+/* ===== BACK BUTTON ===== */
+.mh-back {
+  background: #b10c96;
+  color: white;
+  border: none;
+  padding: 0.55rem 1.3rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+  margin-bottom: 1.5rem;
+}
+.mh-back:hover {
+  background: #770494;
+  transform: translateY(-2px);
+}
+
+/* ===== CONTROLS ===== */
 .mh-controls {
   display: flex;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
 .mh-select,
 .mh-input {
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: white;
 }
 
-/* ---------- LIST ---------- */
+/* ===== LIST ===== */
 .mh-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1.4rem;
 }
 
-/* ---------- CARD ---------- */
+/* ===== CARD ===== */
 .mh-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: white;
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 1.6rem 2rem;
+  border: 1px solid #eee;
+  transition: 0.25s;
+  color: #111827;
+}
+.mh-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
 
-/* ---------- ROW ---------- */
-.mh-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-/* ---------- LEFT ---------- */
-.mh-card-left {
-  display: flex;
-  gap: 16px;
+/* ===== GRID LAYOUT ===== */
+.mh-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr auto;
   align-items: center;
+  gap: 2.5rem;
 }
 
-.mh-date {
-  min-width: 130px;
-}
-
-.mh-date-sub,
-.mh-small {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* ---------- RIGHT ---------- */
-.mh-card-right {
+/* ===== LEFT INFO ===== */
+.mh-info {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-/* ---------- BADGES ---------- */
+.mh-date-main {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.mh-date-sub {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.mh-gameid {
+  margin-top: 0.4rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.mh-gameid span {
+  font-weight: 800;
+}
+
+.mh-meta {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.mh-meta strong {
+  color: #111827;
+}
+
+/* ===== RESULT COLUMN ===== */
+.mh-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.mh-score {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ===== BADGES ===== */
+.mh-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
 .mh-badge.win {
   background: #dcfce7;
   color: #166534;
-  border: 1px solid #86efac;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-weight: 800;
 }
-
 .mh-badge.loss {
   background: #fee2e2;
   color: #991b1b;
-  border: 1px solid #fecaca;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-weight: 800;
 }
 
-/* ---------- BUTTON ---------- */
+/* ===== ACTIONS ===== */
+.mh-actions {
+  display: flex;
+  align-items: center;
+}
+
 .mh-btn {
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
-  padding: 8px 12px;
+  background: #faf9fc;
+  border: 1px solid #ccc;
   border-radius: 10px;
+  padding: 0.45rem 1rem;
   cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+.mh-btn:hover {
+  background: #770494;
+  color: white;
 }
 
-/* ---------- DETAILS ---------- */
+/* ===== DETAILS ===== */
 .mh-details {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 1.4rem;
+  padding: 1.1rem 1.5rem;
+  background: #faf9fc;
+  border-radius: 12px;
+  border: 1px solid #eee;
 }
 
 .mh-details-title {
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
 }
 
 .mh-player-list {
@@ -335,19 +404,20 @@ function formatTime(iso: string) {
 }
 
 .mh-player-list li {
-  padding: 4px 0;
+  padding: 0.2rem 0;
 }
 
 .mh-player-list li.winner {
+  color: #b10c96;
   font-weight: 700;
-  color: #166534;
 }
 
-/* ---------- EMPTY ---------- */
+/* ===== EMPTY ===== */
 .mh-empty {
-  padding: 24px;
-  border-radius: 16px;
-  border: 1px dashed #d1d5db;
-  color: #6b7280;
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed #ccc;
+  border-radius: 14px;
+  color: #777;
 }
 </style>
