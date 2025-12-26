@@ -161,7 +161,7 @@ public class LobbyController {
             new Thread(() -> {
                 try {
                     Thread.sleep(1000); // wait 1s to let clients connect
-                    inGameService.startTurnTimer(game, firstPlayer);
+                    inGameService.startInitialTurnTimer(game, firstPlayer);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -170,7 +170,6 @@ public class LobbyController {
 
         // 🔔 Broadcast that the game started so clients redirect
         lobbyWs.broadcastLobbyUpdate(id);
-        inGameService.markAllPlayersConnected(game.getId());
 
         return lobby;
     }

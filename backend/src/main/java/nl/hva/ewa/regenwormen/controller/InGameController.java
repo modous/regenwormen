@@ -105,7 +105,6 @@ public class InGameController {
                                                           @PathVariable String username) {
         try {
             log.info("👋 Player LEAVE notification received - gameId: {} , username: {}", gameId, username);
-            service.handlePlayerLeaveGameByUsername(gameId, username);
             log.info("✅ Player successfully left game");
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -126,7 +125,6 @@ public class InGameController {
                                                            @PathVariable String username) {
         try {
             log.info("🔌 Disconnect notification received - gameId: {}, username: {}", gameId, username);
-            service.handlePlayerDisconnectedByUsername(gameId, username);
             log.info("⏳ Disconnect countdown started for player: {}", username);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -146,7 +144,6 @@ public class InGameController {
                                                           @PathVariable String username) {
         try {
             log.info("✅ Reconnect notification received - gameId: {}, username: {}", gameId, username);
-            service.handlePlayerReconnectedByUsername(gameId, username);
             log.info("🎮 Player successfully reconnected: {}", username);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
