@@ -52,6 +52,15 @@ function goToProfile() {
     <!-- Navigation -->
     <nav class="nav-links">
       <router-link to="/how-to-play" class="nav-link">How to Play</router-link>
+
+      <router-link
+          v-if="userStore.isAuthenticated"
+          to="/match-history"
+          class="nav-link"
+      >
+        Match history
+      </router-link>
+
       <router-link to="/credits" class="nav-link">Credits</router-link>
 
       <router-link

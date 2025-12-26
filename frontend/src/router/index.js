@@ -9,6 +9,7 @@ import GameMain from '../components/Game/GameMain.vue';
 import LobbyOverview from "@/views/LobbyOverview.vue";
 import LobbyRoom from "@/views/LobbyRoom.vue";
 import Profile from "@/views/Profile.vue";
+import MatchHistoryPage from "@/views/MatchHistoryPage.vue";
 
 const routes = [
     { path: '/', name: 'Home', component: StartScreen },
@@ -20,6 +21,7 @@ const routes = [
     { path: '/lobby/:id', component: LobbyRoom },
     { path: '/game', name: 'GameMain', component: GameMain },
     { path: '/profile', name: 'Profile', component: Profile },
+    { path: '/match-history', name: 'MatchHistory', component: MatchHistoryPage },
 ];
 
 const router = createRouter({
