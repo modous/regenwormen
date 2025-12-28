@@ -418,7 +418,7 @@ function getCurrentGameState() {
 
 import { watch } from "vue"
 
-// --- 🎮 Endgame screen ---
+// --- 🎮 Endgame screen ----
 const gameStateEnded = ref(false)
 const playerWon = ref(false)
 
