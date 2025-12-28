@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="fix: database connection">
+    <list default="true" id="eff4bb18-5563-46b5-b110-a6bf62b5835a" name="Changes" comment="fix: database connection application-dev.yml">
+      <change afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,11 +125,11 @@
       <method v="2" />
     </configuration>
     <configuration name="RegenwormenBackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <envs>
+        <env name="DB_PASSWORD" value="regenwormen" />
+      </envs>
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="regenwormen-backend" />
-      <selectedOptions>
-        <option name="environmentVariables" />
-      </selectedOptions>
       <option name="SPRING_BOOT_MAIN_CLASS" value="nl.hva.ewa.regenwormen.RegenwormenBackendApplication" />
       <extension name="coverage">
         <pattern>
@@ -176,7 +179,7 @@
       <workItem from="1765901985817" duration="799000" />
       <workItem from="1766002305072" duration="8690000" />
       <workItem from="1766871555867" duration="878000" />
-      <workItem from="1766938406856" duration="3532000" />
+      <workItem from="1766938406856" duration="6495000" />
     </task>
     <task id="LOCAL-00001" summary="feat: backend of register and login added">
       <option name="closed" value="true" />
@@ -338,7 +341,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766941964207</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="fix: database connection application-dev.yml">
+      <option name="closed" value="true" />
+      <created>1766943653187</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1766943653187</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -370,7 +381,8 @@
     <MESSAGE value="fix: remove old code (depracated) able to run backend again." />
     <MESSAGE value="feat: implement match history + game ends fix" />
     <MESSAGE value="fix: database connection" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: database connection" />
+    <MESSAGE value="fix: database connection application-dev.yml" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: database connection application-dev.yml" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
