@@ -3,9 +3,10 @@ spring:
     name: regenwormen
 
   datasource:
-    url: jdbc:postgresql://db.wxdfnqxpahfbhaxyrntk.supabase.co:5432/postgres
-    username: postgres
-    password: regenwormen
+    url: jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres
+    username: postgres.wxdfnqxpahfbhaxyrntk
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
