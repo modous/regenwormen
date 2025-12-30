@@ -137,6 +137,7 @@ public class LobbyController {
 
             if (found != null) {
                 try {
+                    found.resetPlayer();
                     game.addPlayer(found);
                 } catch (Exception ignored) {}
             }
