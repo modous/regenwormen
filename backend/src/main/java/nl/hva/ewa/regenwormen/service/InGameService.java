@@ -34,8 +34,8 @@ public class InGameService {
     private final Map<String, ScheduledFuture<?>> activeTimers = new ConcurrentHashMap<>();
     private final Map<String, Integer> remainingTimes = new ConcurrentHashMap<>();
 
-    private static final int TURN_SECONDS = 1;
-    private static final int TIMER_DELAY_SECONDS = 1;
+    private static final int TURN_SECONDS = 10;
+    private static final int TIMER_DELAY_SECONDS = 5;
 
     public InGameService(GameRepository gameRepo,
                          PlayerRepository playerRepo,

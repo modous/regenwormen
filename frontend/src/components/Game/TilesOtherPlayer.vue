@@ -1,20 +1,27 @@
 <template>
   <div class="tiles-box">
     <h3>{{ playerName }}</h3>
-    <div class="tiles-list">
-      <div v-for="(t, index) in tiles" :key="t.value" class="tile-item" :class="{ last: index === tiles.length - 1 }" @click="$emit('steal', t)">
-        <span class="value">{{ t.value }}</span>
-        <span class="worms">🪱 x{{ t.points || 1 }}</span>
-      </div>
 
-      <!-- Alleen tonen als topTile niet in tiles zit -->
-      <div v-if="topTile && !tiles.some(t => t.value === topTile.value)" class="tile-item top-tile" @click="$emit('steal', topTile)">
+    <!-- 🔴 ENEMY: toon ALLEEN de topTile -->
+    <div class="tiles-list">
+      <div
+          v-if="topTile"
+          class="tile-item top-tile"
+          @click="$emit('steal')"
+      >
         <span class="value">{{ topTile.value }}</span>
         <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
       </div>
 
+      <div v-else class="no-tile">
+        Geen stealbare tegel
+      </div>
     </div>
-    <p class="my-score">Totale punten: <strong>{{ totalScore }}</strong></p>
+
+    <!-- ✅ Score = som van ALLE tiles (ook verborgen) -->
+    <p class="my-score">
+      Totale punten: <strong>{{ totalScore }}</strong>
+    </p>
   </div>
 </template>
 
@@ -22,20 +29,23 @@
 import { computed } from "vue"
 
 const props = defineProps({
-  tiles: { type: Array, default: () => [] },
+  tiles: { type: Array, default: () => [] }, // ⚠️ alleen voor score
   topTile: { type: Object, default: null },
   playerName: { type: String, default: "Speler" },
 })
 
-const emits = defineEmits(["steal"])
+defineEmits(["steal"])
 
-const totalScore = computed(() => props.tiles.reduce((sum, t) => sum + (t.points || 0), 0))
+// ✅ score blijft correct, ook na steal
+const totalScore = computed(() =>
+    props.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
+)
 </script>
 
 <style scoped>
 .tile-item {
   background: #fefefe;
-  border: 2px solid #2196f3; /* zelfde als collected tiles */
+  border: 2px solid #2196f3;
   border-radius: 8px;
   padding: 8px 12px;
   font-weight: 600;
@@ -73,8 +83,6 @@ const totalScore = computed(() => props.tiles.reduce((sum, t) => sum + (t.points
 
 .tiles-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
   justify-content: center;
 }
 
@@ -82,5 +90,10 @@ const totalScore = computed(() => props.tiles.reduce((sum, t) => sum + (t.points
   font-weight: 700;
   color: #1565c0;
   margin-top: 0.5rem;
+}
+
+.no-tile {
+  font-size: 0.9rem;
+  color: #777;
 }
 </style>
