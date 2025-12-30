@@ -291,5 +291,10 @@ public class InGameService {
         EndGameHandler handler =
                 new EndGameHandler(game, ws, gameResultRepository);
         handler.checkAndHandleEndGame();
+        
+        // If game ended, cancel timer
+        if (game.getGameState() == nl.hva.ewa.regenwormen.domain.Enum.GameState.ENDED) {
+            cancelTurnTimer(game.getId());
+        }
     }
 }

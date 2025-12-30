@@ -1,9 +1,11 @@
 package nl.hva.ewa.regenwormen.api;
 
 import nl.hva.ewa.regenwormen.domain.Lobby;
+import nl.hva.ewa.regenwormen.domain.dto.ChatMessage;
 import nl.hva.ewa.regenwormen.repository.LobbyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -26,6 +28,13 @@ public class LobbyWebSocketController {
         if (lobby != null) {
             messagingTemplate.convertAndSend("/topic/lobby/" + lobbyId, lobby);
         }
+    }
+
+    // 💬 Chat functionality
+    @MessageMapping("/chat")
+    public void handleChat(@Payload ChatMessage chatMessage) {
+        // Broadcast the message to everyone in the specific lobby topic
+        messagingTemplate.convertAndSend("/topic/lobby/" + chatMessage.getLobbyId() + "/chat", chatMessage);
     }
 
     // 🧠 Helper for broadcasting updates programmatically

@@ -101,6 +101,14 @@
 
       <button class="help-button" @click="showRules = true">❓</button>
       <HowToPlayButton :visible="showRules" @close="showRules = false" />
+
+      <!-- CHAT COMPONENT -->
+      <GameChat
+          v-if="gameId && username"
+          :chatId="'game_' + gameId"
+          :username="username"
+      />
+
     </div>
 
     <GameEndPopup
@@ -114,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue"
+import { ref, computed, onMounted, onUnmounted, watch } from "vue"
 import { useRouter } from "vue-router"
 import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
@@ -126,6 +134,7 @@ import TilesCollected from "./TilesCollected.vue"
 import TilesOtherPlayer from "./TilesOtherPlayer.vue"
 import HowToPlayButton from "./game_assistance/HowToPlayButton.vue"
 import ErrorHandelingForm from "@/components/Game/game_assistance/ErrorHandelingForm.vue"
+import GameChat from "@/components/Game/GameChat.vue"
 
 import "./game.css"
 import GameEndPopup from "@/components/Game/GameEndPopup.vue";
@@ -219,6 +228,16 @@ function applyGame(game) {
     resetRound()
     busted.value = false
     gameMessage.value = "🎯 It's your turn!"
+    setTimeout(() => {
+      if (gameMessage.value === "🎯 It's your turn!") {
+        gameMessage.value = ""
+      }
+    }, 3000)
+  }
+
+  // Ensure message is cleared if it's not my turn
+  if (currentPlayerId.value !== username && gameMessage.value === "🎯 It's your turn!") {
+    gameMessage.value = ""
   }
 }
 
@@ -373,7 +392,17 @@ function resetRound() {
   roundPoints.value = 0
 }
 
-function goToLobby() { router.push("/lobbies") }
+function leaveGame() {
+  // Notify backend of disconnect
+  if (gameId.value) {
+    const url = `http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`
+    navigator.sendBeacon(url)
+  }
+  if (stompClient) stompClient.deactivate()
+  router.push("/lobbies")
+}
+
+function goToLobby() { leaveGame() }
 
 // --- 🎮 GET GAME STATE FOR ERROR REPORT ---
 function getCurrentGameState() {
@@ -392,8 +421,6 @@ function getCurrentGameState() {
     busted: busted.value,
   }
 }
-
-import { watch } from "vue"
 
 // --- 🎮 Endgame screen ----
 const gameStateEnded = ref(false)
@@ -423,7 +450,7 @@ watch([tilesOnTable, players], ([newTiles, newPlayers]) => {
 
 function handleGameEndClose() {
   gameStateEnded.value = false
-  router.push("/lobbies") // Of wat je wilt doen na einde spel
+  leaveGame()
 }
 
 </script>

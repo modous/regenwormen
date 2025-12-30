@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:postgresql://aws-1-eu-west-3.pooler.supabase.com:6543/postgres
     username: postgres.wxdfnqxpahfbhaxyrntk
-    password: ${DB_PASSWORD}
+    password: regenwormen
     driver-class-name: org.postgresql.Driver
 
     hikari:

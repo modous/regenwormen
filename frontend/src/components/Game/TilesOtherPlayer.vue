@@ -2,7 +2,7 @@
   <div class="tiles-box">
     <h3>{{ playerName }}</h3>
 
-    <!-- 🔴 ENEMY: toon ALLEEN de topTile -->
+    <!-- ENEMY: toon ALLEEN de topTile -->
     <div class="tiles-list">
       <div
           v-if="topTile"

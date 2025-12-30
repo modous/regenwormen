@@ -106,7 +106,7 @@
 .help-button,
 .error-button {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     right: 20px;
     width: 45px;
     height: 45px;
@@ -146,6 +146,7 @@
     pointer-events: none;
     transition: opacity 0.4s ease;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
 }
 
 .system-popup.visible {

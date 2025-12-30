@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SockJS from 'sockjs-client'
 import { Client } from '@stomp/stompjs'
@@ -13,6 +13,11 @@ const username = user?.username || user?.name || 'Guest'
 let stompClient = null
 let heartbeatInterval = null
 const HEARTBEAT_INTERVAL = 5000
+
+// Chat state
+const chatMessages = ref([])
+const chatInput = ref('')
+const chatContainer = ref(null)
 
 // === API HELPERS (for actions only, not for sync) ===
 async function post(url, body) {
@@ -112,6 +117,31 @@ function sendReconnectEvent() {
   }
 }
 
+// === CHAT FUNCTIONS ===
+function sendChatMessage() {
+  if (!chatInput.value.trim()) return
+
+  if (stompClient && stompClient.connected) {
+    stompClient.publish({
+      destination: '/app/chat',
+      body: JSON.stringify({
+        sender: username,
+        content: chatInput.value,
+        lobbyId: route.params.id
+      })
+    })
+    chatInput.value = ''
+  }
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
 // === STOMP SOCKET ===
 function connectLobbySocket() {
   const sock = new SockJS('http://localhost:8080/ws')
@@ -147,6 +177,13 @@ function connectLobbySocket() {
         localStorage.setItem('gameId', updated.gameId)
         router.push('/game')
       }
+    })
+
+    // subscribe for chat messages
+    stompClient.subscribe(`/topic/lobby/${route.params.id}/chat`, (msg) => {
+      const chatMsg = JSON.parse(msg.body)
+      chatMessages.value.push(chatMsg)
+      scrollToBottom()
     })
 
     // request initial state
@@ -214,50 +251,88 @@ onBeforeUnmount(() => {
   <section class="lobby-room" v-if="lobby">
     <h1>{{ lobby.name }}</h1>
 
-    <ul>
-      <li
-          v-for="p in lobby.players"
-          :key="p.username"
-          :style="{ color: p.ready ? 'green' : 'red' }"
-      >
-        {{ p.username }} - {{ p.ready ? 'Ready' : 'Not Ready' }}
-      </li>
-    </ul>
+    <div class="lobby-content">
+      <div class="players-section">
+        <h3>Players</h3>
+        <ul>
+          <li
+              v-for="p in lobby.players"
+              :key="p.username"
+              :style="{ color: p.ready ? 'green' : 'red' }"
+          >
+            {{ p.username }} - {{ p.ready ? 'Ready' : 'Not Ready' }}
+          </li>
+        </ul>
 
-    <div class="buttons">
-      <button
-          @click="toggleReady"
-          :style="{ background: lobby.players.find(p => p.username === user.username)?.ready ? 'red' : 'green' }"
-      >
-        {{
-          lobby.players.find(p => p.username === user.username)?.ready
-              ? 'Unready'
-              : 'Click to Ready'
-        }}
-      </button>
+        <div class="buttons">
+          <button
+              @click="toggleReady"
+              :style="{ background: lobby.players.find(p => p.username === user.username)?.ready ? 'red' : 'green' }"
+          >
+            {{
+              lobby.players.find(p => p.username === user.username)?.ready
+                  ? 'Unready'
+                  : 'Click to Ready'
+            }}
+          </button>
 
-      <button class="leave-btn" @click="leaveLobby">Leave Lobby</button>
-    </div>
+          <button class="leave-btn" @click="leaveLobby">Leave Lobby</button>
+        </div>
 
-    <button class="invite-link-btn" @click="copyInviteLink">Invite via Link</button>
+        <button class="invite-link-btn" @click="copyInviteLink">Invite via Link</button>
 
-    <div v-if="allPlayersReady()" class="start-game-container">
-      <button class="start-btn" @click="startGame">🚀 Start Game</button>
+        <div v-if="allPlayersReady()" class="start-game-container">
+          <button class="start-btn" @click="startGame">🚀 Start Game</button>
+        </div>
+      </div>
+
+      <div class="chat-section">
+        <h3>Lobby Chat</h3>
+        <div class="chat-messages" ref="chatContainer">
+          <div v-for="(msg, index) in chatMessages" :key="index" class="chat-message">
+            <span class="chat-sender">{{ msg.sender }}:</span>
+            <span class="chat-content">{{ msg.content }}</span>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input
+            v-model="chatInput"
+            @keyup.enter="sendChatMessage"
+            placeholder="Type a message..."
+            class="chat-input"
+          />
+          <button @click="sendChatMessage" class="send-btn">Send</button>
+        </div>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.lobby-room { text-align: center; color: black; }
+.lobby-room { text-align: center; color: black; max-width: 1000px; margin: 0 auto; padding: 20px; }
+.lobby-content { display: flex; gap: 20px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.players-section, .chat-section { flex: 1; min-width: 300px; background: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+/* Players Section */
 ul { list-style: none; padding: 0; }
 li { margin: 0.5rem 0; font-weight: bold; }
 .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 1rem; }
 button { border: none; border-radius: 8px; padding: 0.5rem 1rem; color: white; font-size: 1rem; cursor: pointer; transition: 0.3s; }
 .leave-btn { background-color: #000; }
 .leave-btn:hover { background-color: #7a0606; transform: translateY(-2px); }
-.invite-link-btn { background-color: #0077cc; margin-top: 20px; margin-left: 10px; }
+.invite-link-btn { background-color: #0077cc; margin-top: 20px; width: 100%; }
 .invite-link-btn:hover { background-color: #005fa3; transform: translateY(-2px); }
 .start-game-container { margin-top: 2rem; }
-.start-btn { background-color: #28a745; font-size: 1.2rem; padding: 0.8rem 1.5rem; }
+.start-btn { background-color: #28a745; font-size: 1.2rem; padding: 0.8rem 1.5rem; width: 100%; }
 .start-btn:hover { background-color: #218838; transform: translateY(-2px); }
+
+/* Chat Section */
+.chat-section { display: flex; flex-direction: column; height: 400px; }
+.chat-messages { flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin-bottom: 10px; background: white; text-align: left; }
+.chat-message { margin-bottom: 5px; word-wrap: break-word; }
+.chat-sender { font-weight: bold; margin-right: 5px; color: #0077cc; }
+.chat-input-area { display: flex; gap: 5px; }
+.chat-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+.send-btn { background-color: #0077cc; }
+.send-btn:hover { background-color: #005fa3; }
 </style>

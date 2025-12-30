@@ -98,8 +98,8 @@ public class InGameController {
     @PostMapping("/{gameId}/stealFromPlayer/{username}")
     public TilesPot stealTopTileFromPlayer(@PathVariable String gameId,
                                            @PathVariable String username,
-                                           @RequestBody String victimUsername) {
-        return service.stealTopTileFromPlayer(gameId, username, victimUsername);
+                                           @RequestBody String victimId) {
+        return service.stealTopTileFromPlayer(gameId, username, victimId);
     }
     // -------------------- 🔌 DISCONNECT & LEAVE SECTION --------------------
     /**
