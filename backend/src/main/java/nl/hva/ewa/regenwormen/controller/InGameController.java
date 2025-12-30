@@ -83,8 +83,14 @@ public class InGameController {
 
     // -------------------- TILE CLAIMING --------------------
     @PostMapping("/{gameId}/claimfrompot/{username}")
-    public ResponseEntity<Game> claimFromPot(@PathVariable String gameId, @PathVariable String username) {
-        Game updated = service.claimTileFromPot(gameId, username);
+    public ResponseEntity<Game> claimFromPot(
+            @PathVariable String gameId,
+            @PathVariable String username,
+            @RequestBody int tileValue
+    ) {
+        log.info("🟦 CLAIM TILE from pot | user={} | tile={}", username, tileValue);
+
+        Game updated = service.claimTileFromPot(gameId, username, tileValue);
         return ResponseEntity.ok(updated);
     }
 

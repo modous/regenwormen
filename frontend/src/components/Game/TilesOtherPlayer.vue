@@ -7,7 +7,7 @@
       <div
           v-if="topTile"
           class="tile-item top-tile"
-          @click="$emit('steal')"
+          @click="$emit('steal', playerName)"
       >
         <span class="value">{{ topTile.value }}</span>
         <span class="worms">🪱 x{{ topTile.points || 1 }}</span>

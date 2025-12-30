@@ -247,14 +247,13 @@ public class InGameService {
     }
 
     // ---------------------- TILE CLAIMING ----------------------
-    public Game claimTileFromPot(String gameId, String username) {
+    public Game claimTileFromPot(String gameId, String username, int tileValue) {
         Game game = guards.getGameOrThrow(gameId);
         Player player = getPlayerByUsername(game, username);
         guards.ensureYourTurn(game, player);
 
-        game.claimFromPot();
+        game.claimFromPot(tileValue);
 
-        handleEndGameIfNeeded(game);
         cancelTurnTimer(game.getId());
         persistAndReturn(game, game);
         startNextPlayerTimerAndAnnounce(game);
@@ -269,7 +268,7 @@ public class InGameService {
 
         guards.ensureYourTurn(game, current);
 
-        TilesPot result = game.stealTopTile(victim.getId());
+        TilesPot result = game.stealTopTile(victim.getName());
         handleEndGameIfNeeded(game);
         cancelTurnTimer(game.getId());
         persistAndReturn(game, result);

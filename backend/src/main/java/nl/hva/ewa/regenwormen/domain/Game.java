@@ -229,22 +229,28 @@ public class Game {
     }
 
     // === TILE CLAIMING ===
-    public Game claimFromPot() {
+    public Game claimFromPot(int tileValue) {
         ensurePlaying();
 
         Player player = getCurrentPlayer();
         Diceroll roll = player.getDiceRoll();
+
         if (roll == null || roll.getBusted())
-            throw new IllegalStateException("No valid roll to claim from.");
+            throw new IllegalStateException("No valid roll");
+
         if (!roll.hasSpecial())
-            throw new IllegalStateException("Need at least one worm to claim a tile.");
+            throw new IllegalStateException("Need at least one worm");
 
         int score = roll.getTakenScore();
-        Tile claimedTile = tilesPot.findHighestAvailableTileAtOrBelow(score);
-        if (claimedTile == null)
-            throw new IllegalArgumentException("No tile available at or below your score (" + score + ").");
 
-        // ✅ Give tile to player
+
+        if (tileValue > score)
+            throw new IllegalArgumentException("Not enough points");
+
+        Tile claimedTile = tilesPot.findExactTile(tileValue);
+        if (claimedTile == null)
+            throw new IllegalArgumentException("Tile not available");
+
         claimedTile.takeTile(player);
         player.addTile(claimedTile);
 
@@ -255,32 +261,41 @@ public class Game {
         return this;
     }
 
+
     // === TILE STEALING ===
-    public TilesPot stealTopTile(String victimId) {
+    public TilesPot stealTopTile(String victimName) {
         ensurePlaying();
+
         Player thief = getCurrentPlayer();
-        Player victim = findPlayerById(victimId);
-        if (victim == null) throw new IllegalArgumentException("Victim not found");
+        Player victim = findPlayerByName(victimName); // ✅ FIX
+
+        if (victim == null)
+            throw new IllegalArgumentException("Victim not found: " + victimName);
 
         Tile top = victim.getTopTile();
-        if (top == null) throw new IllegalArgumentException("Nothing to steal");
+        if (top == null)
+            throw new IllegalArgumentException("Nothing to steal");
 
         Diceroll roll = thief.getDiceRoll();
         if (roll == null || roll.getBusted())
             throw new IllegalStateException("No active roll");
+
         if (!roll.hasSpecial())
             throw new IllegalStateException("SPECIAL required");
+
         if (roll.getTakenScore() != top.getValue())
             throw new IllegalArgumentException("Score must equal victim’s top tile value");
 
         victim.loseTopTileToStack();
         top.takeTile(thief);
         thief.addTile(top);
+
         thief.setEndTurn();
         setNextPlayersTurn();
 
-        return getTilesPot();
+        return tilesPot;
     }
+
 
     // === SUPPORT / ENDGAME ===
     public void endGame() {
@@ -368,7 +383,7 @@ public class Game {
             if (victim.equals(p)) continue;
             Tile top = victim.getTopTile();
             if (top != null && score == top.getValue())
-                steals.add(new StealOptions(victim.getId(), top.getValue()));
+                steals.add(new StealOptions(victim.getName(), top.getValue()));
         }
 
         return new ClaimOptions(p.getId(), claimablePot, steals);
@@ -444,6 +459,14 @@ public class Game {
         // ⏩ Move to next player's turn
         setNextPlayersTurn();
     }
+
+    public Player findPlayerByName(String name) {
+        for (Player p : players) {
+            if (p.getName().equals(name)) return p;
+        }
+        return null;
+    }
+
 
     @Override
     public boolean equals(Object obj) {

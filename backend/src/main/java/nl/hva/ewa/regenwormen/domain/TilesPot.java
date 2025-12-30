@@ -112,4 +112,10 @@ public class TilesPot {
         createTiles();
     }
 
+    public Tile findExactTile(int value) {
+        return tiles.stream()
+                .filter(t -> t.getValue() == value && t.isAvailableInPot())
+                .findFirst()
+                .orElse(null);
+    }
 }

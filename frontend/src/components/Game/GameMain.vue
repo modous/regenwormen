@@ -45,7 +45,7 @@
             @selectDie="trySelectDie"
         />
 
-<!--        <hr class="arena-divider" />-->
+        <!--        <hr class="arena-divider" />-->
 
         <TilesTable
             :tiles="tilesOnTable"
@@ -70,11 +70,11 @@
         <div class="others-section">
           <TilesOtherPlayer
               v-for="p in players.filter(pl => pl.name !== username)"
-              :key="p.id || p.name"
+              :key="p.id"
               :playerName="p.name || 'Unknown'"
               :tiles="p.tiles || []"
               :topTile="p.topTile"
-              @steal="tile => stealTile(p.name, tile)"
+              @steal="() => stealTile(p.name)"
           />
         </div>
 
@@ -92,16 +92,16 @@
 
 
       <button class="error-button" @click="showErrorForm = true">❗</button>
-        <ErrorHandelingForm
-            :visible="showErrorForm"
-            :gameState="getCurrentGameState()"
-            @close="showErrorForm = false"
-            @open="showErrorForm = true"
-        />
+      <ErrorHandelingForm
+          :visible="showErrorForm"
+          :gameState="getCurrentGameState()"
+          @close="showErrorForm = false"
+          @open="showErrorForm = true"
+      />
 
-        <button class="help-button" @click="showRules = true">❓</button>
-        <HowToPlayButton :visible="showRules" @close="showRules = false" />
-      </div>
+      <button class="help-button" @click="showRules = true">❓</button>
+      <HowToPlayButton :visible="showRules" @close="showRules = false" />
+    </div>
 
     <GameEndPopup
         :visible="gameStateEnded"
@@ -198,25 +198,7 @@ async function post(url, body = null) {
   return type.includes("application/json") ? res.json() : null
 }
 
-// Apply game snapshot
-// function applyGame(game) {
-//   if (!game) return
-//   const previousPlayer = currentPlayerId.value
-//
-//   players.value = game.players || []
-//   tilesOnTable.value = (game.tilesPot?.tiles || []).filter(t => t.availableInPot)
-//   currentTurnIndex.value = game.turnIndex ?? null
-//   currentPlayerId.value = players.value?.[game.turnIndex]?.name || null
-//
-//   if (currentPlayerId.value !== previousPlayer && currentPlayerId.value === username) {
-//     resetRound()
-//     busted.value = false
-//     gameMessage.value = "🎯 It's your turn!"
-//   }
-//
-//   // const me = players.value.find(p => p.name === username || p.id === username)
-//   // myTiles.value = Array.isArray(me?.tiles) ? me.tiles : myTiles.value
-// }
+
 
 function applyGame(game) {
   if (!game) return
@@ -341,44 +323,39 @@ async function tryPickTile(tile) {
   await pickTile(tile)
 }
 
-// async function pickTile(tile) {
-//   try {
-//     await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
-//     // verwijder exact die tile uit de array, niet op basis van value
-//     tilesOnTable.value = tilesOnTable.value.filter(t => t !== tile)
-//     // myTiles.value.push(tile)
-//     resetRound()
-//     busted.value = false
-//   } catch {
-//     gameMessage.value = "Failed to claim tile."
-//   }
-// }
+
 
 // pickTile() en stealTile() hoeven geen push/filter meer te doen
 async function pickTile(tile) {
   try {
-    await post(`${API_INGAME}/${gameId.value}/claimfrompot/${username}`)
+    console.log("🟦 FRONTEND pick tile:", tile.value)
+
+    await post(
+        `${API_INGAME}/${gameId.value}/claimfrompot/${username}`,
+        tile.value   // 🔥 DIT is de keuze
+    )
+
     resetRound()
     busted.value = false
-  } catch {
+  } catch (e) {
+    console.error("❌ PICK TILE FAILED", e)
     gameMessage.value = "Failed to claim tile."
   }
 }
 
-async function stealTile(playerName, tile) {
+async function stealTile(victimName) {
   try {
-    await post(`${API_INGAME}/${gameId.value}/claimfromplayer/${username}`, { target: playerName })
-  } catch { gameMessage.value = "Failed to steal tile." }
+    await post(
+        `${API_INGAME}/${gameId.value}/stealFromPlayer/${username}`,
+        victimName
+    )
+  } catch (e) {
+    console.error("STEAL FAILED", e)
+    gameMessage.value = "Failed to steal tile."
+  }
 }
 
-// async function stealTile(playerName, tile) {
-//   try {
-//     await post(`${API_INGAME}/${gameId.value}/claimfromplayer/${username}`, { target: playerName })
-//     // const player = players.value.find(p => p.name === playerName)
-//     if (player) player.tiles = player.tiles.filter(t => t.value !== tile.value)
-//     // myTiles.value.push(tile)
-//   } catch { gameMessage.value = "Failed to steal tile." }
-// }
+
 
 // Helpers
 function updateRoundPoints() {
