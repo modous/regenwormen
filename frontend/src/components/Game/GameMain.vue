@@ -1,6 +1,6 @@
 <template>
   <div class="game">
-    <h1>🎲 Regenwormen</h1>
+    <h1 class="left" >🎲 Regenwormen</h1>
 
     <div v-if="!gameReady">
       <p>⏳ Joining game...</p>
@@ -10,8 +10,8 @@
     <div v-else>
       <button class="back-button" @click="goToLobby">⬅️ Terug naar Lobby</button>
 
-      <h3>Game ID: {{ gameId }}</h3>
-      <h4>Jij: {{ username }}</h4>
+      <h3 class="left" >Game ID: {{ gameId }}</h3>
+      <h4 class="left" >Jij: {{ username }}</h4>
 
       <div class="system-popup" :class="{ visible: !!gameMessage }">
         {{ gameMessage }}
@@ -55,15 +55,18 @@
         />
       </div>
 
-      <DiceCollected
-          :collectedDice="collectedDice"
-          :roundPoints="roundPoints"
-          :hasStartedRoll="hasStartedRoll"
-      />
+      <div class="dice-main-area">
+        <DiceCollected
+            :collectedDice="collectedDice"
+            :roundPoints="roundPoints"
+            :hasStartedRoll="hasStartedRoll"
+        />
+      </div>
 
       <div class="game-board">
         <TilesCollected
             :tiles="players.find(p => p.name === username)?.tiles || []"
+            :isCurrentPlayer="currentPlayerId === username"
         />
 
 
@@ -74,6 +77,7 @@
               :playerName="p.name || 'Unknown'"
               :tiles="p.tiles || []"
               :topTile="p.topTile"
+              :isCurrentPlayer="currentPlayerId === p.name"
               @steal="() => stealTile(p.name)"
           />
         </div>

@@ -32,7 +32,7 @@
       {{ hasStartedRoll ? "Roll Again" : "🎲 Roll Dice" }}
     </button>
 
-    <div class="dice-area" v-if="rolledDice.length">
+    <div class="dice-area">
       <div
           v-for="(face, idx) in rolledDice"
           :key="idx"

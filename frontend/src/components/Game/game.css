@@ -4,8 +4,10 @@
 .game {
     background: lightgray;
     color: #111;
-    min-height: 100vh;
+    min-height: 105vh;
     padding: 2rem;
+    margin-top: -2rem;
+
     text-align: center;
     font-family: "Inter", sans-serif;
 }
@@ -162,6 +164,8 @@
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1.5rem 0;
+    min-height: 75px; /* To prevent layout shift */
+    align-items: center;
 }
 
 .die {
@@ -218,6 +222,10 @@
     border: 2px solid #4caf50;
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .tile:hover {
@@ -281,17 +289,19 @@
 ========================= */
 .game-board {
     display: flex;
-    justify-content: space-between;
-    gap: 2rem;
+    justify-content: center;
+    gap: 10px;
     margin-top: 2rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     min-height: 100px;
+    width: 100%;
+    padding: 0 10px;
 }
 
 .my-section,
 .others-section {
-    flex: 1;
-    min-width: 200px;
+    /* flex: 1; */
+    /* min-width: 200px; */
 }
 
 .other-player {
@@ -303,9 +313,7 @@
 }
 
 .others-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: contents;
 }
 
 /* =========================
@@ -350,15 +358,45 @@
    Tiles Box
 ========================= */
 .tiles-box {
-    min-width: 200px;
-    padding: 1rem;
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem;
     background: #fff;
+    border: 2px solid #ccc; /* Default border color */
     border-radius: 12px;
-    border: 2px solid #2196f3;
     box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 250px;
+    transition: border-color 0.3s ease;
+}
+
+.tiles-box.active-player {
+    border-color: #2196f3; /* Active player border color */
 }
 
 .tiles-box h3 {
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
+}
+
+.no-tile {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 1rem 0;
+}
+
+.left {
+    text-align: left;
+    margin-top: 50px;
+    margin-bottom: -55px;
+}
+
+.dice-main-area {
+    min-height: 200px;
+    background: #fff;
+    width: 60%;
+    margin-left: 20%;
+    border-radius: 20px;
 }

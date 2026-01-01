@@ -21,7 +21,7 @@
       🎯 Points this round: <strong>{{ roundPoints }}</strong>
     </p>
 
-    <div class="dice-area" v-if="collectedDice.length">
+    <div class="dice-area">
        <span v-for="(face, index) in collectedDice" :key="index" class="die die-collected">
          {{ faceEmoji(face) }}
        </span>
