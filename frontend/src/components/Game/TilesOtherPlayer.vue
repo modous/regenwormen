@@ -4,16 +4,18 @@
 
     <!-- ENEMY: toon ALLEEN de topTile -->
     <div class="tiles-list">
-      <div
-          v-if="topTile"
-          class="tile"
-          @click="$emit('steal', playerName)"
-      >
-        <span>{{ topTile.value }}</span>
-        <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
-      </div>
-
-      <div v-else class="no-tile">
+      <transition-group name="tile">
+        <div
+            v-if="topTile"
+            :key="topTile.value"
+            class="tile"
+            @click="$emit('steal', playerName)"
+        >
+          <span>{{ topTile.value }}</span>
+          <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
+        </div>
+      </transition-group>
+      <div v-if="!topTile" class="no-tile">
         Geen stealbare tegel
       </div>
     </div>

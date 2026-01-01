@@ -317,13 +317,25 @@ async function rollDice() {
   try {
     const endpoint = hasStartedRoll.value ? "reroll" : "startroll"
     const data = await post(`${API_INGAME}/${gameId.value}/${endpoint}/${username}`)
-    if (!data || data.fullThrow == null) { gameMessage.value = "💀 You busted!"; busted.value = true; resetRound(); return }
+    if (!data || data.fullThrow == null) {
+      gameMessage.value = "💀 You busted!"
+      busted.value = true
+      resetRound()
+      rolling.value = false
+      return
+    }
     rolledDice.value = Object.entries(data.fullThrow).flatMap(([face, count]) => Array(count).fill(face))
     disabledFaces.value = data.disabledFaces || []
     chosenFaces.value = Array.from(data.chosenFaces || [])
     hasStartedRoll.value = true
-  } catch { gameMessage.value = "Something went wrong while rolling dice." }
-  finally { rolling.value = false }
+
+    setTimeout(() => {
+      rolling.value = false
+    }, 500) // Animation duration
+  } catch {
+    gameMessage.value = "Something went wrong while rolling dice."
+    rolling.value = false
+  }
 }
 
 async function trySelectDie(face) {

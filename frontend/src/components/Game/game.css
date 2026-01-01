@@ -156,7 +156,7 @@
 }
 
 /* =========================
-   Dobbelstenen
+   Dobbelstenen & Animaties
 ========================= */
 .dice-area {
     display: flex;
@@ -179,8 +179,37 @@
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    color: #111;
 }
+
+.die.rolling {
+    background: #2196f3;
+    color: transparent;
+}
+
+.die.rolling:nth-child(odd) {
+    animation: shake-1 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.die.rolling:nth-child(even) {
+    animation: shake-2 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake-1 {
+  10%, 90% { transform: translate3d(-2px, -2px, 0) rotate(-5deg); }
+  20%, 80% { transform: translate3d(3px, 2px, 0) rotate(5deg); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0) rotate(-3deg); }
+  40%, 60% { transform: translate3d(5px, 0, 0) rotate(3deg); }
+}
+
+@keyframes shake-2 {
+  10%, 90% { transform: translate3d(2px, 2px, 0) rotate(5deg); }
+  20%, 80% { transform: translate3d(-3px, -2px, 0) rotate(-5deg); }
+  30%, 50%, 70% { transform: translate3d(5px, 0, 0) rotate(3deg); }
+  40%, 60% { transform: translate3d(-5px, 0, 0) rotate(-3deg); }
+}
+
 
 .die.disabled {
     opacity: 0.4;
@@ -199,7 +228,7 @@
 }
 
 /* =========================
-   Tegels
+   Tegels & Animaties
 ========================= */
 .tiles-table,
 .tiles-list,
@@ -221,7 +250,7 @@
     border-radius: 8px;
     border: 2px solid #4caf50;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,6 +269,16 @@
     cursor: not-allowed;
     transform: none;
 }
+
+/* Vue Transition Group classes */
+.tile-enter-active, .tile-leave-active {
+  transition: all 0.4s ease;
+}
+.tile-enter-from, .tile-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 
 /* =========================
    Tile Items (uniform)
