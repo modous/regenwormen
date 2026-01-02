@@ -1,3 +1,14 @@
+/**
+ * ErrorHandlingForm Component
+ *
+ * Allows users to submit bug reports with optional screenshots and game state information.
+ * Features include:
+ * - Form validation for required fields
+ * - Automatic screenshot capture using html2canvas
+ * - Manual file upload with size validation (max 2MB)
+ * - Real-time feedback (loading, success, error states)
+ * - Multipart form data submission to backend
+ */
 <script setup xmlns="http://www.w3.org/1999/html">
 import {ref, computed, nextTick} from "vue";
 import html2canvas from "html2canvas";
