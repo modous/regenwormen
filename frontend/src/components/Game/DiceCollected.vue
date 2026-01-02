@@ -1,38 +1,19 @@
-<!--<template>-->
-<!--  <div class="dice-collected">-->
-<!--    <h2>Verzameld</h2>-->
-<!--    <div class="dice">-->
-<!--      <span v-for="(die, index) in collectedDice" :key="index" class="die">-->
-<!--        ✅ {{ die }}-->
-<!--      </span>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</template>-->
-
-<!--<script setup>-->
-<!--defineProps({-->
-<!--  collectedDice: { type: Array, required: true }-->
-<!--});-->
-<!--</script>-->
-
 <template>
-  <div class="dice-collected-wrapper">
-    <p v-if="hasStartedRoll" class="points">
-      🎯 Points this round: <strong>{{ roundPoints }}</strong>
-    </p>
-
+  <div class="dice-collected-section" v-if="hasStartedRoll">
+    <h3>Gekozen Dobbelstenen</h3>
     <div class="dice-area">
-       <span v-for="(face, index) in collectedDice" :key="index" class="die die-collected">
-         {{ faceEmoji(face) }}
-       </span>
+      <div v-for="(face, idx) in collectedDice" :key="idx" class="die die-collected">
+        {{ faceEmoji(face) }}
+      </div>
     </div>
+    <p class="points">Huidige punten: {{ roundPoints }}</p>
   </div>
 </template>
 
 <script setup>
 defineProps({
-  collectedDice: { type: Array, required: true },
-  roundPoints: { type: Number, required: true },
+  collectedDice: { type: Array, default: () => [] },
+  roundPoints: { type: Number, default: 0 },
   hasStartedRoll: Boolean
 });
 

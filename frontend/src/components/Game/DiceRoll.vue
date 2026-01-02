@@ -34,7 +34,8 @@ defineProps({
   isBusted: Boolean,
   rolling: Boolean,
   hasStartedRoll: Boolean,
-  canRoll: { type: Boolean, default: true } // Voor extra checks (bijv. timer)
+  canRoll: { type: Boolean, default: true },
+  blocked: { type: Boolean, default: false }
 });
 
 defineEmits(['roll', 'selectDie']);

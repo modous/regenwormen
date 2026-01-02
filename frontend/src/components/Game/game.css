@@ -108,7 +108,7 @@
 .help-button,
 .error-button {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     width: 45px;
     height: 45px;
@@ -116,9 +116,16 @@
     background: #eee;
     color: #333;
     border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    z-index: 999;
 }
 
-.help-button:hover {
+.error-button {
+    right: 70px;
+}
+
+.help-button:hover,
+.error-button:hover {
     background: #ddd;
     transform: scale(1.05);
 }
@@ -438,4 +445,100 @@
     width: 60%;
     margin-left: 20%;
     border-radius: 20px;
+}
+
+/* =========================
+   Modal & Disconnect Alerts
+========================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel, .btn-confirm {
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    color: white;
+}
+
+.btn-cancel {
+    background: #f44336;
+}
+
+.btn-cancel:hover {
+    background: #d32f2f;
+}
+
+.btn-confirm {
+    background: #4caf50;
+}
+
+.btn-confirm:hover {
+    background: #388e3c;
+}
+
+.disconnect-alerts {
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: #fff3cd;
+    border-radius: 8px;
+    color: #856404;
+    font-weight: 500;
+    text-align: left;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.disconnect-alert {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.countdown {
+    font-weight: 700;
+    color: #dc3545;
+    margin-left: 0.5rem;
+}
+
+.game-blocked {
+    margin: 1rem auto;
+    padding: 0.5rem;
+    background: #f8d7da;
+    border-radius: 8px;
+    color: #721c24;
+    font-weight: 500;
+    text-align: center;
+    max-width: 600px;
 }

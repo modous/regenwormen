@@ -8,8 +8,8 @@
         <div
             v-if="topTile"
             :key="topTile.value"
-            class="tile"
-            @click="$emit('steal', playerName)"
+            :class="['tile', { disabled: !canSteal(topTile) }]"
+            @click="canSteal(topTile) && $emit('steal', playerName)"
         >
           <span>{{ topTile.value }}</span>
           <span class="worms">🪱 x{{ topTile.points || 1 }}</span>
@@ -35,6 +35,8 @@ const props = defineProps({
   topTile: { type: Object, default: null },
   playerName: { type: String, default: "Speler" },
   isCurrentPlayer: { type: Boolean, default: false },
+  currentPoints: { type: Number, default: 0 },
+  hasWormInCurrentThrow: { type: Boolean, required: true }
 })
 
 defineEmits(["steal"])
@@ -43,4 +45,11 @@ defineEmits(["steal"])
 const totalScore = computed(() =>
     props.tiles.reduce((sum, t) => sum + (t.points || 0), 0)
 )
+
+function canSteal(tile) {
+  return (
+      props.hasWormInCurrentThrow &&
+      props.currentPoints === tile.value
+  );
+}
 </script>

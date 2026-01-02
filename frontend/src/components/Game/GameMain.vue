@@ -8,10 +8,35 @@
     </div>
 
     <div v-else>
-      <button class="back-button" @click="goToLobby">⬅️ Terug naar Lobby</button>
+      <button class="back-button" @click="showLeaveConfirmation = true">⬅️ Leave to Lobby</button>
+
+      <!-- Leave confirmation modal -->
+      <div v-if="showLeaveConfirmation" class="modal-overlay" @click="showLeaveConfirmation = false">
+        <div class="modal-content" @click.stop>
+          <h3>Leave Game?</h3>
+          <p>Are you sure you want to leave this game? You will be removed immediately.</p>
+          <div class="modal-buttons">
+            <button class="btn-cancel" @click="showLeaveConfirmation = false">Cancel</button>
+            <button class="btn-confirm" @click="confirmLeave">Leave Game</button>
+          </div>
+        </div>
+      </div>
 
       <h3 class="left" >Game ID: {{ gameId }}</h3>
       <h4 class="left" >Jij: {{ username }}</h4>
+
+      <!-- ⚠️ Disconnect countdown alerts -->
+      <div v-if="Object.keys(disconnectedPlayers).length > 0" class="disconnect-alerts">
+        <div v-for="(secondsLeft, playerName) in disconnectedPlayers" :key="playerName" class="disconnect-alert">
+          ⚠️ <strong>{{ playerName }}</strong> is disconnected!
+          <span class="countdown">{{ secondsLeft }}s</span> to reconnect...
+        </div>
+      </div>
+
+      <!-- 🚫 Game blocked message -->
+      <div v-if="isGameBlocked && Object.keys(disconnectedPlayers).length > 0" class="game-blocked">
+        ⏸️ Game is paused - waiting for player to reconnect...
+      </div>
 
       <div class="system-popup" :class="{ visible: !!gameMessage }">
         {{ gameMessage }}
@@ -40,7 +65,8 @@
             :isBusted="isBusted"
             :rolling="rolling"
             :hasStartedRoll="hasStartedRoll"
-            :canRoll="timeLeft > 0 || currentPlayerId !== username"
+            :canRoll="(timeLeft > 0 || currentPlayerId !== username) && !isGameBlocked"
+            :blocked="isGameBlocked"
             @roll="rollDice"
             @selectDie="trySelectDie"
         />
@@ -51,6 +77,7 @@
             :tiles="tilesOnTable"
             :currentPoints="roundPoints"
             :hasWormInCurrentThrow="hasWormInCurrentThrow"
+            :isGameBlocked="isGameBlocked"
             @pickTile="tryPickTile"
         />
       </div>
@@ -78,20 +105,11 @@
               :tiles="p.tiles || []"
               :topTile="p.topTile"
               :isCurrentPlayer="currentPlayerId === p.name"
+              :currentPoints="roundPoints"
+              :hasWormInCurrentThrow="hasWormInCurrentThrow"
               @steal="() => stealTile(p.name)"
           />
         </div>
-
-        <button class="error-button" @click="showErrorForm = true">❗</button>
-        <ErrorHandelingForm
-            :visible="showErrorForm"
-            :gameState="getCurrentGameState()"
-            @close="showErrorForm = false"
-            @open="showErrorForm = true"
-        />
-
-        <button class="help-button" @click="showRules = true">❓</button>
-        <HowToPlayButton :visible="showRules" @close="showRules = false" />
       </div>
 
 
@@ -105,6 +123,9 @@
 
       <button class="help-button" @click="showRules = true">❓</button>
       <HowToPlayButton :visible="showRules" @close="showRules = false" />
+
+      <!-- Player Status List -->
+      <Player_status_list :players="players" />
 
       <!-- CHAT COMPONENT -->
       <GameChat
@@ -139,6 +160,7 @@ import TilesOtherPlayer from "./TilesOtherPlayer.vue"
 import HowToPlayButton from "./game_assistance/HowToPlayButton.vue"
 import ErrorHandelingForm from "@/components/Game/game_assistance/ErrorHandelingForm.vue"
 import GameChat from "@/components/Game/GameChat.vue"
+import Player_status_list from "@/components/Game/game_assistance/player_status_list.vue"
 
 import "./game.css"
 import GameEndPopup from "@/components/Game/GameEndPopup.vue";
@@ -146,6 +168,7 @@ import GameEndPopup from "@/components/Game/GameEndPopup.vue";
 const router = useRouter()
 const showTimer = ref(false)
 const showErrorForm = ref(false)
+const showLeaveConfirmation = ref(false)
 
 // API & WebSocket
 const API_INGAME = "http://localhost:8080/ingame"
@@ -179,6 +202,12 @@ const myTiles = ref([])
 const timeLeft = ref(0)
 const currentTimerPlayer = ref("")
 const gameMessage = ref("")
+
+// --- HEARTBEAT & DISCONNECT STATE ---
+let heartbeatInterval = null
+const HEARTBEAT_INTERVAL = 5000
+const disconnectedPlayers = ref({})
+const isGameBlocked = ref(false)
 
 // Computed
 const turnInfo = computed(() => {
@@ -256,6 +285,8 @@ function connectStomp() {
   })
 
   stompClient.onConnect = () => {
+    console.log("STOMP Connected")
+
     stompClient.subscribe(`/topic/game/${gameId.value}`, msg => {
       try { applyGame(JSON.parse(msg.body)); gameReady.value = true }
       catch (e) { console.warn("Failed parsing game snapshot:", e) }
@@ -294,8 +325,42 @@ function connectStomp() {
       } catch {}
     })
 
+    stompClient.subscribe(`/topic/game/${gameId.value}/disconnect`, (msg) => {
+      try {
+        const data = JSON.parse(msg.body)
+        const playerName = data.player
+        const secondsLeft = data.secondsLeft
+
+        if (secondsLeft > 0) {
+          disconnectedPlayers.value[playerName] = secondsLeft
+          isGameBlocked.value = true
+        } else {
+          delete disconnectedPlayers.value[playerName]
+          if (Object.keys(disconnectedPlayers.value).length === 0) {
+            isGameBlocked.value = false
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to process disconnect countdown:", e)
+      }
+    })
+
     stompClient.publish({ destination: "/app/timerSync", body: gameId.value })
     stompClient.publish({ destination: "/app/sync", body: gameId.value })
+
+    // Notify reconnect
+    sendReconnectEvent()
+
+    // Heartbeat
+    heartbeatInterval = setInterval(() => {
+      if (stompClient && stompClient.connected) {
+        const playerId = JSON.parse(localStorage.getItem("user"))?.id || username
+        stompClient.publish({
+          destination: "/app/heartbeat",
+          body: JSON.stringify({ gameId: gameId.value, playerId: playerId })
+        })
+      }
+    }, HEARTBEAT_INTERVAL)
   }
 
   stompClient.onStompError = frame => { console.error("Broker error:", frame.headers["message"]); errorMsg.value = "WebSocket broker error." }
@@ -307,11 +372,16 @@ function connectStomp() {
 onMounted(() => {
   if (!gameId.value) { errorMsg.value = "No active game found — start one from lobby."; return }
   connectStomp()
+  setupDisconnectHandlers()
 })
-onUnmounted(() => { if (stompClient) stompClient.deactivate() })
+onUnmounted(() => {
+  if (stompClient) stompClient.deactivate()
+  if (heartbeatInterval) clearInterval(heartbeatInterval)
+})
 
 // Game actions
 async function rollDice() {
+  if (isGameBlocked.value) return
   showTimer.value = false
   rolling.value = true
   try {
@@ -339,6 +409,7 @@ async function rollDice() {
 }
 
 async function trySelectDie(face) {
+  if (isGameBlocked.value) return
   if (disabledFaces.value.includes(face) || chosenFaces.value.includes(face)) return
   try {
     const data = await post(`${API_INGAME}/${gameId.value}/pickdice/${username}`, face)
@@ -354,6 +425,7 @@ async function trySelectDie(face) {
 
 // Tile actions
 async function tryPickTile(tile) {
+  if (isGameBlocked.value) return
   if (roundPoints.value < tile.value) return
   await pickTile(tile)
 }
@@ -467,6 +539,50 @@ watch([tilesOnTable, players], ([newTiles, newPlayers]) => {
 function handleGameEndClose() {
   gameStateEnded.value = false
   leaveGame()
+}
+
+// === UNIFIED DISCONNECT HANDLERS ===
+function setupDisconnectHandlers() {
+  console.log("Setting up disconnect handlers for gameId:", gameId.value)
+  window.addEventListener('beforeunload', () => {
+    console.log("Page closing - sending disconnect notification")
+    const url = `${API_INGAME}/${gameId.value}/disconnect/${username}`
+    navigator.sendBeacon(url)
+  })
+}
+
+function sendReconnectEvent() {
+  if (gameId.value) {
+    const url = `${API_INGAME}/${gameId.value}/reconnect/${username}`
+    console.log("Sending reconnect event")
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    }).catch(err => console.error("Reconnect notification failed:", err))
+  }
+}
+
+function confirmLeave() {
+  console.log("Player leaving game")
+  if (!gameId.value || !username) {
+    console.error("Missing gameId or username - cannot leave game")
+    gameMessage.value = "Cannot leave: missing game or player info"
+    return
+  }
+  const url = `${API_INGAME}/${gameId.value}/leave/${username}`
+  post(url)
+      .then(() => {
+        console.log("Player successfully left game")
+        if (stompClient && stompClient.connected) {
+          stompClient.deactivate()
+        }
+        localStorage.removeItem("gameId")
+        router.push("/lobbies")
+      })
+      .catch((err) => {
+        console.error("Error leaving game:", err)
+        gameMessage.value = "Failed to leave game."
+      })
 }
 
 </script>
