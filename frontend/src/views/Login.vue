@@ -48,15 +48,19 @@ const router = useRouter()
 const userStore = useUserStore()
 
 async function handleLogin() {
-  try {
-    const response = await fetch('http://localhost:8080/api/auth/login', {
+ try {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+    {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         identifier: identifier.value,
         password: password.value,
       }),
-    });
+    }
+  );
+
 
     const data = await response.json();
 
