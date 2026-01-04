@@ -111,6 +111,7 @@ public class InGameController {
                                                           @PathVariable String username) {
         try {
             log.info("👋 Player LEAVE notification received - gameId: {} , username: {}", gameId, username);
+            service.leaveGame(gameId, username);
             log.info("✅ Player successfully left game");
             return ResponseEntity.noContent().build();
         } catch (Exception e) {

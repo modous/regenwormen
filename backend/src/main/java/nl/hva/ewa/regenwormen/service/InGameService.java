@@ -1,15 +1,18 @@
 package nl.hva.ewa.regenwormen.service;
 
 import jakarta.transaction.Transactional;
+import nl.hva.ewa.regenwormen.api.LobbyWebSocketController;
 import nl.hva.ewa.regenwormen.controller.GameWebSocketController;
 import nl.hva.ewa.regenwormen.domain.EndGameHandler;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
 import nl.hva.ewa.regenwormen.domain.Game;
+import nl.hva.ewa.regenwormen.domain.Lobby;
 import nl.hva.ewa.regenwormen.domain.Player;
 import nl.hva.ewa.regenwormen.domain.TilesPot;
 import nl.hva.ewa.regenwormen.domain.dto.EndTurnView;
 import nl.hva.ewa.regenwormen.domain.dto.TurnView;
 import nl.hva.ewa.regenwormen.repository.GameRepository;
+import nl.hva.ewa.regenwormen.repository.LobbyRepository;
 import nl.hva.ewa.regenwormen.repository.PlayerRepository;
 import nl.hva.ewa.regenwormen.repository.GameResultRepository;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,8 @@ public class InGameService {
     private final GameResultRepository gameResultRepository;
     private final GameGuards guards;
     private final GameWebSocketController ws;
+    private final LobbyRepository lobbyRepo;
+    private final LobbyWebSocketController lobbyWs;
 
     // 🔥 Timer system
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -41,12 +46,16 @@ public class InGameService {
                          PlayerRepository playerRepo,
                          GameResultRepository gameResultRepository,
                          GameGuards guards,
-                         GameWebSocketController ws) {
+                         GameWebSocketController ws,
+                         LobbyRepository lobbyRepo,
+                         LobbyWebSocketController lobbyWs) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
         this.gameResultRepository = gameResultRepository;
         this.guards = guards;
         this.ws = ws;
+        this.lobbyRepo = lobbyRepo;
+        this.lobbyWs = lobbyWs;
     }
 
     // ---------------------- 🧩 Get full game by ID ----------------------
@@ -275,6 +284,40 @@ public class InGameService {
         startNextPlayerTimerAndAnnounce(game);
         return result;
     }
+
+    // ---------------------- LEAVE GAME ----------------------
+    public void leaveGame(String gameId, String username) {
+        Game game = guards.getGameOrThrow(gameId);
+        Player player = getPlayerByUsername(game, username);
+
+        boolean wasCurrent = game.getCurrentPlayer() != null && game.getCurrentPlayer().equals(player);
+
+        game.leavePlayer(player.getId());
+
+        // Also remove from lobby if applicable
+        Lobby lobby = lobbyRepo.findAll().stream()
+                .filter(l -> l.getGameId() != null && l.getGameId().equals(gameId))
+                .findFirst()
+                .orElse(null);
+
+        if (lobby != null) {
+            lobby.getPlayers().removeIf(p -> p.getUsername().equals(username));
+            lobbyRepo.save(lobby);
+            lobbyWs.broadcastLobbyUpdate(lobby.getId());
+        }
+
+        if (game.getGameState() == nl.hva.ewa.regenwormen.domain.Enum.GameState.ENDED) {
+            cancelTurnTimer(game.getId());
+        } else if (wasCurrent) {
+            Player next = game.getCurrentPlayer();
+            if (next != null) {
+                startTurnTimer(game, next);
+            }
+        }
+
+        persistAndReturn(game, null);
+    }
+
     // 🕒 Used by LobbyController to start the timer after game creation
     public void startInitialTurnTimer(Game game, Player player) {
         scheduler.schedule(
