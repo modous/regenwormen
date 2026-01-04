@@ -11,6 +11,6 @@ RUN ./mvnw -B dependency:go-offline
 COPY src src
 RUN ./mvnw -B package -DskipTests
 
-EXPOSE 8080
+EXPOSE 10000
 
 CMD ["sh", "-c", "java -jar target/*.jar"]
