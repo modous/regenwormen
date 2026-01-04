@@ -2,7 +2,7 @@
   <div v-if="visible" class="rules-overlay" @click.self="close">
     <div class="rules-content">
       <button class="close-button" @click="close">✖</button>
-      <img src="../../assets/Gamerules.png" alt="Game Rules" class="rules-image" />
+      <img src="@/assets/Gamerules.png" alt="Game Rules" class="rules-image" />
     </div>
   </div>
 </template>
