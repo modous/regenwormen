@@ -124,7 +124,7 @@ onMounted(async () => {
   if (!username) return;
 
   const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}api/history/${username}`
+      `${import.meta.env.VITE_API_BASE_URL}/api/history/${username}`
   );
   const data = await res.json();
 
