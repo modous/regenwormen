@@ -28,7 +28,7 @@ function goToProfile() {
       />
       <img
           v-else
-          src="../assets/default-avatar.png"
+          src="../assets/worm.jpeg"
           alt="Default Avatar"
           class="profile-img"
       />
