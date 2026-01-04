@@ -11,22 +11,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+@Bean
+SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> {})   
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                "/api/auth/**",
+                "/api/lobbies/**",
+                "/api/**",
+                "/ws/**",
+                "/pregame/**",
+                "/error"
+            ).permitAll()
+            .anyRequest().permitAll()
+        );
 
-    @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/lobbies/**",
-                                "/pregame/**"
-                        ).permitAll()
-                        .anyRequest().permitAll()
-                );
+    return http.build();
+}
 
-        return http.build();
-    }
 
     @Bean
     PasswordEncoder passwordEncoder() {
