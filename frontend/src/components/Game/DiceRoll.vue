@@ -9,6 +9,10 @@
       {{ hasStartedRoll ? "Roll Again" : "🎲 Roll Dice" }}
     </button>
 
+    <div v-if="hasStartedRoll" class="dice-left-text" style="margin: 10px 0; font-weight: bold;">
+      Dice left: {{ 8 - collectedCount }}
+    </div>
+
     <div class="dice-area">
       <div
           v-for="(face, idx) in rolledDice"
@@ -35,7 +39,8 @@ defineProps({
   rolling: Boolean,
   hasStartedRoll: Boolean,
   canRoll: { type: Boolean, default: true },
-  blocked: { type: Boolean, default: false }
+  blocked: { type: Boolean, default: false },
+  collectedCount: { type: Number, default: 0 }
 });
 
 defineEmits(['roll', 'selectDie']);

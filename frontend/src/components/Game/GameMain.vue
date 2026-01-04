@@ -67,6 +67,7 @@
             :hasStartedRoll="hasStartedRoll"
             :canRoll="(timeLeft > 0 || currentPlayerId !== username) && !isGameBlocked"
             :blocked="isGameBlocked"
+            :collectedCount="collectedDice.length"
             @roll="rollDice"
             @selectDie="trySelectDie"
         />
@@ -420,6 +421,10 @@ async function trySelectDie(face) {
     rolledDice.value = Object.entries(data.fullThrow || {}).flatMap(([f, count]) => Array(count).fill(f))
     disabledFaces.value = data.disabledFaces || []
     chosenFaces.value = Array.from(data.chosenFaces || [])
+
+    // Reset timer visibility on action
+    showTimer.value = false;
+
   } catch { gameMessage.value = "Failed to select dice face." }
 }
 
