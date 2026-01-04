@@ -5,6 +5,7 @@ import nl.hva.ewa.regenwormen.api.LobbyWebSocketController;
 import nl.hva.ewa.regenwormen.controller.GameWebSocketController;
 import nl.hva.ewa.regenwormen.domain.EndGameHandler;
 import nl.hva.ewa.regenwormen.domain.Enum.DiceFace;
+import nl.hva.ewa.regenwormen.domain.Enum.GameState;
 import nl.hva.ewa.regenwormen.domain.Game;
 import nl.hva.ewa.regenwormen.domain.Lobby;
 import nl.hva.ewa.regenwormen.domain.Player;
@@ -331,13 +332,37 @@ public class InGameService {
         System.out.println("🧪 handleEndGameIfNeeded called for game " + game.getId()
                 + " | state=" + game.getGameState()
                 + " | tilesLeft=" + game.getTilesPot().amountAvailableTiles());
+
         EndGameHandler handler =
                 new EndGameHandler(game, ws, gameResultRepository);
         handler.checkAndHandleEndGame();
-        
-        // If game ended, cancel timer
-        if (game.getGameState() == nl.hva.ewa.regenwormen.domain.Enum.GameState.ENDED) {
+
+        if (game.getGameState() == GameState.ENDED) {
             cancelTurnTimer(game.getId());
+
+            // 🔥 DIT WAS DE MISSENDE STAP
+            cleanupLobbyAfterGameEnd(game);
         }
     }
+    private void cleanupLobbyAfterGameEnd(Game game) {
+        Lobby lobby = lobbyRepo.findAll().stream()
+                .filter(l -> game.getId().equals(l.getGameId()))
+                .findFirst()
+                .orElse(null);
+
+        if (lobby != null) {
+            // 🔄 RESET lobby
+            lobby.getPlayers().clear();
+            lobby.setGameStarted(false);
+            lobby.setGameId(null);
+
+            lobbyRepo.save(lobby);
+            lobbyWs.broadcastLobbyUpdate(lobby.getId());
+
+            System.out.println("🔄 Lobby reset after game end: " + lobby.getId());
+        }
+    }
+
+
+
 }
