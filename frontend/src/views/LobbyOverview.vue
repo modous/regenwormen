@@ -10,7 +10,7 @@ let stompClient = null
 
 async function loadLobbies() {
   try {
-    const res = await fetch('http://localhost:8080/api/lobbies')
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies`)
     if (!res.ok) throw new Error(`Failed to load lobbies: ${res.status}`)
     lobbies.value = await res.json()
   } catch (err) {
@@ -28,7 +28,7 @@ async function joinLobby(id) {
   }
 
   try {
-    const res = await fetch(`http://localhost:8080/api/lobbies/join/${id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/join/${id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: user.username, ready: false })
@@ -52,7 +52,7 @@ async function joinLobby(id) {
 
 // === STOMP SOCKET FOR REAL-TIME LOBBY UPDATES ===
 function connectLobbiesSocket() {
-  const sock = new SockJS('http://localhost:8080/ws')
+  const sock = new SockJS(import.meta.env.VITE_WS_URL)
 
   stompClient = new Client({
     webSocketFactory: () => sock,

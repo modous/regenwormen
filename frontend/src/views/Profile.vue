@@ -15,7 +15,7 @@ const uploading = ref(false)
 async function loadProfile() {
   if (!user.value?.id) return
   try {
-    const res = await fetch(`http://localhost:8080/api/users/${user.value.id}`)
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/${user.value.id}`)
     if (!res.ok) throw new Error('Failed to load profile')
     const data = await res.json()
     user.value = data
@@ -33,7 +33,7 @@ async function uploadPhoto(e) {
 
   uploading.value = true
   try {
-    const res = await fetch(`http://localhost:8080/api/users/${user.value.id}/photo`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/${user.value.id}/photo`, {
       method: 'POST',
       body: formData
     })
@@ -99,7 +99,7 @@ async function getLocation() {
 async function saveLocation() {
   if (!user.value?.id) return
   try {
-    await fetch(`http://localhost:8080/api/users/${user.value.id}/location`, {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/${user.value.id}/location`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ location: location.value })
@@ -120,7 +120,7 @@ async function changePassword() {
     return
   }
 
-  const res = await fetch(`http://localhost:8080/api/users/${user.value.id}/password`, {
+  const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/${user.value.id}/password`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: newPassword.value })

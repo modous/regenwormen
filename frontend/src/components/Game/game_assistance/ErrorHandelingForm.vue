@@ -121,7 +121,7 @@ async function submitErrorReport() {
     }
 
     // Stuur naar backend
-    const response = await fetch("http://localhost:8080/api/error-reports", {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/error-reports`, {
       method: "POST",
       body: formData,
     });

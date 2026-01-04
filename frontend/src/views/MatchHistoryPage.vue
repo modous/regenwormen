@@ -102,7 +102,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useRouter } from "vue-router";
 import { computed, onMounted, ref } from "vue";
 
@@ -112,24 +112,10 @@ function goHome() {
   router.push("/");
 }
 
-type MatchResult = "WIN" | "LOSS";
-
-type MatchHistoryItem = {
-  id: string;
-  gameId: string;
-  finishedAt: string;
-  result: MatchResult;
-  score: number;
-  playerCount: number;
-  durationMin: number;
-  players: string[];
-  winner: string | null;
-};
-
-const history = ref<MatchHistoryItem[]>([]);
-const resultFilter = ref<"all" | "win" | "loss">("all");
+const history = ref([]);
+const resultFilter = ref("all");
 const query = ref("");
-const openMatchId = ref<string | null>(null);
+const openMatchId = ref(null);
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 const username = user.username;
@@ -138,11 +124,11 @@ onMounted(async () => {
   if (!username) return;
 
   const res = await fetch(
-      `http://localhost:8080/api/history/${username}`
+      `${import.meta.env.VITE_API_BASE_URL}api/history/${username}`
   );
   const data = await res.json();
 
-  history.value = data.map((r: any) => ({
+  history.value = data.map((r) => ({
     id: r.id,
     gameId: r.gameId,
     finishedAt: r.finishedAt,
@@ -171,11 +157,11 @@ const filtered = computed(() => {
   });
 });
 
-function toggleDetails(id: string) {
+function toggleDetails(id) {
   openMatchId.value = openMatchId.value === id ? null : id;
 }
 
-function formatDate(iso: string) {
+function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -183,7 +169,7 @@ function formatDate(iso: string) {
   });
 }
 
-function formatTime(iso: string) {
+function formatTime(iso) {
   return new Date(iso).toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",

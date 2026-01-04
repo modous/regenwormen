@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -36,6 +37,10 @@ public class UserService {
 
     // ✅ Registreren van nieuwe gebruiker
     public UserEntity register(String email, String username, String password) {
+        if (email == null || username == null || password == null) {
+            throw new IllegalArgumentException("Email, username and password are required");
+        }
+
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already in use");
         }
@@ -44,7 +49,7 @@ public class UserService {
         }
 
         UserEntity user = new UserEntity(
-                java.util.UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
                 email,
                 passwordEncoder.encode(password),
                 username,
@@ -56,14 +61,24 @@ public class UserService {
     }
 
     // ✅ Login check
-    public boolean login(String identifier, String password) {
+    public UserEntity login(String identifier, String password) {
+        if (identifier == null || password == null) {
+            throw new IllegalArgumentException("Identifier and password are required");
+        }
+
         Optional<UserEntity> userOpt = userRepository.findByEmail(identifier);
         if (userOpt.isEmpty()) {
             userOpt = userRepository.findByUsername(identifier);
         }
 
-        return userOpt.isPresent()
-                && passwordEncoder.matches(password, userOpt.get().getPassword());
+        UserEntity user = userOpt
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        return user;
     }
 
     // ✅ Locatie bijwerken
@@ -80,7 +95,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // ✅ Profielfoto opslaan
+    // ✅ Profielfoto opslaan (GEFIXT: geen localhost hardcoded)
     public String saveProfilePhoto(String id, MultipartFile file) {
         try {
             String folder = "uploads/";
@@ -90,7 +105,13 @@ public class UserService {
             Path filePath = Paths.get(folder + fileName);
             Files.write(filePath, file.getBytes());
 
-            String fileUrl = "http://localhost:8080/uploads/" + fileName;
+            // 🔥 BASE_URL uit environment (Render) of fallback lokaal
+            String baseUrl = System.getenv("BASE_URL");
+            if (baseUrl == null || baseUrl.isBlank()) {
+                baseUrl = "http://localhost:8080";
+            }
+
+            String fileUrl = baseUrl + "/uploads/" + fileName;
 
             UserEntity user = getById(id);
             user.setProfilePictureUrl(fileUrl);

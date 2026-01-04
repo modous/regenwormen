@@ -62,7 +62,7 @@ function scrollToBottom() {
 }
 
 function connect() {
-  const sock = new SockJS('http://localhost:8080/ws')
+  const sock = new SockJS(import.meta.env.VITE_WS_URL)
   stompClient = new Client({
     webSocketFactory: () => sock,
     reconnectDelay: 5000,

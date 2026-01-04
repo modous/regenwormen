@@ -32,7 +32,7 @@ async function post(url, body) {
 
 // === API CALLS (single loads if needed) ===
 async function loadLobbyOnce() {
-  const res = await fetch(`http://localhost:8080/api/lobbies/${route.params.id}`)
+  const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/${route.params.id}`)
   if (!res.ok) throw new Error('Failed to load lobby')
   lobby.value = await res.json()
   if (lobby.value.gameId) gameId.value = lobby.value.gameId
@@ -40,18 +40,18 @@ async function loadLobbyOnce() {
 
 // === PLAYER ACTIONS ===
 async function toggleReady() {
-  await post(`http://localhost:8080/api/lobbies/${route.params.id}/ready`, {
+  await post(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/${route.params.id}/ready`, {
     username: user.username
   })
 }
 
 async function leaveLobby() {
-  await post(`http://localhost:8080/api/lobbies/${route.params.id}/leave`, {
+  await post(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/${route.params.id}/leave`, {
     username: user.username
   })
   // Also notify pregame service of disconnect
   if (gameId.value) {
-    const url = `http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`
+    const url = `${import.meta.env.VITE_API_BASE_URL}/pregame/${gameId.value}/disconnect/${username}`
     navigator.sendBeacon(url)
   }
   // ✅ Player deliberately left the lobby - disconnect socket
@@ -65,7 +65,7 @@ async function leaveLobby() {
 
 async function startGame() {
   try {
-    const res = await fetch(`http://localhost:8080/api/lobbies/${route.params.id}/start`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/${route.params.id}/start`, {
       method: 'POST'
     })
     if (!res.ok) {
@@ -99,14 +99,14 @@ function setupDisconnectHandlers() {
   window.addEventListener('beforeunload', (event) => {
     console.log("⚠️ beforeunload triggered - sending disconnect notification from lobby")
     if (gameId.value) {
-      navigator.sendBeacon(`http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`)
+      navigator.sendBeacon(`${import.meta.env.VITE_API_BASE_URL}/pregame/${gameId.value}/disconnect/${username}`)
     }
   })
 }
 
 function sendReconnectEvent() {
   if (gameId.value) {
-    const url = `http://localhost:8080/pregame/${gameId.value}/reconnect/${username}`
+    const url = `${import.meta.env.VITE_API_BASE_URL}/pregame/${gameId.value}/reconnect/${username}`
     console.log("✅ Sending reconnect to lobby:", url)
     fetch(url, {
       method: "POST",
@@ -144,7 +144,7 @@ function scrollToBottom() {
 
 // === STOMP SOCKET ===
 function connectLobbySocket() {
-  const sock = new SockJS('http://localhost:8080/ws')
+  const sock = new SockJS(import.meta.env.VITE_WS_URL)
 
   stompClient = new Client({
     webSocketFactory: () => sock,
@@ -226,7 +226,7 @@ onMounted(async () => {
   // Auto-join if not already in lobby
   const alreadyIn = lobby.value.players.some(p => p.username === user.username)
   if (!alreadyIn && !lobby.value.isFull) {
-    await post(`http://localhost:8080/api/lobbies/join/${route.params.id}`, {
+    await post(`${import.meta.env.VITE_API_BASE_URL}/api/lobbies/join/${route.params.id}`, {
       username: user.username,
       ready: false
     })

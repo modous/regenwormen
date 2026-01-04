@@ -172,8 +172,8 @@ const showErrorForm = ref(false)
 const showLeaveConfirmation = ref(false)
 
 // API & WebSocket
-const API_INGAME = "http://localhost:8080/ingame"
-const SOCKJS_URL = "http://localhost:8080/ws"
+const API_INGAME = `${import.meta.env.VITE_API_BASE_URL}/ingame`
+const SOCKJS_URL = import.meta.env.VITE_WS_URL
 let stompClient = null
 
 // User / game state
@@ -488,7 +488,7 @@ function resetRound() {
 function leaveGame() {
   // Notify backend of disconnect
   if (gameId.value) {
-    const url = `http://localhost:8080/pregame/${gameId.value}/disconnect/${username}`
+   const url = `${import.meta.env.VITE_API_BASE_URL}/pregame/${gameId.value}/disconnect/${username}`
     navigator.sendBeacon(url)
   }
   if (stompClient) stompClient.deactivate()
