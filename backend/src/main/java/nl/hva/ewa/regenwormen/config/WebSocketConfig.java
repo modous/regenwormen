@@ -22,7 +22,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // WebSocket endpoint for frontend to connect
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("*")
+               .setAllowedOriginPatterns(
+    "http://localhost:*",
+    "https://*.vercel.app",
+    "https://regenwormen.onrender.com"
+)
+
                 .withSockJS(); // fallback for browsers that don’t support raw WS
     }
 }

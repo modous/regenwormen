@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/pregame")
-@CrossOrigin(origins = "*")
 public class PreGameController {
 
     private final PreGameService service;

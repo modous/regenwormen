@@ -19,7 +19,6 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/api/error-reports")
-@CrossOrigin(origins = "*")
 public class ErrorReportController {
 
     private final ErrorReportService errorReportService;

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/ingame")
 public class InGameController {

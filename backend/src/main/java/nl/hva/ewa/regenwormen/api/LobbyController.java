@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/lobbies")
-@CrossOrigin(origins = "*")
 public class LobbyController {
 
     private final LobbyRepository lobbyRepo;
