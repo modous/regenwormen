@@ -154,7 +154,7 @@ onMounted(loadProfile)
         />
         <img
             v-else
-            src="../assets/default-avatar.png"
+            src="../assets/worm.jpeg"
             alt="Default avatar"
             class="profile-photo"
         />
