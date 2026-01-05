@@ -22,8 +22,7 @@
         </div>
       </div>
 
-      <h3 class="left" >Game ID: {{ gameId }}</h3>
-      <h4 class="left" >Jij: {{ username }}</h4>
+
 
       <!-- ⚠️ Disconnect countdown alerts -->
       <div v-if="Object.keys(disconnectedPlayers).length > 0" class="disconnect-alerts">
