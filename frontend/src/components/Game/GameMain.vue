@@ -1,6 +1,6 @@
 <template>
   <div class="game">
-    <h1 class="left" >🎲 Regenwormen</h1>
+    
 
     <div v-if="!gameReady">
       <p>⏳ Joining game...</p>
@@ -142,6 +142,8 @@
         :won="playerWon"
         @close="handleGameEndClose"
     />
+<h3 class="left" >Game ID: {{ gameId }}</h3>
+    <h4 class="left" >Jij: {{ username }}</h4>
 
   </div>
 

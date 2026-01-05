@@ -7,7 +7,7 @@
     min-height: 105vh;
     padding: 2rem;
     margin-top: -2rem;
-
+    bottom: -50px;
     text-align: center;
     font-family: "Inter", sans-serif;
 }
@@ -441,7 +441,8 @@
 
 .left {
     text-align: left;
-    margin-top: 50px;
+    margin-left: 200px;
+    margin-top: 45px;
     margin-bottom: -55px;
 }
 

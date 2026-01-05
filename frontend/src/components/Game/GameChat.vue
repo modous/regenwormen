@@ -199,4 +199,12 @@ onUnmounted(() => {
 .send-btn:hover {
   background: #218838;
 }
+@media (max-width: 480px) {
+  .chat-overlay {
+    width: calc(100% - 20px);
+    right: 10px;
+    left: 10px;
+  }
+}
+
 </style>
